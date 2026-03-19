@@ -135,6 +135,10 @@ for scheduler in old new; do
             mean_nanos=$(echo "$total_nanos / $NUM_RUNS" | bc -l)
             mean_steal_ops=$(echo "$total_steal_ops / $NUM_RUNS" | bc -l)
             mean_stolen_tasks=$(echo "$total_stolen_tasks / $NUM_RUNS" | bc -l)
+            mean_time=$(awk -v value="$mean_time" 'BEGIN { printf "%.2f", value + 0 }')
+            mean_nanos=$(printf '%s\n' "$mean_nanos" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
+            mean_steal_ops=$(printf '%s\n' "$mean_steal_ops" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
+            mean_stolen_tasks=$(printf '%s\n' "$mean_stolen_tasks" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
             echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steal_ops,$mean_stolen_tasks,$verification" >> results_scheduler_compare/summary.csv
             echo "$scheduler L=384 x=$xstreams t=$threads runs=$NUM_RUNS mean_time=$mean_time mean_steal_ops=$mean_steal_ops mean_stolen_tasks=$mean_stolen_tasks verification=$verification" >> "$RESULTS"
         done
