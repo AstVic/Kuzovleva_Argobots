@@ -157,7 +157,8 @@ int main(int argc, char **argv) {
     int num_xstreams = DEFAULT_XSTREAMS;
     int num_threads = DEFAULT_THREADS;
     float eps;
-    long long steal_count = 0;
+    long long steal_operations = 0;
+    long long stolen_tasks = 0;
     clock_t start, end;
     struct timespec start_real_time, end_real_time;
     double cpu_time_used;
@@ -255,9 +256,11 @@ int main(int argc, char **argv) {
     free(eps_values);
     if (g_use_ws_scheduler) {
         if (g_use_cost_aware_scheduler) {
-            steal_count = ws_get_steal_count();
+            steal_operations = ws_get_steal_ops_count();
+            stolen_tasks = ws_get_stolen_tasks_count();
         } else {
-            steal_count = ws_old_get_steal_count();
+            steal_operations = ws_old_get_steal_ops_count();
+            stolen_tasks = ws_old_get_stolen_tasks_count();
         }
     }
     finalize_argobots(&reduction_context);
@@ -268,7 +271,8 @@ int main(int argc, char **argv) {
     printf(" Time in seconds   =       %12.2lf\n", cpu_time_used);
     printf(" Real time (nanos) =       %12lld\n", real_time_nanoseconds);
     printf(" Operation type    =     floating point\n");
-    printf(" Steals count      =       %12lld\n", steal_count);
+    printf(" Steal operations  =       %12lld\n", steal_operations);
+    printf(" Stolen tasks      =       %12lld\n", stolen_tasks);
     printf(" Verification      =       %12s\n", 
            (fabs(eps - 5.058044) < 1e-4 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
     printf(" END OF Jacobi3D Benchmark\n");

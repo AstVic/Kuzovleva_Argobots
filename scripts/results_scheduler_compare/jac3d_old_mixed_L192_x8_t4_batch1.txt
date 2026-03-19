@@ -3,8 +3,9 @@ Running Jacobi-3D with xstreams=8 and threads=4
  Size              =  384 x  384 x  384
  Iterations        =                100
  Time in seconds   =              41.00
- Real time (nanos) =        25334400000
+ Real time (nanos) =        23153628000
  Operation type    =     floating point
- Steals count      =               2208
+ Steal operations  =               2208
+ Stolen tasks      =               2208
  Verification      =         SUCCESSFUL
  END OF Jacobi3D Benchmark

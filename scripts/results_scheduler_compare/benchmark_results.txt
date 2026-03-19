@@ -3,46 +3,46 @@ Argobots Jacobi-3D Scheduler Comparison
 
 Scheduler: old
 ----------------------
-old L=384 x=1 t=1 runs=1 mean_time=7.76000000000000000000 mean_steals=0 verification=SUCCESSFUL
-old L=384 x=1 t=2 runs=1 mean_time=7.79000000000000000000 mean_steals=0 verification=SUCCESSFUL
-old L=384 x=1 t=4 runs=1 mean_time=7.67000000000000000000 mean_steals=0 verification=SUCCESSFUL
-old L=384 x=1 t=8 runs=1 mean_time=7.72000000000000000000 mean_steals=0 verification=SUCCESSFUL
-old L=384 x=1 t=16 runs=1 mean_time=7.79000000000000000000 mean_steals=0 verification=SUCCESSFUL
-old L=384 x=2 t=1 runs=1 mean_time=15.38000000000000000000 mean_steals=281.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=2 t=2 runs=1 mean_time=7.80000000000000000000 mean_steals=606.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=2 t=4 runs=1 mean_time=8.51000000000000000000 mean_steals=766.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=2 t=8 runs=1 mean_time=8.60000000000000000000 mean_steals=1010.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=2 t=16 runs=1 mean_time=8.73000000000000000000 mean_steals=1389.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=4 t=1 runs=1 mean_time=43.94000000000000000000 mean_steals=497.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=4 t=2 runs=1 mean_time=23.82000000000000000000 mean_steals=848.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=4 t=4 runs=1 mean_time=15.95000000000000000000 mean_steals=1963.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=4 t=8 runs=1 mean_time=15.99000000000000000000 mean_steals=3321.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=4 t=16 runs=1 mean_time=16.25000000000000000000 mean_steals=4823.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=8 t=1 runs=1 mean_time=106.15000000000000000000 mean_steals=526.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=8 t=2 runs=1 mean_time=59.13000000000000000000 mean_steals=1067.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=8 t=4 runs=1 mean_time=38.99000000000000000000 mean_steals=2325.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=8 t=8 runs=1 mean_time=28.91000000000000000000 mean_steals=5153.00000000000000000000 verification=SUCCESSFUL
-old L=384 x=8 t=16 runs=1 mean_time=28.04000000000000000000 mean_steals=9443.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=1 t=1 runs=1 mean_time=7.76000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+old L=384 x=1 t=2 runs=1 mean_time=7.76000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+old L=384 x=1 t=4 runs=1 mean_time=7.77000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+old L=384 x=1 t=8 runs=1 mean_time=7.76000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+old L=384 x=1 t=16 runs=1 mean_time=7.77000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+old L=384 x=2 t=1 runs=1 mean_time=15.11000000000000000000 mean_steal_ops=230.00000000000000000000 mean_stolen_tasks=230.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=2 runs=1 mean_time=7.70000000000000000000 mean_steal_ops=636.00000000000000000000 mean_stolen_tasks=636.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=4 runs=1 mean_time=8.15000000000000000000 mean_steal_ops=745.00000000000000000000 mean_stolen_tasks=745.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=8 runs=1 mean_time=8.50000000000000000000 mean_steal_ops=1021.00000000000000000000 mean_stolen_tasks=1029.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=16 runs=1 mean_time=8.77000000000000000000 mean_steal_ops=1358.00000000000000000000 mean_stolen_tasks=1451.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=1 runs=1 mean_time=42.93000000000000000000 mean_steal_ops=363.00000000000000000000 mean_stolen_tasks=363.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=2 runs=1 mean_time=24.68000000000000000000 mean_steal_ops=892.00000000000000000000 mean_stolen_tasks=892.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=4 runs=1 mean_time=16.72000000000000000000 mean_steal_ops=2041.00000000000000000000 mean_stolen_tasks=2041.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=8 runs=1 mean_time=16.49000000000000000000 mean_steal_ops=3450.00000000000000000000 mean_stolen_tasks=3450.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=16 runs=1 mean_time=16.05000000000000000000 mean_steal_ops=4910.00000000000000000000 mean_stolen_tasks=4975.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=1 runs=1 mean_time=106.96000000000000000000 mean_steal_ops=535.00000000000000000000 mean_stolen_tasks=535.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=2 runs=1 mean_time=59.90000000000000000000 mean_steal_ops=1083.00000000000000000000 mean_stolen_tasks=1083.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=4 runs=1 mean_time=39.18000000000000000000 mean_steal_ops=2381.00000000000000000000 mean_stolen_tasks=2381.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=8 runs=1 mean_time=28.14000000000000000000 mean_steal_ops=5202.00000000000000000000 mean_stolen_tasks=5202.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=16 runs=1 mean_time=27.63000000000000000000 mean_steal_ops=9527.00000000000000000000 mean_stolen_tasks=9527.00000000000000000000 verification=SUCCESSFUL
 
 Scheduler: new
 ----------------------
-new L=384 x=1 t=1 runs=1 mean_time=7.77000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=1 t=2 runs=1 mean_time=7.77000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=1 t=4 runs=1 mean_time=7.76000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=1 t=8 runs=1 mean_time=7.79000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=1 t=16 runs=1 mean_time=7.81000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=2 t=1 runs=1 mean_time=15.10000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=2 t=2 runs=1 mean_time=8.67000000000000000000 mean_steals=200.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=2 t=4 runs=1 mean_time=9.23000000000000000000 mean_steals=400.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=2 t=8 runs=1 mean_time=8.60000000000000000000 mean_steals=798.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=2 t=16 runs=1 mean_time=8.69000000000000000000 mean_steals=1182.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=4 t=1 runs=1 mean_time=35.58000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=4 t=2 runs=1 mean_time=24.81000000000000000000 mean_steals=205.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=4 t=4 runs=1 mean_time=18.54000000000000000000 mean_steals=752.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=4 t=8 runs=1 mean_time=16.77000000000000000000 mean_steals=1401.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=4 t=16 runs=1 mean_time=16.24000000000000000000 mean_steals=2538.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=8 t=1 runs=1 mean_time=84.51000000000000000000 mean_steals=0 verification=SUCCESSFUL
-new L=384 x=8 t=2 runs=1 mean_time=53.10000000000000000000 mean_steals=206.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=8 t=4 runs=1 mean_time=38.48000000000000000000 mean_steals=736.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=8 t=8 runs=1 mean_time=34.38000000000000000000 mean_steals=1977.00000000000000000000 verification=SUCCESSFUL
-new L=384 x=8 t=16 runs=1 mean_time=32.15000000000000000000 mean_steals=3525.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=1 t=1 runs=1 mean_time=7.71000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=1 t=2 runs=1 mean_time=7.72000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=1 t=4 runs=1 mean_time=7.79000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=1 t=8 runs=1 mean_time=7.79000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=1 t=16 runs=1 mean_time=7.77000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=2 t=1 runs=1 mean_time=15.97000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=2 t=2 runs=1 mean_time=9.96000000000000000000 mean_steal_ops=301.00000000000000000000 mean_stolen_tasks=301.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=2 t=4 runs=1 mean_time=9.77000000000000000000 mean_steal_ops=600.00000000000000000000 mean_stolen_tasks=600.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=2 t=8 runs=1 mean_time=9.19000000000000000000 mean_steal_ops=1016.00000000000000000000 mean_stolen_tasks=1026.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=2 t=16 runs=1 mean_time=8.83000000000000000000 mean_steal_ops=1310.00000000000000000000 mean_stolen_tasks=1387.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=1 runs=1 mean_time=37.85000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=4 t=2 runs=1 mean_time=23.84000000000000000000 mean_steal_ops=306.00000000000000000000 mean_stolen_tasks=306.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=4 runs=1 mean_time=19.58000000000000000000 mean_steal_ops=1023.00000000000000000000 mean_stolen_tasks=1023.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=8 runs=1 mean_time=17.85000000000000000000 mean_steal_ops=1985.00000000000000000000 mean_stolen_tasks=1985.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=16 runs=1 mean_time=16.80000000000000000000 mean_steal_ops=3665.00000000000000000000 mean_stolen_tasks=3873.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=1 runs=1 mean_time=86.35000000000000000000 mean_steal_ops=0 mean_stolen_tasks=0 verification=SUCCESSFUL
+new L=384 x=8 t=2 runs=1 mean_time=53.18000000000000000000 mean_steal_ops=303.00000000000000000000 mean_stolen_tasks=303.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=4 runs=1 mean_time=39.48000000000000000000 mean_steal_ops=1019.00000000000000000000 mean_stolen_tasks=1019.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=8 runs=1 mean_time=33.41000000000000000000 mean_steal_ops=2690.00000000000000000000 mean_stolen_tasks=2690.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=16 runs=1 mean_time=31.68000000000000000000 mean_steal_ops=4754.00000000000000000000 mean_stolen_tasks=4754.00000000000000000000 verification=SUCCESSFUL

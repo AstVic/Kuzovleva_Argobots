@@ -11,4 +11,6 @@ void ABT_create_ws_scheds(int num, ABT_pool *pools, ABT_sched *scheds);
 /* Runtime counters for the baseline work-stealing scheduler. */
 void ws_old_reset_steal_count(void);
 long long ws_old_get_steal_count(void);
+long long ws_old_get_steal_ops_count(void);
+long long ws_old_get_stolen_tasks_count(void);
 

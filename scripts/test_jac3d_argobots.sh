@@ -95,7 +95,7 @@ mkdir -p results_scheduler_compare
 RESULTS="results_scheduler_compare/benchmark_results.txt"
 echo "Argobots Jacobi-3D Scheduler Comparison" > "$RESULTS"
 echo "=======================================" >> "$RESULTS"
-echo "scheduler,xstreams,threads,time_seconds,real_time_nanos,steals_count,verification" > results_scheduler_compare/summary.csv
+echo "scheduler,xstreams,threads,time_seconds,real_time_nanos,steal_operations,stolen_tasks,verification" > results_scheduler_compare/summary.csv
 
 XSTREAMS=(1 2 4 8)
 THREADS=(1 2 4 8 16)
@@ -110,7 +110,8 @@ for scheduler in old new; do
         for threads in "${THREADS[@]}"; do
             total_time=0
             total_nanos=0
-            total_steals=0
+            total_steal_ops=0
+            total_stolen_tasks=0
             verification="SUCCESSFUL"
 
             for run in $(seq 1 "$NUM_RUNS"); do
@@ -119,10 +120,12 @@ for scheduler in old new; do
                 TIME=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
                 TIME_NANOS=$(grep "Real time" "$output_file" | awk '{print $NF}')
                 VERIFICATION=$(grep "Verification" "$output_file" | awk '{print $NF}')
-                STEALS_COUNT=$(grep "Steals count" "$output_file" | awk '{print $NF}')
+                STEAL_OPS=$(grep "Steal operations" "$output_file" | awk '{print $NF}')
+                STOLEN_TASKS=$(grep "Stolen tasks" "$output_file" | awk '{print $NF}')
                 total_time=$(echo "$total_time + $TIME" | bc -l)
                 total_nanos=$(echo "$total_nanos + $TIME_NANOS" | bc)
-                total_steals=$(echo "$total_steals + $STEALS_COUNT" | bc)
+                total_steal_ops=$(echo "$total_steal_ops + $STEAL_OPS" | bc)
+                total_stolen_tasks=$(echo "$total_stolen_tasks + $STOLEN_TASKS" | bc)
                 if [ "$VERIFICATION" = "UNSUCCESSFUL" ]; then
                     verification="UNSUCCESSFUL"
                 fi
@@ -130,9 +133,10 @@ for scheduler in old new; do
 
             mean_time=$(echo "$total_time / $NUM_RUNS" | bc -l)
             mean_nanos=$(echo "$total_nanos / $NUM_RUNS" | bc -l)
-            mean_steals=$(echo "$total_steals / $NUM_RUNS" | bc -l)
-            echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steals,$verification" >> results_scheduler_compare/summary.csv
-            echo "$scheduler L=384 x=$xstreams t=$threads runs=$NUM_RUNS mean_time=$mean_time mean_steals=$mean_steals verification=$verification" >> "$RESULTS"
+            mean_steal_ops=$(echo "$total_steal_ops / $NUM_RUNS" | bc -l)
+            mean_stolen_tasks=$(echo "$total_stolen_tasks / $NUM_RUNS" | bc -l)
+            echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steal_ops,$mean_stolen_tasks,$verification" >> results_scheduler_compare/summary.csv
+            echo "$scheduler L=384 x=$xstreams t=$threads runs=$NUM_RUNS mean_time=$mean_time mean_steal_ops=$mean_steal_ops mean_stolen_tasks=$mean_stolen_tasks verification=$verification" >> "$RESULTS"
         done
     done
 done

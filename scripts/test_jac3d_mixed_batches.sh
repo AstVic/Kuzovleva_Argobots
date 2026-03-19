@@ -105,7 +105,7 @@ RESULTS="results_scheduler_compare/benchmark_mixed_batches.txt"
 SUMMARY="results_scheduler_compare/summary_mixed_batches.csv"
 echo "Mixed-size Jacobi benchmark (4 parallel tasks per xstreams+threads config)" > "$RESULTS"
 echo "============================================================================" >> "$RESULTS"
-echo "scheduler,xstreams,threads,batch,total_time_seconds,total_real_time_nanos,total_steals_count,verification" > "$SUMMARY"
+echo "scheduler,xstreams,threads,batch,total_time_seconds,total_real_time_nanos,total_steal_operations,total_stolen_tasks,verification" > "$SUMMARY"
 
 echo "Building mixed-size binaries for sizes: ${MIXED_TASK_SIZES[*]}"
 for size in "${MIXED_TASK_SIZES[@]}"; do
@@ -125,7 +125,8 @@ for scheduler in old new; do
                 verification="SUCCESSFUL"
                 total_time=0
                 total_nanos=0
-                total_steals=0
+                total_steal_ops=0
+                total_stolen_tasks=0
 
                 for size in "${MIXED_TASK_SIZES[@]}"; do
                     output_file="results_scheduler_compare/jac3d_${scheduler}_mixed_L${size}_x${xstreams}_t${threads}_batch${batch}.txt"
@@ -142,17 +143,19 @@ for scheduler in old new; do
                     TIME=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
                     TIME_NANOS=$(grep "Real time" "$output_file" | awk '{print $NF}')
                     VERIFICATION=$(grep "Verification" "$output_file" | awk '{print $NF}')
-                    STEALS_COUNT=$(grep "Steals count" "$output_file" | awk '{print $NF}')
+                    STEAL_OPS=$(grep "Steal operations" "$output_file" | awk '{print $NF}')
+                    STOLEN_TASKS=$(grep "Stolen tasks" "$output_file" | awk '{print $NF}')
                     total_time=$(echo "$total_time + $TIME" | bc -l)
                     total_nanos=$(echo "$total_nanos + $TIME_NANOS" | bc)
-                    total_steals=$(echo "$total_steals + $STEALS_COUNT" | bc)
+                    total_steal_ops=$(echo "$total_steal_ops + $STEAL_OPS" | bc)
+                    total_stolen_tasks=$(echo "$total_stolen_tasks + $STOLEN_TASKS" | bc)
                     if [ "$VERIFICATION" = "UNSUCCESSFUL" ]; then
                         verification="UNSUCCESSFUL"
                     fi
                 done
 
-                echo "$scheduler,$xstreams,$threads,$batch,$total_time,$total_nanos,$total_steals,$verification" >> "$SUMMARY"
-                echo "$scheduler x=$xstreams t=$threads batch=$batch sizes=${MIXED_TASK_SIZES[*]} parallel_tasks=4 total_time=$total_time total_steals=$total_steals verification=$verification" >> "$RESULTS"
+                echo "$scheduler,$xstreams,$threads,$batch,$total_time,$total_nanos,$total_steal_ops,$total_stolen_tasks,$verification" >> "$SUMMARY"
+                echo "$scheduler x=$xstreams t=$threads batch=$batch sizes=${MIXED_TASK_SIZES[*]} parallel_tasks=4 total_time=$total_time total_steal_ops=$total_steal_ops total_stolen_tasks=$total_stolen_tasks verification=$verification" >> "$RESULTS"
             done
         done
     done

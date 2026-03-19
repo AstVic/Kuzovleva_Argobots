@@ -5,6 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
+
+static int cost_aware_enabled(void) {
+    const char *mode = getenv("ABT_WS_SCHEDULER");
+    if (!mode || mode[0] == '\0') {
+        return 0;
+    }
+    return strcmp(mode, "new") == 0 || strcmp(mode, "cost-aware") == 0;
+}
+
 #if USE_TREE_REDUCTION
 
 typedef struct {
@@ -94,6 +104,9 @@ void reduce_common(
 
     for (int i = 0; i < num_threads; ++i) {
         int pool_id = i % reduction_context->num_pools;
+        if (cost_aware_enabled()) {
+            ws_push_task_estimate(pool_id, (double)(thread_args[i].num_elems * elem_size));
+        }
         ABT_thread_create(
             reduction_context->pools[pool_id],
             reduction_thread,
@@ -176,6 +189,9 @@ void reduce_common(
 
     for (int i = 0; i < num_threads; ++i) {
         int pool_id = i % reduction_context->num_pools;
+        if (cost_aware_enabled()) {
+            ws_push_task_estimate(pool_id, (double)(thread_args[i].num_elems * elem_size));
+        }
         ABT_thread_create(
             reduction_context->pools[pool_id],
             reduction_thread,

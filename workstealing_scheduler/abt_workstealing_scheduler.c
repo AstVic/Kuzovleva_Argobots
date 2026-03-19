@@ -9,13 +9,15 @@ typedef struct {
 } ws_sched_data_t;
 
 static ABT_mutex g_old_steal_mutex = ABT_MUTEX_NULL;
-static long long g_old_successful_steals = 0;
+static long long g_old_steal_operations = 0;
+static long long g_old_stolen_tasks = 0;
 
 void ws_old_reset_steal_count(void)
 {
     if (g_old_steal_mutex != ABT_MUTEX_NULL) {
         ABT_mutex_lock(g_old_steal_mutex);
-        g_old_successful_steals = 0;
+        g_old_steal_operations = 0;
+        g_old_stolen_tasks = 0;
         ABT_mutex_unlock(g_old_steal_mutex);
     }
 }
@@ -25,7 +27,29 @@ long long ws_old_get_steal_count(void)
     long long value = 0;
     if (g_old_steal_mutex != ABT_MUTEX_NULL) {
         ABT_mutex_lock(g_old_steal_mutex);
-        value = g_old_successful_steals;
+        value = g_old_stolen_tasks;
+        ABT_mutex_unlock(g_old_steal_mutex);
+    }
+    return value;
+}
+
+long long ws_old_get_steal_ops_count(void)
+{
+    long long value = 0;
+    if (g_old_steal_mutex != ABT_MUTEX_NULL) {
+        ABT_mutex_lock(g_old_steal_mutex);
+        value = g_old_steal_operations;
+        ABT_mutex_unlock(g_old_steal_mutex);
+    }
+    return value;
+}
+
+long long ws_old_get_stolen_tasks_count(void)
+{
+    long long value = 0;
+    if (g_old_steal_mutex != ABT_MUTEX_NULL) {
+        ABT_mutex_lock(g_old_steal_mutex);
+        value = g_old_stolen_tasks;
         ABT_mutex_unlock(g_old_steal_mutex);
     }
     return value;
@@ -63,14 +87,30 @@ static void sched_run(ABT_sched sched)
         if (thread == ABT_THREAD_NULL) {
             /* Try to steal from other pools */
             for (target = 1; target < num_pools; target++) {
-                ABT_pool_pop_thread(pools[target], &thread);
-                if (thread != ABT_THREAD_NULL) {
+                 size_t victim_size = 0;
+                int steal_target = 1;
+                if (ABT_pool_get_size(pools[target], &victim_size) == ABT_SUCCESS && victim_size > 1) {
+                    steal_target = (int)(victim_size / 2);
+                }
+
+                int stole_any = 0;
+                long long stolen_from_victim = 0;
+                for (int s = 0; s < steal_target; s++) {
+                    ABT_pool_pop_thread(pools[target], &thread);
+                    if (thread == ABT_THREAD_NULL) {
+                        break;
+                    }
+                    stolen_from_victim++;
+                    ABT_self_schedule(thread, pools[target]);
+                    stole_any = 1;
+                }
+                if (stole_any) {
                     if (g_old_steal_mutex != ABT_MUTEX_NULL) {
                         ABT_mutex_lock(g_old_steal_mutex);
-                        g_old_successful_steals++;
+                        g_old_steal_operations++;
+                        g_old_stolen_tasks += stolen_from_victim;
                         ABT_mutex_unlock(g_old_steal_mutex);
                     }
-                    ABT_self_schedule(thread, pools[target]);
                     break;
                 }
             }

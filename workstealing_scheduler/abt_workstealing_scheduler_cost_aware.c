@@ -13,7 +13,8 @@ static ws_global_load_t *g_loads = NULL;
 static ABT_mutex g_loads_mutex;
 static ABT_mutex g_steal_mutex;
 static int g_num_xstreams = 0;
-static long long g_successful_steals = 0;
+static long long g_steal_operations = 0;
+static long long g_stolen_tasks = 0;
 
 /* ===================== МЕТАДАННЫЕ О ТЕКУЩИХ ОЧЕРЕДЯХ ===================== */
 /* Для каждой очереди храним суммарную оценочную стоимость и FIFO буфер оценок.
@@ -40,57 +41,29 @@ typedef struct {
 
 /* ===================== УТИЛИТЫ ДЛЯ pool_meta ===================== */
 
-static int pool_meta_init_one(pool_meta_t *pm, int initial_capacity) {
+static int pool_meta_init_one(pool_meta_t *pm) {
     pm->sum_estimated = 0.0;
     pm->count = 0;
-    pm->buf_capacity = initial_capacity > 0 ? initial_capacity : 1024;
-    pm->est_buffer = (double*)malloc(sizeof(double) * pm->buf_capacity);
-    if (!pm->est_buffer) return -1;
-    pm->buf_head = pm->buf_tail = 0;
     if (ABT_mutex_create(&pm->mutex) != ABT_SUCCESS) {
-        free(pm->est_buffer);
-        pm->est_buffer = NULL;
         return -1;
     }
     return 0;
 }
 
-/* push: добавляет оценку в хвост буфера */
+/* Увеличивает суммарную оценку и счётчик задач очереди. */
 void ws_push_task_estimate(int rank, double est) {
     if (!g_pool_meta) return;
     if (rank < 0 || rank >= g_num_xstreams) return;
     pool_meta_t *pm = &g_pool_meta[rank];
     ABT_mutex_lock(pm->mutex);
 
-    /* ресайз если переполнение */
-    int next_tail = (pm->buf_tail + 1) % pm->buf_capacity;
-    if (next_tail == pm->buf_head) {
-        /* расширяем буфер в 2 раза */
-        int newcap = pm->buf_capacity * 2;
-        double *nb = (double*)malloc(sizeof(double) * newcap);
-        int i = 0;
-        /* скопировать элементы FIFO */
-        int idx = pm->buf_head;
-        while (idx != pm->buf_tail) {
-            nb[i++] = pm->est_buffer[idx];
-            idx = (idx + 1) % pm->buf_capacity;
-        }
-        free(pm->est_buffer);
-        pm->est_buffer = nb;
-        pm->buf_capacity = newcap;
-        pm->buf_head = 0;
-        pm->buf_tail = i;
-    }
-
-    pm->est_buffer[pm->buf_tail] = est;
-    pm->buf_tail = (pm->buf_tail + 1) % pm->buf_capacity;
     pm->sum_estimated += est;
     pm->count++;
 
     ABT_mutex_unlock(pm->mutex);
 }
 
-/* pop: удаляет оценку с головы (FIFO). Возвращает -1.0 если пусто. */
+/* Списывает оценку выполненной/украденной задачи из суммарной оценки очереди. */
 double ws_pop_task_estimate(int rank) {
     if (!g_pool_meta) return -1.0;
     if (rank < 0 || rank >= g_num_xstreams) return -1.0;
@@ -98,9 +71,8 @@ double ws_pop_task_estimate(int rank) {
     double est = -1.0;
     ABT_mutex_lock(pm->mutex);
 
-    if (pm->buf_head != pm->buf_tail) {
-        est = pm->est_buffer[pm->buf_head];
-        pm->buf_head = (pm->buf_head + 1) % pm->buf_capacity;
+    if (pm->count > 0) {
+        est = (pm->sum_estimated > 0.0) ? (pm->sum_estimated / pm->count) : 0.0;
         pm->sum_estimated -= est;
         pm->count--;
         if (pm->count < 0) pm->count = 0;
@@ -126,9 +98,10 @@ double ws_get_pool_estimated_load(int rank) {
 /* ===================== УТИЛИТЫ ===================== */
 
 /* Поиск жертвы — теперь на основе текущих оценочных сумм задач в очередях */
-static int ws_find_heaviest_pool(int self, int num) {
+static int ws_find_heaviest_pool(int self, int num, double local_load) {
     int i, victim = -1;
     double max_load = 0.0;
+    (void)local_load;
 
     if (g_pool_meta) {
         /* читаем sum_estimated для каждого пула */
@@ -139,6 +112,9 @@ static int ws_find_heaviest_pool(int self, int num) {
                 max_load = cur;
                 victim = i;
             }
+        }
+        if (victim < 0) {
+            return -1;
         }
         return victim;
     } else {
@@ -152,6 +128,9 @@ static int ws_find_heaviest_pool(int self, int num) {
             }
         }
         ABT_mutex_unlock(g_loads_mutex);
+        if (victim < 0) {
+            return -1;
+        }
         return victim;
     }
 }
@@ -168,14 +147,31 @@ void ws_update_task_time(double elapsed, int rank) {
 
 void ws_reset_steal_count(void) {
     ABT_mutex_lock(g_steal_mutex);
-    g_successful_steals = 0;
+    g_steal_operations = 0;
+    g_stolen_tasks = 0;
     ABT_mutex_unlock(g_steal_mutex);
 }
 
 long long ws_get_steal_count(void) {
     long long value;
     ABT_mutex_lock(g_steal_mutex);
-    value = g_successful_steals;
+    value = g_stolen_tasks;
+    ABT_mutex_unlock(g_steal_mutex);
+    return value;
+}
+
+long long ws_get_steal_ops_count(void) {
+    long long value;
+    ABT_mutex_lock(g_steal_mutex);
+    value = g_steal_operations;
+    ABT_mutex_unlock(g_steal_mutex);
+    return value;
+}
+
+long long ws_get_stolen_tasks_count(void) {
+    long long value;
+    ABT_mutex_lock(g_steal_mutex);
+    value = g_stolen_tasks;
     ABT_mutex_unlock(g_steal_mutex);
     return value;
 }
@@ -231,23 +227,36 @@ static void sched_run(ABT_sched sched) {
         
         if (thread == ABT_THREAD_NULL) {
             /* Локальная очередь пуста - ищем, у кого красть (по текущим оценкам) */
-            int victim = ws_find_heaviest_pool(p_data->rank, num_pools);
+            double local_load = ws_get_pool_estimated_load(p_data->rank);
+            int victim = ws_find_heaviest_pool(p_data->rank, num_pools, local_load);
             
             if (victim >= 0) {
                 int victim_local_idx = global_to_local_pool_index(p_data->rank, victim, num_pools);
-                /* Пытаемся красть у выбранной жертвы */
-                ABT_pool_pop_thread(pools[victim_local_idx], &thread);
-                if (thread != ABT_THREAD_NULL) {
-                    /* Мы успешно взяли задачу из жертвы — уменьшаем её метаданные */
-                    /* Попытка удалить одну оценку из жертвы */
-                    (void)ws_pop_task_estimate(victim);
+                size_t victim_size = 0;
+                int steal_target = 1;
+                if (ABT_pool_get_size(pools[victim_local_idx], &victim_size) == ABT_SUCCESS && victim_size > 1) {
+                    steal_target = (int)(victim_size / 2);
+                }
 
-                    ABT_mutex_lock(g_steal_mutex);
-                    g_successful_steals++;
-                    ABT_mutex_unlock(g_steal_mutex);
+                long long stolen_from_victim = 0;
+                for (int s = 0; s < steal_target; s++) {
+                    ABT_pool_pop_thread(pools[victim_local_idx], &thread);
+                    if (thread == ABT_THREAD_NULL) {
+                        break;
+                    }
+                    /* Мы успешно взяли задачу из жертвы — уменьшаем её метаданные */
+                    (void)ws_pop_task_estimate(victim);
+                    stolen_from_victim++;
                     
                     /* Выполняем задачу на текущем ES (вор) */
                     ABT_self_schedule(thread, ABT_POOL_NULL);
+
+                    if (stolen_from_victim > 0) {
+                    ABT_mutex_lock(g_steal_mutex);
+                    g_steal_operations++;
+                    g_stolen_tasks += stolen_from_victim;
+                    ABT_mutex_unlock(g_steal_mutex);
+                    }
                 }
             } 
             /* если victim < 0 или поп неуспешен — просто продолжим */
@@ -298,7 +307,8 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
 
     /* Инициализируем глобальную статистику */
     g_num_xstreams = num;
-    g_successful_steals = 0;
+    g_steal_operations = 0;
+    g_stolen_tasks = 0;
     g_loads = (ws_global_load_t *)calloc(num, sizeof(ws_global_load_t));
     for (i = 0; i < num; i++) {
         g_loads[i].total_time = 0.0;
@@ -310,7 +320,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
     for (i = 0; i < num; ++i) {
-        if (pool_meta_init_one(&g_pool_meta[i], 1024) != 0) {
+        if (pool_meta_init_one(&g_pool_meta[i]) != 0) {
             fprintf(stderr, "Ошибка инициализации pool_meta для пула %d\n", i);
             /* продолжаем, но это плохо */
         }

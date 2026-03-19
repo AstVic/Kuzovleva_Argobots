@@ -10,6 +10,8 @@ double ws_pop_task_estimate(int rank);
 double ws_get_pool_estimated_load(int rank);
 void ws_reset_steal_count(void);
 long long ws_get_steal_count(void);
+long long ws_get_steal_ops_count(void);
+long long ws_get_stolen_tasks_count(void);
 
 /* Историческая статистика выполнения задач. */
 void ws_update_task_time(double elapsed, int rank);

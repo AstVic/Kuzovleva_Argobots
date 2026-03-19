@@ -1,0 +1,16 @@
+8-way mixed Jacobi benchmark (sizes: 320 384 448 512 576 640 768 896)
+xstreams=8, threads_list=6 10 12 14, batches=1
+
+Scheduler: old
+----------------------
+old x=8 t=6 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=265.53 total_steal_ops=28335 total_stolen_tasks=28335 verification=SUCCESSFUL
+old x=8 t=10 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=255.16 total_steal_ops=51545 total_stolen_tasks=51545 verification=SUCCESSFUL
+old x=8 t=12 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=247.48 total_steal_ops=60969 total_stolen_tasks=60969 verification=SUCCESSFUL
+old x=8 t=14 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=252.18 total_steal_ops=69863 total_stolen_tasks=69863 verification=SUCCESSFUL
+
+Scheduler: new
+----------------------
+new x=8 t=6 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=754.28 total_steal_ops=13696 total_stolen_tasks=13696 verification=SUCCESSFUL
+new x=8 t=10 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=946.02 total_steal_ops=21648 total_stolen_tasks=21648 verification=SUCCESSFUL
+new x=8 t=12 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=937.25 total_steal_ops=26387 total_stolen_tasks=26387 verification=SUCCESSFUL
+new x=8 t=14 batch=1 parallel_tasks=8 sizes=320 384 448 512 576 640 768 896 total_time=927.90 total_steal_ops=31115 total_stolen_tasks=31115 verification=SUCCESSFUL
