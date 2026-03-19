@@ -1,42 +1,48 @@
 Argobots Jacobi-3D Scheduler Comparison
 =======================================
-old x=1 t=1 time=7.69000000000000000000 steals=0 verification=SUCCESSFUL
-old x=1 t=2 time=7.67000000000000000000 steals=0 verification=SUCCESSFUL
-old x=1 t=4 time=7.68500000000000000000 steals=0 verification=SUCCESSFUL
-old x=1 t=8 time=7.68500000000000000000 steals=0 verification=SUCCESSFUL
-old x=1 t=16 time=7.72500000000000000000 steals=0 verification=SUCCESSFUL
-old x=2 t=1 time=15.06500000000000000000 steals=0 verification=SUCCESSFUL
-old x=2 t=2 time=8.23000000000000000000 steals=0 verification=SUCCESSFUL
-old x=2 t=4 time=8.47500000000000000000 steals=0 verification=SUCCESSFUL
-old x=2 t=8 time=8.58000000000000000000 steals=0 verification=SUCCESSFUL
-old x=2 t=16 time=8.71500000000000000000 steals=0 verification=SUCCESSFUL
-old x=4 t=1 time=43.50500000000000000000 steals=0 verification=SUCCESSFUL
-old x=4 t=2 time=24.58500000000000000000 steals=0 verification=SUCCESSFUL
-old x=4 t=4 time=16.28500000000000000000 steals=0 verification=SUCCESSFUL
-old x=4 t=8 time=16.54000000000000000000 steals=0 verification=SUCCESSFUL
-old x=4 t=16 time=17.30000000000000000000 steals=0 verification=SUCCESSFUL
-old x=8 t=1 time=108.27000000000000000000 steals=0 verification=SUCCESSFUL
-old x=8 t=2 time=61.21000000000000000000 steals=0 verification=SUCCESSFUL
-old x=8 t=4 time=38.44500000000000000000 steals=0 verification=SUCCESSFUL
-old x=8 t=8 time=28.09000000000000000000 steals=0 verification=SUCCESSFUL
-old x=8 t=16 time=27.76000000000000000000 steals=0 verification=SUCCESSFUL
-new x=1 t=1 time=7.74500000000000000000 steals=0 verification=SUCCESSFUL
-new x=1 t=2 time=7.70500000000000000000 steals=0 verification=SUCCESSFUL
-new x=1 t=4 time=7.76000000000000000000 steals=0 verification=SUCCESSFUL
-new x=1 t=8 time=7.73000000000000000000 steals=0 verification=SUCCESSFUL
-new x=1 t=16 time=7.71500000000000000000 steals=0 verification=SUCCESSFUL
-new x=2 t=1 time=15.17500000000000000000 steals=0 verification=SUCCESSFUL
-new x=2 t=2 time=9.67500000000000000000 steals=0 verification=SUCCESSFUL
-new x=2 t=4 time=9.78500000000000000000 steals=0 verification=SUCCESSFUL
-new x=2 t=8 time=8.80000000000000000000 steals=0 verification=SUCCESSFUL
-new x=2 t=16 time=9.02500000000000000000 steals=0 verification=SUCCESSFUL
-new x=4 t=1 time=36.79000000000000000000 steals=0 verification=SUCCESSFUL
-new x=4 t=2 time=24.86500000000000000000 steals=0 verification=SUCCESSFUL
-new x=4 t=4 time=19.23000000000000000000 steals=0 verification=SUCCESSFUL
-new x=4 t=8 time=18.18500000000000000000 steals=0 verification=SUCCESSFUL
-new x=4 t=16 time=17.70000000000000000000 steals=0 verification=SUCCESSFUL
-new x=8 t=1 time=84.36000000000000000000 steals=0 verification=SUCCESSFUL
-new x=8 t=2 time=56.92000000000000000000 steals=0 verification=SUCCESSFUL
-new x=8 t=4 time=39.43000000000000000000 steals=0 verification=SUCCESSFUL
-new x=8 t=8 time=35.05000000000000000000 steals=0 verification=SUCCESSFUL
-new x=8 t=16 time=33.29000000000000000000 steals=0 verification=SUCCESSFUL
+
+Scheduler: old
+----------------------
+old L=384 x=1 t=1 runs=1 mean_time=7.76000000000000000000 mean_steals=0 verification=SUCCESSFUL
+old L=384 x=1 t=2 runs=1 mean_time=7.79000000000000000000 mean_steals=0 verification=SUCCESSFUL
+old L=384 x=1 t=4 runs=1 mean_time=7.67000000000000000000 mean_steals=0 verification=SUCCESSFUL
+old L=384 x=1 t=8 runs=1 mean_time=7.72000000000000000000 mean_steals=0 verification=SUCCESSFUL
+old L=384 x=1 t=16 runs=1 mean_time=7.79000000000000000000 mean_steals=0 verification=SUCCESSFUL
+old L=384 x=2 t=1 runs=1 mean_time=15.38000000000000000000 mean_steals=281.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=2 runs=1 mean_time=7.80000000000000000000 mean_steals=606.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=4 runs=1 mean_time=8.51000000000000000000 mean_steals=766.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=8 runs=1 mean_time=8.60000000000000000000 mean_steals=1010.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=2 t=16 runs=1 mean_time=8.73000000000000000000 mean_steals=1389.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=1 runs=1 mean_time=43.94000000000000000000 mean_steals=497.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=2 runs=1 mean_time=23.82000000000000000000 mean_steals=848.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=4 runs=1 mean_time=15.95000000000000000000 mean_steals=1963.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=8 runs=1 mean_time=15.99000000000000000000 mean_steals=3321.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=4 t=16 runs=1 mean_time=16.25000000000000000000 mean_steals=4823.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=1 runs=1 mean_time=106.15000000000000000000 mean_steals=526.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=2 runs=1 mean_time=59.13000000000000000000 mean_steals=1067.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=4 runs=1 mean_time=38.99000000000000000000 mean_steals=2325.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=8 runs=1 mean_time=28.91000000000000000000 mean_steals=5153.00000000000000000000 verification=SUCCESSFUL
+old L=384 x=8 t=16 runs=1 mean_time=28.04000000000000000000 mean_steals=9443.00000000000000000000 verification=SUCCESSFUL
+
+Scheduler: new
+----------------------
+new L=384 x=1 t=1 runs=1 mean_time=7.77000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=1 t=2 runs=1 mean_time=7.77000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=1 t=4 runs=1 mean_time=7.76000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=1 t=8 runs=1 mean_time=7.79000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=1 t=16 runs=1 mean_time=7.81000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=2 t=1 runs=1 mean_time=15.10000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=2 t=2 runs=1 mean_time=8.67000000000000000000 mean_steals=200.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=2 t=4 runs=1 mean_time=9.23000000000000000000 mean_steals=400.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=2 t=8 runs=1 mean_time=8.60000000000000000000 mean_steals=798.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=2 t=16 runs=1 mean_time=8.69000000000000000000 mean_steals=1182.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=1 runs=1 mean_time=35.58000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=4 t=2 runs=1 mean_time=24.81000000000000000000 mean_steals=205.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=4 runs=1 mean_time=18.54000000000000000000 mean_steals=752.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=8 runs=1 mean_time=16.77000000000000000000 mean_steals=1401.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=4 t=16 runs=1 mean_time=16.24000000000000000000 mean_steals=2538.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=1 runs=1 mean_time=84.51000000000000000000 mean_steals=0 verification=SUCCESSFUL
+new L=384 x=8 t=2 runs=1 mean_time=53.10000000000000000000 mean_steals=206.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=4 runs=1 mean_time=38.48000000000000000000 mean_steals=736.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=8 runs=1 mean_time=34.38000000000000000000 mean_steals=1977.00000000000000000000 verification=SUCCESSFUL
+new L=384 x=8 t=16 runs=1 mean_time=32.15000000000000000000 mean_steals=3525.00000000000000000000 verification=SUCCESSFUL

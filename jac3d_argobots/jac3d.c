@@ -184,7 +184,6 @@ int main(int argc, char **argv) {
             ws_old_reset_steal_count();
         }
     }
-    }
 
     for (int i = 0; i < L; i++) {
         for (int j = 0; j < L; j++) {
