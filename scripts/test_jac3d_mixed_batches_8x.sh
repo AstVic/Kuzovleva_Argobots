@@ -46,11 +46,23 @@ resolve_scheduler_sources() {
 
     if [ ! -f "$SCHEDULER_OLD_SRC" ] || [ ! -f "$SCHEDULER_NEW_SRC" ]; then
         echo "Scheduler sources not found. Set ABT_SCHEDULER_DIR or verify repository layout." >&2
-        echo "Expected files:" >&2
-        echo "  - $SCHEDULER_OLD_SRC" >&2
-        echo "  - $SCHEDULER_NEW_SRC" >&2
         exit 1
     fi
+}
+
+build_jac3d_binary() {
+    local output_bin="$1"
+    local grid_size="$2"
+
+    gcc -O3 -Wall -Wextra $ABT_CFLAGS \
+        -I"$JAC3D_SRC_DIR" \
+        -I"$(dirname "$SCHEDULER_OLD_SRC")" \
+        "-DL=$grid_size" \
+        -o "$output_bin" \
+        "$JAC3D_SRC_DIR/jac3d.c" "$JAC3D_SRC_DIR/abt_reduction.c" \
+        "$SCHEDULER_OLD_SRC" \
+        "$SCHEDULER_NEW_SRC" \
+        $ABT_LIBS
 }
 
 require_command gcc "Install GCC or Clang-compatible gcc."
@@ -64,58 +76,50 @@ if [ ! -f "$JAC3D_SRC_DIR/jac3d.c" ] || [ ! -f "$JAC3D_SRC_DIR/abt_reduction.c" 
     exit 1
 fi
 
-build_jac3d_binary() {
-    local output_bin="$1"
-    local grid_size="${2:-}"
-    if [ -n "$grid_size" ]; then
-        gcc -O3 -Wall -Wextra $ABT_CFLAGS \
-            -I"$JAC3D_SRC_DIR" \
-            -I"$(dirname "$SCHEDULER_OLD_SRC")" \
-            "-DL=$grid_size" \
-            -o "$output_bin" \
-            "$JAC3D_SRC_DIR/jac3d.c" "$JAC3D_SRC_DIR/abt_reduction.c" \
-            "$SCHEDULER_OLD_SRC" \
-            "$SCHEDULER_NEW_SRC" \
-            $ABT_LIBS
-    else
-        gcc -O3 -Wall -Wextra $ABT_CFLAGS \
-            -I"$JAC3D_SRC_DIR" \
-            -I"$(dirname "$SCHEDULER_OLD_SRC")" \
-            -o "$output_bin" \
-            "$JAC3D_SRC_DIR/jac3d.c" "$JAC3D_SRC_DIR/abt_reduction.c" \
-            "$SCHEDULER_OLD_SRC" \
-            "$SCHEDULER_NEW_SRC" \
-            $ABT_LIBS
-    fi
-}
-
-build_jac3d_binary jac3d 384
+XSTREAMS="${XSTREAMS:-8}"
+THREADS_STR="${THREADS_LIST:-6 10 12 14}"
+read -r -a THREADS <<< "$THREADS_STR"
+MIXED_TASK_SIZES=(320 384 448 512 576 640 768 896)
+MIXED_TASK_BATCHES="${MIXED_TASK_BATCHES:-1}"
 
 mkdir -p results_scheduler_compare
-RESULTS="results_scheduler_compare/benchmark_results.txt"
-echo "Argobots Jacobi-3D Scheduler Comparison" > "$RESULTS"
-echo "=======================================" >> "$RESULTS"
-echo "scheduler,xstreams,threads,time_seconds,real_time_nanos,steals_count,verification" > results_scheduler_compare/summary.csv
+RESULTS="results_scheduler_compare/benchmark_mixed_8x.txt"
+SUMMARY="results_scheduler_compare/summary_mixed_8x.csv"
+echo "scheduler,xstreams,threads,batch,total_time_seconds,total_real_time_nanos,total_steals_count,verification" > "$SUMMARY"
+echo "8-way mixed Jacobi benchmark (sizes: ${MIXED_TASK_SIZES[*]})" > "$RESULTS"
+echo "xstreams=$XSTREAMS, threads_list=${THREADS[*]}, batches=$MIXED_TASK_BATCHES" >> "$RESULTS"
 
-XSTREAMS=(1 2 4 8)
-THREADS=(1 2 4 8 16)
-NUM_RUNS="${NUM_RUNS:-1}"
+echo "Building binaries for sizes: ${MIXED_TASK_SIZES[*]}"
+for size in "${MIXED_TASK_SIZES[@]}"; do
+    build_jac3d_binary "jac3d_L${size}" "$size"
+done
 
 for scheduler in old new; do
     echo "" >> "$RESULTS"
     echo "Scheduler: $scheduler" >> "$RESULTS"
     echo "----------------------" >> "$RESULTS"
 
-    for xstreams in "${XSTREAMS[@]}"; do
-        for threads in "${THREADS[@]}"; do
+    for threads in "${THREADS[@]}"; do
+        for batch in $(seq 1 "$MIXED_TASK_BATCHES"); do
+            pids=()
+            output_files=()
+            verification="SUCCESSFUL"
             total_time=0
             total_nanos=0
             total_steals=0
-            verification="SUCCESSFUL"
 
-            for run in $(seq 1 "$NUM_RUNS"); do
-                output_file="results_scheduler_compare/jac3d_${scheduler}_L384_x${xstreams}_t${threads}_run${run}.txt"
-                ABT_WS_SCHEDULER=$scheduler ./jac3d "$xstreams" "$threads" > "$output_file" 2>&1
+            for size in "${MIXED_TASK_SIZES[@]}"; do
+                output_file="results_scheduler_compare/jac3d_${scheduler}_8x_L${size}_x${XSTREAMS}_t${threads}_batch${batch}.txt"
+                ABT_WS_SCHEDULER=$scheduler "./jac3d_L${size}" "$XSTREAMS" "$threads" > "$output_file" 2>&1 &
+                pids+=("$!")
+                output_files+=("$output_file")
+            done
+
+            for pid in "${pids[@]}"; do
+                wait "$pid"
+            done
+
+            for output_file in "${output_files[@]}"; do
                 TIME=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
                 TIME_NANOS=$(grep "Real time" "$output_file" | awk '{print $NF}')
                 VERIFICATION=$(grep "Verification" "$output_file" | awk '{print $NF}')
@@ -128,13 +132,12 @@ for scheduler in old new; do
                 fi
             done
 
-            mean_time=$(echo "$total_time / $NUM_RUNS" | bc -l)
-            mean_nanos=$(echo "$total_nanos / $NUM_RUNS" | bc -l)
-            mean_steals=$(echo "$total_steals / $NUM_RUNS" | bc -l)
-            echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steals,$verification" >> results_scheduler_compare/summary.csv
-            echo "$scheduler L=384 x=$xstreams t=$threads runs=$NUM_RUNS mean_time=$mean_time mean_steals=$mean_steals verification=$verification" >> "$RESULTS"
+            echo "$scheduler,$XSTREAMS,$threads,$batch,$total_time,$total_nanos,$total_steals,$verification" >> "$SUMMARY"
+            echo "$scheduler x=$XSTREAMS t=$threads batch=$batch parallel_tasks=8 sizes=${MIXED_TASK_SIZES[*]} total_time=$total_time total_steals=$total_steals verification=$verification" >> "$RESULTS"
         done
     done
 done
 
-echo "Done. Results in results_scheduler_compare/"
+echo "Done. Results:"
+echo "  - $SUMMARY"
+echo "  - $RESULTS"

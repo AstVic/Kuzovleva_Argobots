@@ -8,7 +8,9 @@
 #include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
+#ifndef L
 #define L 384
+#endif
 #define ITMAX 100
 
 #define DEFAULT_XSTREAMS 4
@@ -177,8 +179,12 @@ int main(int argc, char **argv) {
     /* Initialize Argobots */
     reduction_context_t reduction_context;
     initialize_argobots(&reduction_context, num_xstreams, num_threads);
-    if (g_use_cost_aware_scheduler) {
-        ws_reset_steal_count();
+    if (g_use_ws_scheduler) {
+        if (g_use_cost_aware_scheduler) {
+            ws_reset_steal_count();
+        } else {
+            ws_old_reset_steal_count();
+        }
     }
 
     for (int i = 0; i < L; i++) {
@@ -249,8 +255,12 @@ int main(int argc, char **argv) {
     
     free(thread_args);
     free(eps_values);
-    if (g_use_cost_aware_scheduler) {
-        steal_count = ws_get_steal_count();
+    if (g_use_ws_scheduler) {
+        if (g_use_cost_aware_scheduler) {
+            steal_count = ws_get_steal_count();
+        } else {
+            steal_count = ws_old_get_steal_count();
+        }
     }
     finalize_argobots(&reduction_context);
     
