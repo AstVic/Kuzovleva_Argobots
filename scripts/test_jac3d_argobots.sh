@@ -64,14 +64,32 @@ if [ ! -f "$JAC3D_SRC_DIR/jac3d.c" ] || [ ! -f "$JAC3D_SRC_DIR/abt_reduction.c" 
     exit 1
 fi
 
-gcc -O3 -Wall -Wextra $ABT_CFLAGS \
-    -I"$JAC3D_SRC_DIR" \
-    -I"$(dirname "$SCHEDULER_OLD_SRC")" \
-    -o jac3d \
-    "$JAC3D_SRC_DIR/jac3d.c" "$JAC3D_SRC_DIR/abt_reduction.c" \
-    "$SCHEDULER_OLD_SRC" \
-    "$SCHEDULER_NEW_SRC" \
-    $ABT_LIBS
+build_jac3d_binary() {
+    local output_bin="$1"
+    local grid_size="${2:-}"
+    if [ -n "$grid_size" ]; then
+        gcc -O3 -Wall -Wextra $ABT_CFLAGS \
+            -I"$JAC3D_SRC_DIR" \
+            -I"$(dirname "$SCHEDULER_OLD_SRC")" \
+            "-DL=$grid_size" \
+            -o "$output_bin" \
+            "$JAC3D_SRC_DIR/jac3d.c" "$JAC3D_SRC_DIR/abt_reduction.c" \
+            "$SCHEDULER_OLD_SRC" \
+            "$SCHEDULER_NEW_SRC" \
+            $ABT_LIBS
+    else
+        gcc -O3 -Wall -Wextra $ABT_CFLAGS \
+            -I"$JAC3D_SRC_DIR" \
+            -I"$(dirname "$SCHEDULER_OLD_SRC")" \
+            -o "$output_bin" \
+            "$JAC3D_SRC_DIR/jac3d.c" "$JAC3D_SRC_DIR/abt_reduction.c" \
+            "$SCHEDULER_OLD_SRC" \
+            "$SCHEDULER_NEW_SRC" \
+            $ABT_LIBS
+    fi
+}
+
+build_jac3d_binary jac3d 384
 
 mkdir -p results_scheduler_compare
 RESULTS="results_scheduler_compare/benchmark_results.txt"
@@ -81,38 +99,42 @@ echo "scheduler,xstreams,threads,time_seconds,real_time_nanos,steals_count,verif
 
 XSTREAMS=(1 2 4 8)
 THREADS=(1 2 4 8 16)
-NUM_RUNS=2
+NUM_RUNS="${NUM_RUNS:-1}"
 
 for scheduler in old new; do
-  for xstreams in "${XSTREAMS[@]}"; do
-    for threads in "${THREADS[@]}"; do
-      total_time=0
-      total_nanos=0
-      verification="SUCCESSFUL"
-      total_steals=0
+    echo "" >> "$RESULTS"
+    echo "Scheduler: $scheduler" >> "$RESULTS"
+    echo "----------------------" >> "$RESULTS"
 
-      for run in $(seq 1 $NUM_RUNS); do
-        OUTPUT_FILE="results_scheduler_compare/jac3d_${scheduler}_x${xstreams}_t${threads}_run${run}.txt"
-        ABT_WS_SCHEDULER=$scheduler ./jac3d $xstreams $threads > "$OUTPUT_FILE" 2>&1
-        TIME=$(grep "Time in seconds" "$OUTPUT_FILE" | awk '{print $NF}')
-        TIME_NANOS=$(grep "Real time" "$OUTPUT_FILE" | awk '{print $NF}')
-        VERIFICATION=$(grep "Verification" "$OUTPUT_FILE" | awk '{print $NF}')
-        STEALS_COUNT=$(grep "Steals count" "$OUTPUT_FILE" | awk '{print $NF}')
-        total_time=$(echo "$total_time + $TIME" | bc)
-        total_nanos=$(echo "$total_nanos + $TIME_NANOS" | bc)
-        STEALS_COUNT=$(grep "Steals count" "$OUTPUT_FILE" | awk '{print $NF}')
-        if [ "$VERIFICATION" = "UNSUCCESSFUL" ]; then
-          verification="UNSUCCESSFUL"
-        fi
-      done
+    for xstreams in "${XSTREAMS[@]}"; do
+        for threads in "${THREADS[@]}"; do
+            total_time=0
+            total_nanos=0
+            total_steals=0
+            verification="SUCCESSFUL"
 
-      mean_time=$(echo "$total_time / $NUM_RUNS" | bc -l)
-      mean_nanos=$(echo "$total_nanos / $NUM_RUNS" | bc -l)
-      mean_steals=$(echo "$total_steals / $NUM_RUNS" | bc)
-      echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steals,$verification" >> results_scheduler_compare/summary.csv
-      echo "$scheduler x=$xstreams t=$threads time=$mean_time steals=$mean_steals verification=$verification" >> "$RESULTS"
+            for run in $(seq 1 "$NUM_RUNS"); do
+                output_file="results_scheduler_compare/jac3d_${scheduler}_L384_x${xstreams}_t${threads}_run${run}.txt"
+                ABT_WS_SCHEDULER=$scheduler ./jac3d "$xstreams" "$threads" > "$output_file" 2>&1
+                TIME=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
+                TIME_NANOS=$(grep "Real time" "$output_file" | awk '{print $NF}')
+                VERIFICATION=$(grep "Verification" "$output_file" | awk '{print $NF}')
+                STEALS_COUNT=$(grep "Steals count" "$output_file" | awk '{print $NF}')
+                total_time=$(echo "$total_time + $TIME" | bc -l)
+                total_nanos=$(echo "$total_nanos + $TIME_NANOS" | bc)
+                total_steals=$(echo "$total_steals + $STEALS_COUNT" | bc)
+                if [ "$VERIFICATION" = "UNSUCCESSFUL" ]; then
+                    verification="UNSUCCESSFUL"
+                fi
+            done
+
+            mean_time=$(echo "$total_time / $NUM_RUNS" | bc -l)
+            mean_nanos=$(echo "$total_nanos / $NUM_RUNS" | bc -l)
+            mean_steals=$(echo "$total_steals / $NUM_RUNS" | bc -l)
+            echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steals,$verification" >> results_scheduler_compare/summary.csv
+            echo "$scheduler L=384 x=$xstreams t=$threads runs=$NUM_RUNS mean_time=$mean_time mean_steals=$mean_steals verification=$verification" >> "$RESULTS"
+        done
     done
-  done
 done
 
 echo "Done. Results in results_scheduler_compare/"

@@ -8,6 +8,30 @@ typedef struct {
     uint32_t event_freq;
 } ws_sched_data_t;
 
+static ABT_mutex g_old_steal_mutex = ABT_MUTEX_NULL;
+static long long g_old_successful_steals = 0;
+
+void ws_old_reset_steal_count(void)
+{
+    if (g_old_steal_mutex != ABT_MUTEX_NULL) {
+        ABT_mutex_lock(g_old_steal_mutex);
+        g_old_successful_steals = 0;
+        ABT_mutex_unlock(g_old_steal_mutex);
+    }
+}
+
+long long ws_old_get_steal_count(void)
+{
+    long long value = 0;
+    if (g_old_steal_mutex != ABT_MUTEX_NULL) {
+        ABT_mutex_lock(g_old_steal_mutex);
+        value = g_old_successful_steals;
+        ABT_mutex_unlock(g_old_steal_mutex);
+    }
+    return value;
+}
+
+
 static int sched_init(ABT_sched sched, ABT_sched_config config)
 {
     ws_sched_data_t *p_data = (ws_sched_data_t *)calloc(1, sizeof(ws_sched_data_t));
@@ -41,6 +65,11 @@ static void sched_run(ABT_sched sched)
             for (target = 1; target < num_pools; target++) {
                 ABT_pool_pop_thread(pools[target], &thread);
                 if (thread != ABT_THREAD_NULL) {
+                    if (g_old_steal_mutex != ABT_MUTEX_NULL) {
+                        ABT_mutex_lock(g_old_steal_mutex);
+                        g_old_successful_steals++;
+                        ABT_mutex_unlock(g_old_steal_mutex);
+                    }
                     ABT_self_schedule(thread, pools[target]);
                     break;
                 }
@@ -92,6 +121,12 @@ void ABT_create_ws_scheds(int num, ABT_pool *pools, ABT_sched *scheds)
     };
 
     ABT_sched_config_create(&config, cv_event_freq, 10, ABT_sched_config_var_end);
+
+    if (g_old_steal_mutex == ABT_MUTEX_NULL) {
+        ABT_mutex_create(&g_old_steal_mutex);
+    }
+    ws_old_reset_steal_count();
+
 
     sched_pools = (ABT_pool *)malloc(num * sizeof(ABT_pool));
     for (i = 0; i < num; i++) {
