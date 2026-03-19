@@ -31,6 +31,7 @@ long long ws_old_get_steal_count(void)
     return value;
 }
 
+
 static int sched_init(ABT_sched sched, ABT_sched_config config)
 {
     ws_sched_data_t *p_data = (ws_sched_data_t *)calloc(1, sizeof(ws_sched_data_t));
@@ -125,6 +126,7 @@ void ABT_create_ws_scheds(int num, ABT_pool *pools, ABT_sched *scheds)
         ABT_mutex_create(&g_old_steal_mutex);
     }
     ws_old_reset_steal_count();
+
 
     sched_pools = (ABT_pool *)malloc(num * sizeof(ABT_pool));
     for (i = 0; i < num; i++) {

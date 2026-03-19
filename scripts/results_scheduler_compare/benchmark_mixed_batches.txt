@@ -1,0 +1,48 @@
+Mixed-size Jacobi benchmark (4 parallel tasks per xstreams+threads config)
+============================================================================
+
+Scheduler: old
+----------------------
+old x=1 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=55.94 total_steals=0 verification=SUCCESSFUL
+old x=1 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=57.40 total_steals=0 verification=SUCCESSFUL
+old x=1 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=54.93 total_steals=0 verification=SUCCESSFUL
+old x=1 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=57.54 total_steals=0 verification=SUCCESSFUL
+old x=1 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=56.81 total_steals=0 verification=SUCCESSFUL
+old x=2 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=128.83 total_steals=1046 verification=SUCCESSFUL
+old x=2 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=92.75 total_steals=64953 verification=SUCCESSFUL
+old x=2 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=93.86 total_steals=3171 verification=SUCCESSFUL
+old x=2 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=92.33 total_steals=5323 verification=SUCCESSFUL
+old x=2 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=93.20 total_steals=9771 verification=SUCCESSFUL
+old x=4 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=235.09 total_steals=24276 verification=SUCCESSFUL
+old x=4 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=142.19 total_steals=3433 verification=SUCCESSFUL
+old x=4 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=101.24 total_steals=6751 verification=SUCCESSFUL
+old x=4 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=102.34 total_steals=13211 verification=SUCCESSFUL
+old x=4 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=102.31 total_steals=25443 verification=SUCCESSFUL
+old x=8 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=440.26 total_steals=1919 verification=SUCCESSFUL
+old x=8 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=253.30 total_steals=4302 verification=SUCCESSFUL
+old x=8 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=163.60 total_steals=8745 verification=SUCCESSFUL
+old x=8 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=135.47 total_steals=18351 verification=SUCCESSFUL
+old x=8 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=132.94 total_steals=37979 verification=SUCCESSFUL
+
+Scheduler: new
+----------------------
+new x=1 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=65.26 total_steals=0 verification=SUCCESSFUL
+new x=1 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=63.39 total_steals=0 verification=SUCCESSFUL
+new x=1 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=61.65 total_steals=0 verification=SUCCESSFUL
+new x=1 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=60.97 total_steals=0 verification=SUCCESSFUL
+new x=1 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=58.33 total_steals=0 verification=SUCCESSFUL
+new x=2 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=127.25 total_steals=0 verification=SUCCESSFUL
+new x=2 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=98.35 total_steals=829 verification=SUCCESSFUL
+new x=2 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=93.15 total_steals=1600 verification=SUCCESSFUL
+new x=2 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=93.22 total_steals=3196 verification=SUCCESSFUL
+new x=2 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=91.95 total_steals=6341 verification=SUCCESSFUL
+new x=4 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=218.48 total_steals=0 verification=SUCCESSFUL
+new x=4 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=151.71 total_steals=822 verification=SUCCESSFUL
+new x=4 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=140.60 total_steals=2678 verification=SUCCESSFUL
+new x=4 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=139.13 total_steals=5060 verification=SUCCESSFUL
+new x=4 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=132.21 total_steals=9791 verification=SUCCESSFUL
+new x=8 t=1 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=427.46 total_steals=0 verification=SUCCESSFUL
+new x=8 t=2 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=309.46 total_steals=873 verification=SUCCESSFUL
+new x=8 t=4 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=282.89 total_steals=2751 verification=SUCCESSFUL
+new x=8 t=8 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=317.62 total_steals=6746 verification=SUCCESSFUL
+new x=8 t=16 batch=1 sizes=192 256 320 384 parallel_tasks=4 total_time=360.38 total_steals=12437 verification=SUCCESSFUL
