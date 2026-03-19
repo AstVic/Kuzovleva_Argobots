@@ -101,7 +101,8 @@ static void sched_run(ABT_sched sched)
                         break;
                     }
                     stolen_from_victim++;
-                    ABT_self_schedule(thread, pools[target]);
+                    /* Place stolen work into the thief's local pool. */
+                    ABT_self_schedule(thread, pools[0]);
                     stole_any = 1;
                 }
                 if (stole_any) {
