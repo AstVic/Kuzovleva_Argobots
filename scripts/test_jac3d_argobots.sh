@@ -2,7 +2,17 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 cd "$SCRIPT_DIR"
+
+require_command() {
+    local cmd="$1"
+    local help_msg="$2"
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "Missing required command: $cmd. $help_msg" >&2
+        exit 1
+    fi
+}
 
 resolve_argobots_flags() {
     if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists argobots; then
@@ -29,13 +39,38 @@ resolve_argobots_flags() {
     exit 1
 }
 
+resolve_scheduler_sources() {
+    local scheduler_root="${ABT_SCHEDULER_DIR:-$REPO_ROOT/workstealing_scheduler}"
+    SCHEDULER_OLD_SRC="$scheduler_root/abt_workstealing_scheduler.c"
+    SCHEDULER_NEW_SRC="$scheduler_root/abt_workstealing_scheduler_cost_aware.c"
+
+    if [ ! -f "$SCHEDULER_OLD_SRC" ] || [ ! -f "$SCHEDULER_NEW_SRC" ]; then
+        echo "Scheduler sources not found. Set ABT_SCHEDULER_DIR or verify repository layout." >&2
+        echo "Expected files:" >&2
+        echo "  - $SCHEDULER_OLD_SRC" >&2
+        echo "  - $SCHEDULER_NEW_SRC" >&2
+        exit 1
+    fi
+}
+
+require_command gcc "Install GCC or Clang-compatible gcc."
+require_command bc "Install bc for floating-point aggregation."
 resolve_argobots_flags
+resolve_scheduler_sources
+
+JAC3D_SRC_DIR="${JAC3D_SRC_DIR:-$REPO_ROOT/jac3d_argobots}"
+if [ ! -f "$JAC3D_SRC_DIR/jac3d.c" ] || [ ! -f "$JAC3D_SRC_DIR/abt_reduction.c" ]; then
+    echo "Jacobi-3D sources not found. Set JAC3D_SRC_DIR or verify repository layout." >&2
+    exit 1
+fi
 
 gcc -O3 -Wall -Wextra $ABT_CFLAGS \
+    -I"$JAC3D_SRC_DIR" \
+    -I"$(dirname "$SCHEDULER_OLD_SRC")" \
     -o jac3d \
-    jac3d.c abt_reduction.c \
-    ../argobots_framework/examples/workstealing_scheduler/abt_workstealing_scheduler.c \
-    ../argobots_framework/examples/workstealing_scheduler/abt_workstealing_scheduler_cost_aware.c \
+    "$JAC3D_SRC_DIR/jac3d.c" "$JAC3D_SRC_DIR/abt_reduction.c" \
+    "$SCHEDULER_OLD_SRC" \
+    "$SCHEDULER_NEW_SRC" \
     $ABT_LIBS
 
 mkdir -p results_scheduler_compare
