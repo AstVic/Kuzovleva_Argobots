@@ -3,7 +3,7 @@ Running Jacobi-3D with xstreams=1 and threads=1
  Size              =  384 x  384 x  384
  Iterations        =                100
  Time in seconds   =              13.81
- Real time (nanos) =        13994784000
+ Real time (nanos) =        13926740000
  Operation type    =     floating point
  Steal operations  =                  0
  Stolen tasks      =                  0

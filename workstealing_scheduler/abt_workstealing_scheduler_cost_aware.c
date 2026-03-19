@@ -23,9 +23,9 @@ typedef struct {
     ABT_mutex mutex;
     double sum_estimated;   /* суммарная оценочная стоимость задач, которые сейчас в очереди */
     int count;              /* количество задач в очереди (оценочно) */
-
-    double *est_buffer;     /* кольцевой буфер оценок (FIFO) */
-    int buf_head, buf_tail;
+    double *est_buffer;     /* кольцевой FIFO буфер точных оценок задач */
+    int buf_head;
+    int buf_tail;
     int buf_capacity;
 } pool_meta_t;
 
@@ -41,44 +41,82 @@ typedef struct {
 
 /* ===================== УТИЛИТЫ ДЛЯ pool_meta ===================== */
 
-static int pool_meta_init_one(pool_meta_t *pm) {
+static int pool_meta_init_one(pool_meta_t *pm, int initial_capacity) {
     pm->sum_estimated = 0.0;
     pm->count = 0;
+    pm->buf_capacity = (initial_capacity > 0) ? initial_capacity : 1024;
+    pm->est_buffer = (double *)malloc(sizeof(double) * pm->buf_capacity);
+    if (!pm->est_buffer) {
+        return -1;
+    }
+    pm->buf_head = 0;
+    pm->buf_tail = 0;
     if (ABT_mutex_create(&pm->mutex) != ABT_SUCCESS) {
+        free(pm->est_buffer);
+        pm->est_buffer = NULL;
         return -1;
     }
     return 0;
 }
 
-/* Увеличивает суммарную оценку и счётчик задач очереди. */
+static int pool_meta_grow_locked(pool_meta_t *pm) {
+    int newcap = pm->buf_capacity * 2;
+    double *nb = (double *)malloc(sizeof(double) * newcap);
+    if (!nb) {
+        return -1;
+    }
+
+    int i = 0;
+    int idx = pm->buf_head;
+    while (idx != pm->buf_tail) {
+        nb[i++] = pm->est_buffer[idx];
+        idx = (idx + 1) % pm->buf_capacity;
+    }
+    free(pm->est_buffer);
+    pm->est_buffer = nb;
+    pm->buf_capacity = newcap;
+    pm->buf_head = 0;
+    pm->buf_tail = i;
+    return 0;
+}
+
+/* Увеличивает суммарную оценку и счётчик задач очереди, сохраняя точную оценку задачи в FIFO. */
 void ws_push_task_estimate(int rank, double est) {
     if (!g_pool_meta) return;
     if (rank < 0 || rank >= g_num_xstreams) return;
     pool_meta_t *pm = &g_pool_meta[rank];
     ABT_mutex_lock(pm->mutex);
 
+    int next_tail = (pm->buf_tail + 1) % pm->buf_capacity;
+    if (next_tail == pm->buf_head) {
+        if (pool_meta_grow_locked(pm) != 0) {
+            ABT_mutex_unlock(pm->mutex);
+            return;
+        }
+    }
+
+    pm->est_buffer[pm->buf_tail] = est;
+    pm->buf_tail = (pm->buf_tail + 1) % pm->buf_capacity;
     pm->sum_estimated += est;
     pm->count++;
-
     ABT_mutex_unlock(pm->mutex);
 }
 
-/* Списывает оценку выполненной/украденной задачи из суммарной оценки очереди. */
+/* Списывает точную оценку выполненной/украденной задачи из FIFO и суммарной оценки очереди. */
 double ws_pop_task_estimate(int rank) {
     if (!g_pool_meta) return -1.0;
     if (rank < 0 || rank >= g_num_xstreams) return -1.0;
     pool_meta_t *pm = &g_pool_meta[rank];
     double est = -1.0;
     ABT_mutex_lock(pm->mutex);
-
-    if (pm->count > 0) {
-        est = (pm->sum_estimated > 0.0) ? (pm->sum_estimated / pm->count) : 0.0;
+    if (pm->buf_head != pm->buf_tail) {
+        est = pm->est_buffer[pm->buf_head];
+        pm->buf_head = (pm->buf_head + 1) % pm->buf_capacity;
         pm->sum_estimated -= est;
         pm->count--;
         if (pm->count < 0) pm->count = 0;
         if (pm->sum_estimated < 0.0) pm->sum_estimated = 0.0;
     }
-
     ABT_mutex_unlock(pm->mutex);
     return est;
 }
@@ -244,19 +282,20 @@ static void sched_run(ABT_sched sched) {
                     if (thread == ABT_THREAD_NULL) {
                         break;
                     }
+
                     /* Мы успешно взяли задачу из жертвы — уменьшаем её метаданные */
                     (void)ws_pop_task_estimate(victim);
                     stolen_from_victim++;
-                    
+
                     /* Выполняем задачу на текущем ES (вор) */
                     ABT_self_schedule(thread, ABT_POOL_NULL);
+                }
 
-                    if (stolen_from_victim > 0) {
+                if (stolen_from_victim > 0) {
                     ABT_mutex_lock(g_steal_mutex);
                     g_steal_operations++;
                     g_stolen_tasks += stolen_from_victim;
                     ABT_mutex_unlock(g_steal_mutex);
-                    }
                 }
             } 
             /* если victim < 0 или поп неуспешен — просто продолжим */
@@ -320,7 +359,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
     for (i = 0; i < num; ++i) {
-        if (pool_meta_init_one(&g_pool_meta[i]) != 0) {
+        if (pool_meta_init_one(&g_pool_meta[i], 1024) != 0) {
             fprintf(stderr, "Ошибка инициализации pool_meta для пула %d\n", i);
             /* продолжаем, но это плохо */
         }
