@@ -11,7 +11,9 @@ typedef struct {
 
 static ws_global_load_t *g_loads = NULL;
 static ABT_mutex g_loads_mutex;
+static ABT_mutex g_steal_mutex;
 static int g_num_xstreams = 0;
+static long long g_successful_steals = 0;
 
 /* ===================== МЕТАДАННЫЕ О ТЕКУЩИХ ОЧЕРЕДЯХ ===================== */
 /* Для каждой очереди храним суммарную оценочную стоимость и FIFO буфер оценок.
@@ -164,6 +166,21 @@ void ws_update_task_time(double elapsed, int rank) {
     ABT_mutex_unlock(g_loads_mutex);
 }
 
+void ws_reset_steal_count(void) {
+    ABT_mutex_lock(g_steal_mutex);
+    g_successful_steals = 0;
+    ABT_mutex_unlock(g_steal_mutex);
+}
+
+long long ws_get_steal_count(void) {
+    long long value;
+    ABT_mutex_lock(g_steal_mutex);
+    value = g_successful_steals;
+    ABT_mutex_unlock(g_steal_mutex);
+    return value;
+}
+
+
 /* ===================== ФУНКЦИИ ПЛАНИРОВЩИКА ===================== */
 
 static int sched_init(ABT_sched sched, ABT_sched_config config) {
@@ -184,6 +201,16 @@ static int sched_init(ABT_sched sched, ABT_sched_config config) {
     return ABT_SUCCESS;
 }
 
+/* For scheduler with rotated pool order:
+ * local index 0 corresponds to global pool [self_rank],
+ * local index k corresponds to global pool [(self_rank + k) % num_pools]. */
+static inline int global_to_local_pool_index(int self_rank, int global_pool_id, int num_pools) {
+    int idx = (global_pool_id - self_rank) % num_pools;
+    if (idx < 0) idx += num_pools;
+    return idx;
+}
+
+
 static void sched_run(ABT_sched sched) {
     uint32_t work_count = 0;
     ws_sched_data_t *p_data;
@@ -198,21 +225,26 @@ static void sched_run(ABT_sched sched) {
 
     while (1) {
         ABT_thread thread;
-        
-        /* 1) Пытаемся взять задачу из локальной очереди */
-        ABT_pool_pop_thread(pools[p_data->rank], &thread);
+
+         /* 1) Пытаемся взять задачу из локальной очереди (local index 0). */
+        ABT_pool_pop_thread(pools[0], &thread);
         
         if (thread == ABT_THREAD_NULL) {
             /* Локальная очередь пуста - ищем, у кого красть (по текущим оценкам) */
             int victim = ws_find_heaviest_pool(p_data->rank, num_pools);
             
             if (victim >= 0) {
+                int victim_local_idx = global_to_local_pool_index(p_data->rank, victim, num_pools);
                 /* Пытаемся красть у выбранной жертвы */
-                ABT_pool_pop_thread(pools[victim], &thread);
+                ABT_pool_pop_thread(pools[victim_local_idx], &thread);
                 if (thread != ABT_THREAD_NULL) {
                     /* Мы успешно взяли задачу из жертвы — уменьшаем её метаданные */
                     /* Попытка удалить одну оценку из жертвы */
                     (void)ws_pop_task_estimate(victim);
+
+                    ABT_mutex_lock(g_steal_mutex);
+                    g_successful_steals++;
+                    ABT_mutex_unlock(g_steal_mutex);
                     
                     /* Выполняем задачу на текущем ES (вор) */
                     ABT_self_schedule(thread, ABT_POOL_NULL);
@@ -266,12 +298,14 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
 
     /* Инициализируем глобальную статистику */
     g_num_xstreams = num;
+    g_successful_steals = 0;
     g_loads = (ws_global_load_t *)calloc(num, sizeof(ws_global_load_t));
     for (i = 0; i < num; i++) {
         g_loads[i].total_time = 0.0;
         g_loads[i].task_count = 0;
     }
     ABT_mutex_create(&g_loads_mutex);
+    ABT_mutex_create(&g_steal_mutex);
 
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));

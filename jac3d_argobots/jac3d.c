@@ -4,8 +4,8 @@
 #include <time.h>
 #include <string.h>
 #include "abt_reduction.h"
-#include "../argobots_framework/examples/workstealing_scheduler/abt_workstealing_scheduler.h"
-#include "../argobots_framework/examples/workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
+#include "../workstealing_scheduler/abt_workstealing_scheduler.h"
+#include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
 #define L 384
@@ -157,6 +157,7 @@ int main(int argc, char **argv) {
     int num_xstreams = DEFAULT_XSTREAMS;
     int num_threads = DEFAULT_THREADS;
     float eps;
+    long long steal_count = 0;
     clock_t start, end;
     struct timespec start_real_time, end_real_time;
     double cpu_time_used;
@@ -176,7 +177,10 @@ int main(int argc, char **argv) {
     /* Initialize Argobots */
     reduction_context_t reduction_context;
     initialize_argobots(&reduction_context, num_xstreams, num_threads);
-    
+    if (g_use_cost_aware_scheduler) {
+        ws_reset_steal_count();
+    }
+
     for (int i = 0; i < L; i++) {
         for (int j = 0; j < L; j++) {
             for (int k = 0; k < L; k++) {
@@ -245,6 +249,9 @@ int main(int argc, char **argv) {
     
     free(thread_args);
     free(eps_values);
+    if (g_use_cost_aware_scheduler) {
+        steal_count = ws_get_steal_count();
+    }
     finalize_argobots(&reduction_context);
     
     printf(" Jacobi3D Benchmark Completed.\n");
@@ -253,6 +260,7 @@ int main(int argc, char **argv) {
     printf(" Time in seconds   =       %12.2lf\n", cpu_time_used);
     printf(" Real time (nanos) =       %12lld\n", real_time_nanoseconds);
     printf(" Operation type    =     floating point\n");
+    printf(" Steals count      =       %12lld\n", steal_count);
     printf(" Verification      =       %12s\n", 
            (fabs(eps - 5.058044) < 1e-4 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
     printf(" END OF Jacobi3D Benchmark\n");
