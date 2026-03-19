@@ -77,7 +77,7 @@ mkdir -p results_scheduler_compare
 RESULTS="results_scheduler_compare/benchmark_results.txt"
 echo "Argobots Jacobi-3D Scheduler Comparison" > "$RESULTS"
 echo "=======================================" >> "$RESULTS"
-echo "scheduler,xstreams,threads,time_seconds,real_time_nanos,verification" > results_scheduler_compare/summary.csv
+echo "scheduler,xstreams,threads,time_seconds,real_time_nanos,steals_count,verification" > results_scheduler_compare/summary.csv
 
 XSTREAMS=(1 2 4 8)
 THREADS=(1 2 4 8 16)
@@ -89,6 +89,7 @@ for scheduler in old new; do
       total_time=0
       total_nanos=0
       verification="SUCCESSFUL"
+      total_steals=0
 
       for run in $(seq 1 $NUM_RUNS); do
         OUTPUT_FILE="results_scheduler_compare/jac3d_${scheduler}_x${xstreams}_t${threads}_run${run}.txt"
@@ -96,8 +97,10 @@ for scheduler in old new; do
         TIME=$(grep "Time in seconds" "$OUTPUT_FILE" | awk '{print $NF}')
         TIME_NANOS=$(grep "Real time" "$OUTPUT_FILE" | awk '{print $NF}')
         VERIFICATION=$(grep "Verification" "$OUTPUT_FILE" | awk '{print $NF}')
+        STEALS_COUNT=$(grep "Steals count" "$OUTPUT_FILE" | awk '{print $NF}')
         total_time=$(echo "$total_time + $TIME" | bc)
         total_nanos=$(echo "$total_nanos + $TIME_NANOS" | bc)
+        STEALS_COUNT=$(grep "Steals count" "$OUTPUT_FILE" | awk '{print $NF}')
         if [ "$VERIFICATION" = "UNSUCCESSFUL" ]; then
           verification="UNSUCCESSFUL"
         fi
@@ -105,8 +108,9 @@ for scheduler in old new; do
 
       mean_time=$(echo "$total_time / $NUM_RUNS" | bc -l)
       mean_nanos=$(echo "$total_nanos / $NUM_RUNS" | bc -l)
-      echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$verification" >> results_scheduler_compare/summary.csv
-      echo "$scheduler x=$xstreams t=$threads time=$mean_time verification=$verification" >> "$RESULTS"
+      mean_steals=$(echo "$total_steals / $NUM_RUNS" | bc)
+      echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steals,$verification" >> results_scheduler_compare/summary.csv
+      echo "$scheduler x=$xstreams t=$threads time=$mean_time steals=$mean_steals verification=$verification" >> "$RESULTS"
     done
   done
 done
