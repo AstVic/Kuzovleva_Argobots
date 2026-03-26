@@ -1,0 +1,48 @@
+Single-runtime 4-task Jacobi benchmark
+task_sizes=384 320 256 192
+
+Scheduler: old
+----------------------
+old x=1 t=1 tasks=4 sizes=384 320 256 192 total_time=17.53 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+old x=1 t=2 tasks=4 sizes=384 320 256 192 total_time=17.50 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+old x=1 t=4 tasks=4 sizes=384 320 256 192 total_time=17.42 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+old x=1 t=8 tasks=4 sizes=384 320 256 192 total_time=17.67 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+old x=1 t=16 tasks=4 sizes=384 320 256 192 total_time=18.07 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+old x=2 t=1 tasks=4 sizes=384 320 256 192 total_time=24.05 total_steal_ops=674 total_stolen_tasks=706 verification=SUCCESSFUL
+old x=2 t=2 tasks=4 sizes=384 320 256 192 total_time=24.82 total_steal_ops=814 total_stolen_tasks=1336 verification=SUCCESSFUL
+old x=2 t=4 tasks=4 sizes=384 320 256 192 total_time=25.38 total_steal_ops=889 total_stolen_tasks=2214 verification=SUCCESSFUL
+old x=2 t=8 tasks=4 sizes=384 320 256 192 total_time=25.34 total_steal_ops=793 total_stolen_tasks=3708 verification=SUCCESSFUL
+old x=2 t=16 tasks=4 sizes=384 320 256 192 total_time=25.05 total_steal_ops=765 total_stolen_tasks=6922 verification=SUCCESSFUL
+old x=4 t=1 tasks=4 sizes=384 320 256 192 total_time=59.06 total_steal_ops=1120 total_stolen_tasks=1120 verification=SUCCESSFUL
+old x=4 t=2 tasks=4 sizes=384 320 256 192 total_time=40.70 total_steal_ops=2045 total_stolen_tasks=2048 verification=SUCCESSFUL
+old x=4 t=4 tasks=4 sizes=384 320 256 192 total_time=40.14 total_steal_ops=2971 total_stolen_tasks=3819 verification=SUCCESSFUL
+old x=4 t=8 tasks=4 sizes=384 320 256 192 total_time=39.76 total_steal_ops=2965 total_stolen_tasks=5919 verification=SUCCESSFUL
+old x=4 t=16 tasks=4 sizes=384 320 256 192 total_time=40.00 total_steal_ops=2938 total_stolen_tasks=10083 verification=SUCCESSFUL
+old x=8 t=1 tasks=4 sizes=384 320 256 192 total_time=114.65 total_steal_ops=1310 total_stolen_tasks=1310 verification=SUCCESSFUL
+old x=8 t=2 tasks=4 sizes=384 320 256 192 total_time=72.42 total_steal_ops=2405 total_stolen_tasks=2405 verification=SUCCESSFUL
+old x=8 t=4 tasks=4 sizes=384 320 256 192 total_time=52.71 total_steal_ops=4425 total_stolen_tasks=4442 verification=SUCCESSFUL
+old x=8 t=8 tasks=4 sizes=384 320 256 192 total_time=51.13 total_steal_ops=6996 total_stolen_tasks=8067 verification=SUCCESSFUL
+old x=8 t=16 tasks=4 sizes=384 320 256 192 total_time=48.87 total_steal_ops=7511 total_stolen_tasks=12990 verification=SUCCESSFUL
+
+Scheduler: new
+----------------------
+new x=1 t=1 tasks=4 sizes=384 320 256 192 total_time=17.81 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=1 t=2 tasks=4 sizes=384 320 256 192 total_time=18.07 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=1 t=4 tasks=4 sizes=384 320 256 192 total_time=17.38 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=1 t=8 tasks=4 sizes=384 320 256 192 total_time=17.50 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=1 t=16 tasks=4 sizes=384 320 256 192 total_time=17.46 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=2 t=1 tasks=4 sizes=384 320 256 192 total_time=42.63 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=2 t=2 tasks=4 sizes=384 320 256 192 total_time=42.84 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=2 t=4 tasks=4 sizes=384 320 256 192 total_time=42.93 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=2 t=8 tasks=4 sizes=384 320 256 192 total_time=42.98 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=2 t=16 tasks=4 sizes=384 320 256 192 total_time=42.75 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=4 t=1 tasks=4 sizes=384 320 256 192 total_time=55.36 total_steal_ops=597 total_stolen_tasks=597 verification=SUCCESSFUL
+new x=4 t=2 tasks=4 sizes=384 320 256 192 total_time=47.97 total_steal_ops=1477 total_stolen_tasks=1517 verification=SUCCESSFUL
+new x=4 t=4 tasks=4 sizes=384 320 256 192 total_time=47.00 total_steal_ops=2371 total_stolen_tasks=3030 verification=SUCCESSFUL
+new x=4 t=8 tasks=4 sizes=384 320 256 192 total_time=47.23 total_steal_ops=4021 total_stolen_tasks=6082 verification=SUCCESSFUL
+new x=4 t=16 tasks=4 sizes=384 320 256 192 total_time=46.96 total_steal_ops=6114 total_stolen_tasks=10999 verification=SUCCESSFUL
+new x=8 t=1 tasks=4 sizes=384 320 256 192 total_time=114.05 total_steal_ops=724 total_stolen_tasks=724 verification=SUCCESSFUL
+new x=8 t=2 tasks=4 sizes=384 320 256 192 total_time=77.55 total_steal_ops=1596 total_stolen_tasks=1596 verification=SUCCESSFUL
+new x=8 t=4 tasks=4 sizes=384 320 256 192 total_time=63.26 total_steal_ops=2978 total_stolen_tasks=3092 verification=SUCCESSFUL
+new x=8 t=8 tasks=4 sizes=384 320 256 192 total_time=62.82 total_steal_ops=4146 total_stolen_tasks=5656 verification=SUCCESSFUL
+new x=8 t=16 tasks=4 sizes=384 320 256 192 total_time=61.93 total_steal_ops=4610 total_stolen_tasks=9311 verification=SUCCESSFUL

@@ -1,0 +1,20 @@
+Running 8 Jacobi-3D problems in one Argobots runtime
+xstreams=8 threads=16
+problem_sizes: 352 320 288 256 224 192 160 128
+problem[0]_result: size=352 iterations=100 final_eps=4.629822 checksum=21172571394.824207 status=OK
+problem[1]_result: size=320 iterations=100 final_eps=4.201538 checksum=14338039871.642273 status=OK
+problem[2]_result: size=288 iterations=100 final_eps=3.773315 checksum=9309049876.987181 status=OK
+problem[3]_result: size=256 iterations=100 final_eps=3.345093 checksum=5735573567.608523 status=OK
+problem[4]_result: size=224 iterations=100 final_eps=2.916748 checksum=3305331832.557871 status=OK
+problem[5]_result: size=192 iterations=100 final_eps=2.488556 checksum=1743794315.095419 status=OK
+problem[6]_result: size=160 iterations=100 final_eps=2.060333 checksum=814179370.781482 status=OK
+problem[7]_result: size=128 iterations=100 final_eps=1.632065 checksum=317454089.474867 status=OK
+ Multi-Jacobi Benchmark Completed.
+ Problem count      =                  8
+ Threads per task   =                 16
+ Time in seconds    =              82.60
+ Real time (nanos)  =        16967865000
+ Steal operations   =               6645
+ Stolen tasks       =              18572
+ Verification       =         SUCCESSFUL
+ END OF Multi-Jacobi Benchmark
