@@ -1,7 +1,13 @@
 #include "abt_workstealing_scheduler_cost_aware.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <abt.h>
+
+#define WS_VICTIM_SAMPLE_SIZE 3
+#define WS_LOAD_IMBALANCE_RATIO 1.15
+#define WS_MIN_STEAL_COST 1.0
+#define WS_CHEAP_TASK_COST 32.0
 
 /* ===================== ГЛОБАЛЬНАЯ СТАТИСТИКА ===================== */
 typedef struct {
@@ -21,8 +27,10 @@ static long long g_stolen_tasks = 0;
    Доступ защищён mutex'ом пула. */
 typedef struct {
     ABT_mutex mutex;
-    double sum_estimated;   /* суммарная оценочная стоимость задач, которые сейчас в очереди */
-    int count;              /* количество задач в очереди (оценочно) */
+    double queued_estimated;    /* суммарная оценочная стоимость задач, которые сейчас в очереди */
+    int queued_count;           /* количество задач в очереди (оценочно) */
+    double running_estimated;   /* суммарная оценочная стоимость задач, которые сейчас выполняются на ES */
+    int running_count;          /* количество задач, которые сейчас выполняются на ES */
     double *est_buffer;     /* кольцевой FIFO буфер точных оценок задач */
     int buf_head;
     int buf_tail;
@@ -37,13 +45,16 @@ typedef struct {
     int rank;                   // Идентификатор исполнительного потока
     double local_total_time;    // Локальное суммарное время (историческое)
     int local_task_count;       // Локальное количество выполненных задач (историческое)
+    unsigned int rng_state;     // Локальный генератор для sampled victim selection
 } ws_sched_data_t;
 
 /* ===================== УТИЛИТЫ ДЛЯ pool_meta ===================== */
 
 static int pool_meta_init_one(pool_meta_t *pm, int initial_capacity) {
-    pm->sum_estimated = 0.0;
-    pm->count = 0;
+    pm->queued_estimated = 0.0;
+    pm->queued_count = 0;
+    pm->running_estimated = 0.0;
+    pm->running_count = 0;
     pm->buf_capacity = (initial_capacity > 0) ? initial_capacity : 1024;
     pm->est_buffer = (double *)malloc(sizeof(double) * pm->buf_capacity);
     if (!pm->est_buffer) {
@@ -97,12 +108,12 @@ void ws_push_task_estimate(int rank, double est) {
 
     pm->est_buffer[pm->buf_tail] = est;
     pm->buf_tail = (pm->buf_tail + 1) % pm->buf_capacity;
-    pm->sum_estimated += est;
-    pm->count++;
+    pm->queued_estimated += est;
+    pm->queued_count++;
     ABT_mutex_unlock(pm->mutex);
 }
 
-/* Списывает точную оценку выполненной/украденной задачи из FIFO и суммарной оценки очереди. */
+/* Списывает точную оценку задачи из FIFO очереди. */
 double ws_pop_task_estimate(int rank) {
     if (!g_pool_meta) return -1.0;
     if (rank < 0 || rank >= g_num_xstreams) return -1.0;
@@ -112,65 +123,145 @@ double ws_pop_task_estimate(int rank) {
     if (pm->buf_head != pm->buf_tail) {
         est = pm->est_buffer[pm->buf_head];
         pm->buf_head = (pm->buf_head + 1) % pm->buf_capacity;
-        pm->sum_estimated -= est;
-        pm->count--;
-        if (pm->count < 0) pm->count = 0;
-        if (pm->sum_estimated < 0.0) pm->sum_estimated = 0.0;
+        pm->queued_estimated -= est;
+        pm->queued_count--;
+        if (pm->queued_count < 0) pm->queued_count = 0;
+        if (pm->queued_estimated < 0.0) pm->queued_estimated = 0.0;
     }
     ABT_mutex_unlock(pm->mutex);
     return est;
 }
 
-/* Возвращает суммарную оценочную стоимость очереди (thread-safe read) */
+static void ws_start_task_execution(int rank, double est) {
+    pool_meta_t *pm;
+    if (!g_pool_meta || est <= 0.0) return;
+    if (rank < 0 || rank >= g_num_xstreams) return;
+    pm = &g_pool_meta[rank];
+    ABT_mutex_lock(pm->mutex);
+    pm->running_estimated += est;
+    pm->running_count++;
+    ABT_mutex_unlock(pm->mutex);
+}
+
+static void ws_finish_task_execution(int rank, double est) {
+    pool_meta_t *pm;
+    if (!g_pool_meta || est <= 0.0) return;
+    if (rank < 0 || rank >= g_num_xstreams) return;
+    pm = &g_pool_meta[rank];
+    ABT_mutex_lock(pm->mutex);
+    pm->running_estimated -= est;
+    pm->running_count--;
+    if (pm->running_count < 0) pm->running_count = 0;
+    if (pm->running_estimated < 0.0) pm->running_estimated = 0.0;
+    ABT_mutex_unlock(pm->mutex);
+}
+
+/* Возвращает суммарную оценочную стоимость очереди (без running work). */
 double ws_get_pool_estimated_load(int rank) {
     if (!g_pool_meta) return 0.0;
     if (rank < 0 || rank >= g_num_xstreams) return 0.0;
     pool_meta_t *pm = &g_pool_meta[rank];
     double val;
     ABT_mutex_lock(pm->mutex);
-    val = pm->sum_estimated;
+    val = pm->queued_estimated;
+    ABT_mutex_unlock(pm->mutex);
+    return val;
+}
+
+static double ws_get_pool_total_load(int rank) {
+    if (!g_pool_meta) return 0.0;
+    if (rank < 0 || rank >= g_num_xstreams) return 0.0;
+    pool_meta_t *pm = &g_pool_meta[rank];
+    double val;
+    ABT_mutex_lock(pm->mutex);
+    val = pm->queued_estimated + pm->running_estimated;
     ABT_mutex_unlock(pm->mutex);
     return val;
 }
 
 /* ===================== УТИЛИТЫ ===================== */
 
-/* Поиск жертвы — теперь на основе текущих оценочных сумм задач в очередях */
-static int ws_find_heaviest_pool(int self, int num, double local_load) {
-    int i, victim = -1;
-    double max_load = 0.0;
-    (void)local_load;
+static int ws_pick_random_other_pool(unsigned int *rng_state, int self, int num)
+{
+    int victim;
+    if (num <= 1) {
+        return -1;
+    }
+    victim = (int)(rand_r(rng_state) % (unsigned int)(num - 1));
+    if (victim >= self) {
+        victim++;
+    }
+    return victim;
+}
+
+static int ws_find_victim_sampled(int self, int num, double local_load,
+                                  unsigned int *rng_state, double *victim_load_out) {
+    int victim = -1;
+    double best_load = 0.0;
 
     if (g_pool_meta) {
-        /* читаем sum_estimated для каждого пула */
-        for (i = 0; i < num; i++) {
-            if (i == self) continue;
-            double cur = ws_get_pool_estimated_load(i);
-            if (cur > max_load && cur > 0.0) {
-                max_load = cur;
-                victim = i;
+        int sample_count = num - 1;
+        if (sample_count > WS_VICTIM_SAMPLE_SIZE) {
+            sample_count = WS_VICTIM_SAMPLE_SIZE;
+        }
+        for (int s = 0; s < sample_count; s++) {
+            int candidate = ws_pick_random_other_pool(rng_state, self, num);
+            double cur;
+            if (candidate < 0) {
+                continue;
+            }
+            cur = ws_get_pool_total_load(candidate);
+            if (cur > best_load) {
+                best_load = cur;
+                victim = candidate;
             }
         }
-        if (victim < 0) {
-            return -1;
+        if (victim >= 0 &&
+            best_load > WS_MIN_STEAL_COST &&
+            best_load > local_load * WS_LOAD_IMBALANCE_RATIO) {
+            *victim_load_out = best_load;
+            return victim;
         }
-        return victim;
-    } else {
-        /* fallback — использовать исторические данные g_loads */
-        ABT_mutex_lock(g_loads_mutex);
-        for (i = 0; i < num; i++) {
-            if (i == self) continue;
-            if (g_loads[i].total_time > max_load && g_loads[i].task_count > 0) {
-                max_load = g_loads[i].total_time;
-                victim = i;
-            }
+        return -1;
+    }
+
+    ABT_mutex_lock(g_loads_mutex);
+    for (int i = 0; i < num; i++) {
+        if (i == self) continue;
+        if (g_loads[i].total_time > best_load && g_loads[i].task_count > 0) {
+            best_load = g_loads[i].total_time;
+            victim = i;
         }
-        ABT_mutex_unlock(g_loads_mutex);
-        if (victim < 0) {
-            return -1;
-        }
+    }
+    ABT_mutex_unlock(g_loads_mutex);
+    if (victim >= 0 && best_load > local_load * WS_LOAD_IMBALANCE_RATIO) {
+        *victim_load_out = best_load;
         return victim;
     }
+    return -1;
+}
+
+static int ws_find_fallback_victim(int self, int num, ABT_pool *pools)
+{
+    (void)self;
+    for (int target = 1; target < num; target++) {
+        size_t victim_size = 0;
+        if (ABT_pool_get_size(pools[target], &victim_size) == ABT_SUCCESS &&
+            victim_size > 0) {
+            return target;
+        }
+    }
+    return -1;
+}
+
+static void ws_execute_task_with_estimate(ABT_thread thread, int exec_rank, double est)
+{
+    if (est < 0.0) {
+        est = 0.0;
+    }
+    ws_start_task_execution(exec_rank, est);
+    ABT_self_schedule(thread, ABT_POOL_NULL);
+    ws_finish_task_execution(exec_rank, est);
 }
 
 /* Обновление исторической статистики (после выполнения задачи) */
@@ -230,6 +321,8 @@ static int sched_init(ABT_sched sched, ABT_sched_config config) {
     
     p_data->local_total_time = 0.0;
     p_data->local_task_count = 0;
+    p_data->rng_state =
+        (unsigned int)time(NULL) ^ (unsigned int)(p_data->rank * 2654435761u);
     
     ABT_sched_set_data(sched, (void *)p_data);
     return ABT_SUCCESS;
@@ -265,30 +358,46 @@ static void sched_run(ABT_sched sched) {
         
         if (thread == ABT_THREAD_NULL) {
             /* Локальная очередь пуста - ищем, у кого красть (по текущим оценкам) */
-            double local_load = ws_get_pool_estimated_load(p_data->rank);
-            int victim = ws_find_heaviest_pool(p_data->rank, num_pools, local_load);
+            double local_load = ws_get_pool_total_load(p_data->rank);
+            double victim_load = 0.0;
+            int victim = ws_find_victim_sampled(p_data->rank, num_pools, local_load,
+                                               &p_data->rng_state, &victim_load);
             
             if (victim >= 0) {
                 int victim_local_idx = global_to_local_pool_index(p_data->rank, victim, num_pools);
-                size_t victim_size = 0;
-                int steal_target = 1;
-                if (ABT_pool_get_size(pools[victim_local_idx], &victim_size) == ABT_SUCCESS && victim_size > 1) {
-                    steal_target = (int)(victim_size / 2);
+                double target_cost = (victim_load - local_load) * 0.5;
+                double stolen_cost = 0.0;
+                long long stolen_from_victim = 0;
+                if (target_cost < WS_MIN_STEAL_COST) {
+                    target_cost = WS_MIN_STEAL_COST;
                 }
 
-                long long stolen_from_victim = 0;
-                for (int s = 0; s < steal_target; s++) {
+                while (stolen_cost < target_cost) {
                     ABT_pool_pop_thread(pools[victim_local_idx], &thread);
                     if (thread == ABT_THREAD_NULL) {
                         break;
                     }
 
                     /* Мы успешно взяли задачу из жертвы — уменьшаем её метаданные */
-                    (void)ws_pop_task_estimate(victim);
+                    double est = ws_pop_task_estimate(victim);
                     stolen_from_victim++;
+                    if (est > 0.0) {
+                        stolen_cost += est;
+                    }
 
                     /* Выполняем задачу на текущем ES (вор) */
-                    ABT_self_schedule(thread, ABT_POOL_NULL);
+                    ws_execute_task_with_estimate(thread, p_data->rank, est);
+
+                    if (est > 0.0 && est <= WS_CHEAP_TASK_COST) {
+                        break;
+                    }
+
+                    ABT_pool_pop_thread(pools[0], &thread);
+                    if (thread != ABT_THREAD_NULL) {
+                        double local_est = ws_pop_task_estimate(p_data->rank);
+                        ws_execute_task_with_estimate(thread, p_data->rank, local_est);
+                        break;
+                    }
                 }
 
                 if (stolen_from_victim > 0) {
@@ -297,13 +406,40 @@ static void sched_run(ABT_sched sched) {
                     g_stolen_tasks += stolen_from_victim;
                     ABT_mutex_unlock(g_steal_mutex);
                 }
-            } 
-            /* если victim < 0 или поп неуспешен — просто продолжим */
+            } else {
+                int fallback_local_idx = ws_find_fallback_victim(p_data->rank, num_pools, pools);
+                if (fallback_local_idx >= 1) {
+                    long long stolen_from_victim = 0;
+                    size_t victim_size = 0;
+                    int steal_target = 1;
+                    int victim_rank = (p_data->rank + fallback_local_idx) % num_pools;
+                    if (ABT_pool_get_size(pools[fallback_local_idx], &victim_size) ==
+                            ABT_SUCCESS &&
+                        victim_size > 1) {
+                        steal_target = (int)(victim_size / 2);
+                    }
+                    for (int s = 0; s < steal_target; s++) {
+                        ABT_pool_pop_thread(pools[fallback_local_idx], &thread);
+                        if (thread == ABT_THREAD_NULL) {
+                            break;
+                        }
+                        stolen_from_victim++;
+                        ws_execute_task_with_estimate(
+                            thread, p_data->rank, ws_pop_task_estimate(victim_rank));
+                    }
+                    if (stolen_from_victim > 0) {
+                        ABT_mutex_lock(g_steal_mutex);
+                        g_steal_operations++;
+                        g_stolen_tasks += stolen_from_victim;
+                        ABT_mutex_unlock(g_steal_mutex);
+                    }
+                }
+            }
         } else {
             /* Мы взяли локальную задачу — удаляем соответствующую оценку из локальных метаданных */
-            (void)ws_pop_task_estimate(p_data->rank);
+            double est = ws_pop_task_estimate(p_data->rank);
             /* Выполняем задачу */
-            ABT_self_schedule(thread, ABT_POOL_NULL);
+            ws_execute_task_with_estimate(thread, p_data->rank, est);
         }
         
         if (++work_count >= p_data->event_freq) {
@@ -387,8 +523,8 @@ void ws_print_global_stats(void) {
     for (int i = 0; i < g_num_xstreams; i++) {
         printf("Поток %d: время=%.6f, задачи=%d, текущая_оценка=%.6f, текущие_задачи=%d\n", 
                i, g_loads[i].total_time, g_loads[i].task_count,
-               g_pool_meta ? g_pool_meta[i].sum_estimated : 0.0,
-               g_pool_meta ? g_pool_meta[i].count : 0);
+               g_pool_meta ? (g_pool_meta[i].queued_estimated + g_pool_meta[i].running_estimated) : 0.0,
+               g_pool_meta ? (g_pool_meta[i].queued_count + g_pool_meta[i].running_count) : 0);
     }
     ABT_mutex_unlock(g_loads_mutex);
 }
