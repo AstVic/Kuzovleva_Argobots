@@ -23,11 +23,11 @@ void reduce_common(
     void *result
 );
 
-// =================== Declarations for reduction funcs ===================
+// =================== Объявления функций редукции ===================
 #define DECLARE_REDFUNC(func, type, type_str) \
 void reduce_##func##_##type_str(reduction_context_t *reduction_context, type *array, size_t num_elems, type *result)
 
-// Use in case when type and it's string representation are the same (for example, int, float)
+// Используется, когда тип и его строковое представление совпадают (например, int, float)
 #define DECLARE_REDFUNC_SIMPLE(func, type) DECLARE_REDFUNC(func, type, type)
 
 DECLARE_REDFUNC_SIMPLE(sum, char);
@@ -85,4 +85,4 @@ DECLARE_REDFUNC_SIMPLE(sub, double);
 DECLARE_REDFUNC_SIMPLE(prod, double);
 DECLARE_REDFUNC_SIMPLE(max, double);
 DECLARE_REDFUNC_SIMPLE(min, double);
-// =================== End Declarations for reduction funcs ===============
+// =================== Конец объявлений функций редукции ===============

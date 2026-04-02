@@ -1,27 +1,20 @@
-Running 8 Jacobi-3D tasks in one Argobots runtime
+Running 8 Jacobi-3D problems in one Argobots runtime
 xstreams=8
-task_sizes: 352 320 288 256 224 192 160 128
-task[0]: size=352 pool=0 est_cost=8575000000
-task[1]: size=320 pool=1 est_cost=6431486400
-task[2]: size=288 pool=2 est_cost=4678731200
-task[3]: size=256 pool=3 est_cost=3277412800
-task[4]: size=224 pool=0 est_cost=2188209600
-task[5]: size=192 pool=1 est_cost=1371800000
-task[6]: size=160 pool=2 est_cost=788862400
-task[7]: size=128 pool=3 est_cost=400075200
-task[0]_result: size=352 iterations=100 final_eps=4.629822 checksum=21172571394.824207 status=OK
-task[1]_result: size=320 iterations=100 final_eps=4.201538 checksum=14338039871.642273 status=OK
-task[2]_result: size=288 iterations=100 final_eps=3.773315 checksum=9309049876.987181 status=OK
-task[3]_result: size=256 iterations=100 final_eps=3.345093 checksum=5735573567.608523 status=OK
-task[4]_result: size=224 iterations=100 final_eps=2.916748 checksum=3305331832.557871 status=OK
-task[5]_result: size=192 iterations=100 final_eps=2.488556 checksum=1743794315.095419 status=OK
-task[6]_result: size=160 iterations=100 final_eps=2.060333 checksum=814179370.781482 status=OK
-task[7]_result: size=128 iterations=100 final_eps=1.632065 checksum=317454089.474867 status=OK
+problem_sizes: 352 320 288 256 224 192 160 128
+problem_chunks: 73 67 60 53 47 40 33 27
+problem[0]_result: size=352 iterations=100 final_eps=4.629822 checksum=21172571394.824207 status=OK
+problem[1]_result: size=320 iterations=100 final_eps=4.201538 checksum=14338039871.642273 status=OK
+problem[2]_result: size=288 iterations=100 final_eps=3.773315 checksum=9309049876.987181 status=OK
+problem[3]_result: size=256 iterations=100 final_eps=3.345093 checksum=5735573567.608523 status=OK
+problem[4]_result: size=224 iterations=100 final_eps=2.916748 checksum=3305331832.557871 status=OK
+problem[5]_result: size=192 iterations=100 final_eps=2.488556 checksum=1743794315.095419 status=OK
+problem[6]_result: size=160 iterations=100 final_eps=2.060333 checksum=814179370.781482 status=OK
+problem[7]_result: size=128 iterations=100 final_eps=1.632065 checksum=317454089.474867 status=OK
  Multi-Jacobi Benchmark Completed.
- Task count         =                  8
- Time in seconds    =              92.31
- Real time (nanos)  =        18316386000
- Steal operations   =                  3
- Stolen tasks       =                  3
+ Problem count      =                  8
+ Time in seconds    =              56.18
+ Real time (nanos)  =        12481337000
+ Steal operations   =               4727
+ Stolen tasks       =              10610
  Verification       =         SUCCESSFUL
  END OF Multi-Jacobi Benchmark

@@ -9,9 +9,10 @@
 #include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
 
 #define DEFAULT_XSTREAMS 4
-#define DEFAULT_THREADS 4
 #define DEFAULT_ITMAX 100
 #define DEFAULT_MAXEPS 0.5f
+#define REFERENCE_GRID_SIZE 384
+#define REFERENCE_BEST_CHUNKS 80
 
 typedef enum {
     JACOBI_PHASE_A = 0,
@@ -19,6 +20,19 @@ typedef enum {
     JACOBI_PHASE_REDUCTION = 2
 } jacobi_phase_t;
 
+/* Общий контекст одного Argobots runtime: execution streams, пулы и
+ * выбранный режим планировщика. Все задачи Якоби используют его совместно. */
+typedef struct {
+    ABT_xstream *xstreams;
+    ABT_pool *pools;
+    ABT_sched *scheds;
+    int num_xstreams;
+    int use_ws_scheduler;
+    int use_cost_aware_scheduler;
+} runtime_context_t;
+
+/* Полное состояние одной независимой задачи Якоби: размеры сетки, массивы,
+ * параметры сходимости и ссылка на общий runtime. */
 typedef struct {
     int size;
     int itmax;
@@ -30,17 +44,13 @@ typedef struct {
     int iterations_done;
     int success;
     int converged;
+    int problem_id;
+    int num_chunks;
+    runtime_context_t *runtime;
 } jacobi_problem_t;
 
-typedef struct {
-    ABT_xstream *xstreams;
-    ABT_pool *pools;
-    ABT_sched *scheds;
-    int num_xstreams;
-    int use_ws_scheduler;
-    int use_cost_aware_scheduler;
-} runtime_context_t;
-
+/* Аргументы одного вычислительного чанка. Чанк покрывает диапазон строк
+ * по оси i и выполняет фазу A или B для конкретной задачи Якоби. */
 typedef struct {
     jacobi_problem_t *problem;
     int start_i;
@@ -49,6 +59,8 @@ typedef struct {
     float *eps_local;
 } jacobi_chunk_arg_t;
 
+/* Аргументы одной подзадачи редукции, которая считает частичный максимум
+ * по фрагменту массива локальных eps-значений. */
 typedef struct {
     const float *input;
     int start;
@@ -56,6 +68,8 @@ typedef struct {
     float *output;
 } reduction_chunk_arg_t;
 
+/* Читает переменную окружения и определяет, какой планировщик должен
+ * использоваться в текущем runtime. */
 static void configure_scheduler_mode(int *use_ws_scheduler,
                                      int *use_cost_aware_scheduler)
 {
@@ -72,11 +86,14 @@ static void configure_scheduler_mode(int *use_ws_scheduler,
          strcmp(scheduler_mode, "cost-aware") == 0);
 }
 
+/* Преобразует координаты (i, j, k) в линейный индекс плоского массива,
+ * в котором хранится кубическая сетка. */
 static size_t cell_index(int n, int i, int j, int k)
 {
     return ((size_t)i * (size_t)n + (size_t)j) * (size_t)n + (size_t)k;
 }
 
+/* Оценивает стоимость вычислительного чанка для cost-aware планировщика. */
 static double estimate_chunk_cost(int size, int rows, jacobi_phase_t phase)
 {
     double cells = (double)rows * (double)(size - 2) * (double)(size - 2);
@@ -89,20 +106,22 @@ static double estimate_chunk_cost(int size, int rows, jacobi_phase_t phase)
     return cells * phase_factor;
 }
 
+/* Оценивает стоимость подзадачи редукции по числу обрабатываемых значений. */
 static double estimate_reduction_cost(int num_values)
 {
     return (double)num_values;
 }
 
+/* Выбирает пул для новой подзадачи. Все мелкие задачи от всех Якоби
+ * складываются в общие пулы одного runtime. */
 static int task_pool_id(int problem_id, int chunk_id, int num_xstreams)
 {
-    int active_pools = num_xstreams / 2;
-    if (active_pools < 1) {
-        active_pools = 1;
-    }
-    return (problem_id + chunk_id) % active_pools;
+    /* Все чанки от всех задач Якоби используют общие пулы runtime.
+     * Смещение по problem_id помогает естественно перемешивать задачи. */
+    return (problem_id + chunk_id) % num_xstreams;
 }
 
+/* Инициализирует массивы одной задачи начальными значениями метода Якоби. */
 static void initialize_problem_arrays(jacobi_problem_t *problem)
 {
     int n = problem->size;
@@ -122,6 +141,7 @@ static void initialize_problem_arrays(jacobi_problem_t *problem)
     }
 }
 
+/* Считает контрольную сумму итоговой сетки для печати и быстрой проверки. */
 static double compute_checksum(const float *grid, int n)
 {
     double sum = 0.0;
@@ -132,6 +152,8 @@ static double compute_checksum(const float *grid, int n)
     return sum;
 }
 
+/* Выполняет один вычислительный чанк: в фазе A обновляет a и считает
+ * локальный eps, в фазе B обновляет b. */
 static void jacobi_chunk_run(void *arg)
 {
     jacobi_chunk_arg_t *chunk = (jacobi_chunk_arg_t *)arg;
@@ -171,6 +193,7 @@ static void jacobi_chunk_run(void *arg)
     }
 }
 
+/* Выполняет один reduction-чанк и возвращает частичный максимум. */
 static void reduction_chunk_run(void *arg)
 {
     reduction_chunk_arg_t *chunk = (reduction_chunk_arg_t *)arg;
@@ -184,6 +207,8 @@ static void reduction_chunk_run(void *arg)
     *chunk->output = local_max;
 }
 
+/* Создаёт один общий runtime: xstreams, пулы и нужные scheduler-ы.
+ * В этом runtime затем работают все top-level и дочерние задачи. */
 static int init_runtime(runtime_context_t *ctx, int num_xstreams)
 {
     ABT_init(0, NULL);
@@ -235,6 +260,7 @@ static int init_runtime(runtime_context_t *ctx, int num_xstreams)
     return 0;
 }
 
+/* Корректно завершает runtime и освобождает все связанные ресурсы. */
 static void finalize_runtime(runtime_context_t *ctx)
 {
     for (int i = 1; i < ctx->num_xstreams; i++) {
@@ -252,40 +278,230 @@ static void finalize_runtime(runtime_context_t *ctx)
     ABT_finalize();
 }
 
+/* Вычисляет число чанков для задачи пропорционально её размеру.
+ * В качестве эталона используется лучшая конфигурация одиночного Jacobi:
+ * 80 чанков для сетки размера 384. */
+static int scaled_problem_chunks(int size)
+{
+    int interior_rows = size - 2;
+    int chunks = (size * REFERENCE_BEST_CHUNKS + REFERENCE_GRID_SIZE / 2) /
+                 REFERENCE_GRID_SIZE;
+
+    if (chunks < 1) {
+        chunks = 1;
+    }
+    if (chunks > interior_rows) {
+        chunks = interior_rows;
+    }
+    return chunks;
+}
+
+/* Печатает формат запуска multi-runtime сценария. */
 static void print_usage(const char *prog)
 {
-    fprintf(stderr, "Usage: %s <xstreams> <threads> <size1> [size2 ...]\n", prog);
-    fprintf(stderr, "Example: %s 4 8 384 320 256 192\n", prog);
+    fprintf(stderr, "Usage: %s <xstreams> <size1> [size2 ...]\n", prog);
+    fprintf(stderr, "Example: %s 4 384 320 256 192\n", prog);
 }
 
-static int count_active_problems(const jacobi_problem_t *problems, int num_problems)
+/* Возвращает фактическое число chunk-task для одной задачи: не больше,
+ * чем число внутренних строк сетки. */
+static int problem_chunk_count(const jacobi_problem_t *problem)
 {
-    int active = 0;
-    for (int i = 0; i < num_problems; i++) {
-        if (!problems[i].converged) {
-            active++;
+    int interior_rows = problem->size - 2;
+    return (problem->num_chunks < interior_rows) ? problem->num_chunks : interior_rows;
+}
+
+/* Создаёт все чанки одной фазы для конкретной задачи Якоби и раскладывает
+ * их по общим пулам runtime. */
+static int launch_problem_phase(jacobi_problem_t *problem,
+                                jacobi_phase_t phase,
+                                ABT_thread *threads,
+                                jacobi_chunk_arg_t *chunk_args,
+                                float *eps_values)
+{
+    runtime_context_t *runtime = problem->runtime;
+    int chunks = problem_chunk_count(problem);
+    int interior_rows = problem->size - 2;
+    int base_rows = interior_rows / chunks;
+    int remainder = interior_rows % chunks;
+    int current_row = 1;
+
+    /* chunks здесь означает число chunk-task, на которые режется одна
+     * конкретная задача Якоби. */
+    for (int c = 0; c < chunks; c++) {
+        int rows = base_rows + (c < remainder ? 1 : 0);
+        int pool_id = task_pool_id(problem->problem_id, c, runtime->num_xstreams);
+        chunk_args[c].problem = problem;
+        chunk_args[c].start_i = current_row;
+        chunk_args[c].end_i = current_row + rows;
+        chunk_args[c].phase = phase;
+        chunk_args[c].eps_local = (phase == JACOBI_PHASE_A) ? &eps_values[c] : NULL;
+
+        if (runtime->use_cost_aware_scheduler) {
+            ws_push_task_estimate(pool_id,
+                                  estimate_chunk_cost(problem->size, rows, phase));
+        }
+        ABT_thread_create(runtime->pools[pool_id], jacobi_chunk_run,
+                          &chunk_args[c], ABT_THREAD_ATTR_NULL, &threads[c]);
+        current_row += rows;
+    }
+
+    return chunks;
+}
+
+/* Выполняет локальную редукцию одной задачи Якоби: запускает reduction-task,
+ * ждёт только их и сохраняет итоговый eps этой задачи. */
+static int run_problem_reduction(jacobi_problem_t *problem,
+                                 float *eps_values)
+{
+    runtime_context_t *runtime = problem->runtime;
+    int chunks = problem_chunk_count(problem);
+    int reduction_chunks = (chunks < runtime->num_xstreams) ? chunks : runtime->num_xstreams;
+    int base_chunk_len;
+    int remainder;
+    int current = 0;
+    float eps = 0.0f;
+    ABT_thread *reduction_threads;
+    reduction_chunk_arg_t *reduction_args;
+    float *reduction_outputs;
+
+    if (reduction_chunks < 1) {
+        reduction_chunks = 1;
+    }
+
+    reduction_threads = (ABT_thread *)calloc((size_t)reduction_chunks, sizeof(ABT_thread));
+    reduction_args = (reduction_chunk_arg_t *)calloc((size_t)reduction_chunks,
+                                                     sizeof(reduction_chunk_arg_t));
+    reduction_outputs = (float *)calloc((size_t)reduction_chunks, sizeof(float));
+    if (!reduction_threads || !reduction_args || !reduction_outputs) {
+        free(reduction_threads);
+        free(reduction_args);
+        free(reduction_outputs);
+        return -1;
+    }
+
+    base_chunk_len = chunks / reduction_chunks;
+    remainder = chunks % reduction_chunks;
+
+    for (int r = 0; r < reduction_chunks; r++) {
+        int len = base_chunk_len + (r < remainder ? 1 : 0);
+        int pool_id = task_pool_id(problem->problem_id, chunks + r, runtime->num_xstreams);
+        reduction_args[r].input = eps_values;
+        reduction_args[r].start = current;
+        reduction_args[r].end = current + len;
+        reduction_args[r].output = &reduction_outputs[r];
+
+        if (runtime->use_cost_aware_scheduler) {
+            ws_push_task_estimate(pool_id, estimate_reduction_cost(len));
+        }
+        ABT_thread_create(runtime->pools[pool_id], reduction_chunk_run,
+                          &reduction_args[r], ABT_THREAD_ATTR_NULL,
+                          &reduction_threads[r]);
+        current += len;
+    }
+
+    /* Редукция локальна для одной задачи Якоби: ожидание идёт только по её
+     * частичным максимумам, без глобального барьера между задачами. */
+    for (int r = 0; r < reduction_chunks; r++) {
+        ABT_thread_join(reduction_threads[r]);
+        ABT_thread_free(&reduction_threads[r]);
+        if (reduction_outputs[r] > eps) {
+            eps = reduction_outputs[r];
         }
     }
-    return active;
+
+    problem->final_eps = eps;
+
+    free(reduction_threads);
+    free(reduction_args);
+    free(reduction_outputs);
+    return 0;
 }
 
+/* Top-level ULT одной задачи Якоби. Он полностью управляет её жизненным
+ * циклом: фаза A, локальная редукция, фаза B и переход к следующей итерации. */
+static void run_one_jacobi_problem(void *arg)
+{
+    jacobi_problem_t *problem = (jacobi_problem_t *)arg;
+    int chunks = problem_chunk_count(problem);
+    ABT_thread *threads =
+        (ABT_thread *)calloc((size_t)chunks, sizeof(ABT_thread));
+    jacobi_chunk_arg_t *chunk_args =
+        (jacobi_chunk_arg_t *)calloc((size_t)chunks, sizeof(jacobi_chunk_arg_t));
+    float *eps_values =
+        (float *)calloc((size_t)chunks, sizeof(float));
+
+    problem->success = 0;
+    problem->converged = 0;
+    problem->iterations_done = 0;
+    problem->final_eps = 0.0f;
+
+    if (!threads || !chunk_args || !eps_values) {
+        free(threads);
+        free(chunk_args);
+        free(eps_values);
+        return;
+    }
+
+    for (int it = 1; it <= problem->itmax; it++) {
+        int launched_chunks;
+
+        memset(threads, 0, (size_t)chunks * sizeof(ABT_thread));
+        memset(chunk_args, 0, (size_t)chunks * sizeof(jacobi_chunk_arg_t));
+        memset(eps_values, 0, (size_t)chunks * sizeof(float));
+
+        launched_chunks = launch_problem_phase(problem, JACOBI_PHASE_A,
+                                               threads, chunk_args, eps_values);
+        for (int c = 0; c < launched_chunks; c++) {
+            ABT_thread_join(threads[c]);
+            ABT_thread_free(&threads[c]);
+        }
+
+        if (run_problem_reduction(problem, eps_values) != 0) {
+            free(threads);
+            free(chunk_args);
+            free(eps_values);
+            return;
+        }
+
+        memset(threads, 0, (size_t)chunks * sizeof(ABT_thread));
+        memset(chunk_args, 0, (size_t)chunks * sizeof(jacobi_chunk_arg_t));
+        launch_problem_phase(problem, JACOBI_PHASE_B, threads, chunk_args, eps_values);
+        for (int c = 0; c < launched_chunks; c++) {
+            ABT_thread_join(threads[c]);
+            ABT_thread_free(&threads[c]);
+        }
+
+        problem->iterations_done = it;
+        if (problem->final_eps < problem->maxeps) {
+            problem->converged = 1;
+            break;
+        }
+    }
+
+    problem->checksum = compute_checksum(problem->b, problem->size);
+    problem->success = isfinite(problem->final_eps) && isfinite(problem->checksum);
+
+    free(threads);
+    free(chunk_args);
+    free(eps_values);
+}
+
+/* Точка входа сценария multi-runtime. Создаёт несколько независимых задач
+ * Якоби в одном runtime и ждёт завершения каждой top-level ULT. */
 int main(int argc, char **argv)
 {
-    if (argc < 4) {
+    if (argc < 3) {
         print_usage(argv[0]);
         return 1;
     }
 
     int num_xstreams = atoi(argv[1]);
-    int num_threads = atoi(argv[2]);
     if (num_xstreams <= 0) {
         num_xstreams = DEFAULT_XSTREAMS;
     }
-    if (num_threads <= 0) {
-        num_threads = DEFAULT_THREADS;
-    }
 
-    int num_problems = argc - 3;
+    int num_problems = argc - 2;
     jacobi_problem_t *problems =
         (jacobi_problem_t *)calloc((size_t)num_problems, sizeof(jacobi_problem_t));
     runtime_context_t runtime = {0};
@@ -295,7 +511,7 @@ int main(int argc, char **argv)
     }
 
     for (int i = 0; i < num_problems; i++) {
-        int size = atoi(argv[i + 3]);
+        int size = atoi(argv[i + 2]);
         size_t total_cells;
         if (size < 4) {
             fprintf(stderr, "Grid size must be >= 4, got %d\n", size);
@@ -307,6 +523,9 @@ int main(int argc, char **argv)
         problems[i].maxeps = DEFAULT_MAXEPS;
         problems[i].success = 0;
         problems[i].converged = 0;
+        problems[i].problem_id = i;
+        problems[i].num_chunks = scaled_problem_chunks(size);
+        problems[i].runtime = &runtime;
 
         total_cells = (size_t)size * (size_t)size * (size_t)size;
         problems[i].a = (float *)malloc(total_cells * sizeof(float));
@@ -342,263 +561,51 @@ int main(int argc, char **argv)
     }
 
     printf("Running %d Jacobi-3D problems in one Argobots runtime\n", num_problems);
-    printf("xstreams=%d threads=%d\n", num_xstreams, num_threads);
+    printf("xstreams=%d\n", num_xstreams);
     printf("problem_sizes:");
     for (int i = 0; i < num_problems; i++) {
         printf(" %d", problems[i].size);
+    }
+    printf("\n");
+    printf("problem_chunks:");
+    for (int i = 0; i < num_problems; i++) {
+        printf(" %d", problems[i].num_chunks);
     }
     printf("\n");
 
     clock_t cpu_start = clock();
     struct timespec wall_start, wall_end;
     clock_gettime(CLOCK_REALTIME, &wall_start);
-
-    for (int it = 1; it <= DEFAULT_ITMAX; it++) {
-        int active = count_active_problems(problems, num_problems);
-        int total_chunks = 0;
-        for (int p = 0; p < num_problems; p++) {
-            int interior_rows = problems[p].size - 2;
-            if (!problems[p].converged) {
-                total_chunks += (num_threads < interior_rows) ? num_threads : interior_rows;
+    {
+        ABT_thread *problem_threads =
+            (ABT_thread *)calloc((size_t)num_problems, sizeof(ABT_thread));
+        if (!problem_threads) {
+            fprintf(stderr, "Allocation failure for top-level Jacobi tasks.\n");
+            finalize_runtime(&runtime);
+            for (int i = 0; i < num_problems; i++) {
+                free(problems[i].a);
+                free(problems[i].b);
             }
-        }
-        if (active == 0 || total_chunks == 0) {
-            break;
-        }
-
-        ABT_thread *threads =
-            (ABT_thread *)calloc((size_t)total_chunks, sizeof(ABT_thread));
-        jacobi_chunk_arg_t *chunk_args =
-            (jacobi_chunk_arg_t *)calloc((size_t)total_chunks, sizeof(jacobi_chunk_arg_t));
-        float *eps_values =
-            (float *)calloc((size_t)total_chunks, sizeof(float));
-        if (!threads || !chunk_args || !eps_values) {
-            free(threads);
-            free(chunk_args);
-            free(eps_values);
-            fprintf(stderr, "Allocation failure for chunk metadata.\n");
-            break;
+            free(problems);
+            return 1;
         }
 
-        int chunk_index = 0;
-        for (int p = 0; p < num_problems; p++) {
-            jacobi_problem_t *problem = &problems[p];
-            int interior_rows;
-            int chunks;
-            int base_rows;
-            int remainder;
-            int current_row;
-
-            if (problem->converged) {
-                continue;
-            }
-
-            interior_rows = problem->size - 2;
-            chunks = (num_threads < interior_rows) ? num_threads : interior_rows;
-            base_rows = interior_rows / chunks;
-            remainder = interior_rows % chunks;
-            current_row = 1;
-
-            for (int c = 0; c < chunks; c++) {
-                int rows = base_rows + (c < remainder ? 1 : 0);
-                int pool_id = task_pool_id(p, c, runtime.num_xstreams);
-                chunk_args[chunk_index].problem = problem;
-                chunk_args[chunk_index].start_i = current_row;
-                chunk_args[chunk_index].end_i = current_row + rows;
-                chunk_args[chunk_index].phase = JACOBI_PHASE_A;
-                chunk_args[chunk_index].eps_local = &eps_values[chunk_index];
-
-                if (runtime.use_cost_aware_scheduler) {
-                    ws_push_task_estimate(pool_id,
-                                          estimate_chunk_cost(problem->size, rows,
-                                                              JACOBI_PHASE_A));
-                }
-                ABT_thread_create(runtime.pools[pool_id], jacobi_chunk_run,
-                                  &chunk_args[chunk_index], ABT_THREAD_ATTR_NULL,
-                                  &threads[chunk_index]);
-                current_row += rows;
-                chunk_index++;
-            }
+        /* Каждый top-level ULT отвечает за одну полную задачу Якоби.
+         * Он создаёт чанки и reduction-task только для своей задачи, но все
+         * дочерние задачи работают в тех же общих пулах runtime. */
+        for (int i = 0; i < num_problems; i++) {
+            int pool_id = i % runtime.num_xstreams;
+            ABT_thread_create(runtime.pools[pool_id], run_one_jacobi_problem,
+                              &problems[i], ABT_THREAD_ATTR_NULL,
+                              &problem_threads[i]);
         }
 
-        for (int i = 0; i < total_chunks; i++) {
-            ABT_thread_join(threads[i]);
-            ABT_thread_free(&threads[i]);
+        for (int i = 0; i < num_problems; i++) {
+            ABT_thread_join(problem_threads[i]);
+            ABT_thread_free(&problem_threads[i]);
         }
 
-        {
-            ABT_thread *reduction_threads =
-                (ABT_thread *)calloc((size_t)num_problems * (size_t)num_threads,
-                                     sizeof(ABT_thread));
-            reduction_chunk_arg_t *reduction_args =
-                (reduction_chunk_arg_t *)calloc((size_t)num_problems * (size_t)num_threads,
-                                               sizeof(reduction_chunk_arg_t));
-            float *reduction_outputs =
-                (float *)calloc((size_t)num_problems * (size_t)num_threads,
-                                sizeof(float));
-            if (!reduction_threads || !reduction_args || !reduction_outputs) {
-                free(reduction_threads);
-                free(reduction_args);
-                free(reduction_outputs);
-                free(threads);
-                free(chunk_args);
-                free(eps_values);
-                fprintf(stderr, "Allocation failure for reduction metadata.\n");
-                break;
-            }
-
-            chunk_index = 0;
-            int reduction_task_index = 0;
-            for (int p = 0; p < num_problems; p++) {
-                jacobi_problem_t *problem = &problems[p];
-                int interior_rows;
-                int chunks;
-                int reduction_chunks;
-                int base_chunk_len;
-                int remainder;
-                int current = 0;
-
-                if (problem->converged) {
-                    continue;
-                }
-
-                interior_rows = problem->size - 2;
-                chunks = (num_threads < interior_rows) ? num_threads : interior_rows;
-                reduction_chunks = (chunks < runtime.num_xstreams) ? chunks : runtime.num_xstreams;
-                if (reduction_chunks < 1) {
-                    reduction_chunks = 1;
-                }
-                base_chunk_len = chunks / reduction_chunks;
-                remainder = chunks % reduction_chunks;
-
-                for (int r = 0; r < reduction_chunks; r++) {
-                    int len = base_chunk_len + (r < remainder ? 1 : 0);
-                    int pool_id = task_pool_id(p, r + chunks, runtime.num_xstreams);
-                    reduction_args[reduction_task_index].input = &eps_values[chunk_index];
-                    reduction_args[reduction_task_index].start = current;
-                    reduction_args[reduction_task_index].end = current + len;
-                    reduction_args[reduction_task_index].output =
-                        &reduction_outputs[reduction_task_index];
-
-                    if (runtime.use_cost_aware_scheduler) {
-                        ws_push_task_estimate(pool_id, estimate_reduction_cost(len));
-                    }
-                    ABT_thread_create(runtime.pools[pool_id], reduction_chunk_run,
-                                      &reduction_args[reduction_task_index],
-                                      ABT_THREAD_ATTR_NULL,
-                                      &reduction_threads[reduction_task_index]);
-                    current += len;
-                    reduction_task_index++;
-                }
-                chunk_index += chunks;
-            }
-
-            for (int i = 0; i < reduction_task_index; i++) {
-                ABT_thread_join(reduction_threads[i]);
-                ABT_thread_free(&reduction_threads[i]);
-            }
-
-            reduction_task_index = 0;
-            for (int p = 0; p < num_problems; p++) {
-                jacobi_problem_t *problem = &problems[p];
-                int interior_rows;
-                int chunks;
-                int reduction_chunks;
-                float eps = 0.0f;
-
-                if (problem->converged) {
-                    continue;
-                }
-
-                interior_rows = problem->size - 2;
-                chunks = (num_threads < interior_rows) ? num_threads : interior_rows;
-                reduction_chunks = (chunks < runtime.num_xstreams) ? chunks : runtime.num_xstreams;
-                if (reduction_chunks < 1) {
-                    reduction_chunks = 1;
-                }
-
-                for (int r = 0; r < reduction_chunks; r++) {
-                    if (reduction_outputs[reduction_task_index + r] > eps) {
-                        eps = reduction_outputs[reduction_task_index + r];
-                    }
-                }
-                problem->final_eps = eps;
-                problem->iterations_done = it;
-                reduction_task_index += reduction_chunks;
-            }
-
-            free(reduction_threads);
-            free(reduction_args);
-            free(reduction_outputs);
-        }
-
-        free(threads);
-        free(chunk_args);
-        free(eps_values);
-
-        threads = (ABT_thread *)calloc((size_t)total_chunks, sizeof(ABT_thread));
-        chunk_args = (jacobi_chunk_arg_t *)calloc((size_t)total_chunks, sizeof(jacobi_chunk_arg_t));
-        if (!threads || !chunk_args) {
-            free(threads);
-            free(chunk_args);
-            fprintf(stderr, "Allocation failure for chunk metadata.\n");
-            break;
-        }
-
-        chunk_index = 0;
-        for (int p = 0; p < num_problems; p++) {
-            jacobi_problem_t *problem = &problems[p];
-            int interior_rows;
-            int chunks;
-            int base_rows;
-            int remainder;
-            int current_row;
-
-            if (problem->converged) {
-                continue;
-            }
-
-            interior_rows = problem->size - 2;
-            chunks = (num_threads < interior_rows) ? num_threads : interior_rows;
-            base_rows = interior_rows / chunks;
-            remainder = interior_rows % chunks;
-            current_row = 1;
-
-            for (int c = 0; c < chunks; c++) {
-                int rows = base_rows + (c < remainder ? 1 : 0);
-                int pool_id = task_pool_id(p, c, runtime.num_xstreams);
-                chunk_args[chunk_index].problem = problem;
-                chunk_args[chunk_index].start_i = current_row;
-                chunk_args[chunk_index].end_i = current_row + rows;
-                chunk_args[chunk_index].phase = JACOBI_PHASE_B;
-                chunk_args[chunk_index].eps_local = NULL;
-
-                if (runtime.use_cost_aware_scheduler) {
-                    ws_push_task_estimate(pool_id,
-                                          estimate_chunk_cost(problem->size, rows,
-                                                              JACOBI_PHASE_B));
-                }
-                ABT_thread_create(runtime.pools[pool_id], jacobi_chunk_run,
-                                  &chunk_args[chunk_index], ABT_THREAD_ATTR_NULL,
-                                  &threads[chunk_index]);
-                current_row += rows;
-                chunk_index++;
-            }
-        }
-
-        for (int i = 0; i < total_chunks; i++) {
-            ABT_thread_join(threads[i]);
-            ABT_thread_free(&threads[i]);
-        }
-
-        for (int p = 0; p < num_problems; p++) {
-            if (!problems[p].converged && problems[p].final_eps < problems[p].maxeps) {
-                problems[p].converged = 1;
-            }
-        }
-
-        free(threads);
-        free(chunk_args);
+        free(problem_threads);
     }
 
     clock_t cpu_end = clock();
@@ -619,8 +626,6 @@ int main(int argc, char **argv)
     int success = 1;
     for (int i = 0; i < num_problems; i++) {
         problems[i].checksum = compute_checksum(problems[i].b, problems[i].size);
-        problems[i].success = isfinite(problems[i].final_eps) &&
-                              isfinite(problems[i].checksum);
         printf("problem[%d]_result: size=%d iterations=%d final_eps=%f checksum=%.6f status=%s\n",
                i, problems[i].size, problems[i].iterations_done, problems[i].final_eps,
                problems[i].checksum, problems[i].success ? "OK" : "FAILED");
@@ -645,7 +650,6 @@ int main(int argc, char **argv)
 
     printf(" Multi-Jacobi Benchmark Completed.\n");
     printf(" Problem count      =       %12d\n", num_problems);
-    printf(" Threads per task   =       %12d\n", num_threads);
     printf(" Time in seconds    =       %12.2lf\n", cpu_time_used);
     printf(" Real time (nanos)  =       %12lld\n", real_time_nanoseconds);
     printf(" Steal operations   =       %12lld\n", steal_operations);

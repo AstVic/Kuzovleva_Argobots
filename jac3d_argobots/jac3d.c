@@ -78,7 +78,7 @@ void update_B_thread(void *arg) {
 }
 
 void initialize_argobots(reduction_context_t *reduction_context, int num_xstreams, int num_threads) {
-    /* Initialize Argobots. */
+    /* Инициализируем Argobots runtime. */
     ABT_init(0, NULL);
     configure_scheduler_mode();
 
@@ -111,15 +111,15 @@ void initialize_argobots(reduction_context_t *reduction_context, int num_xstream
             ABT_xstream_create(g_scheds[i], &(reduction_context->xstreams[i]));
         }
     } else {
-        /* Get a primary execution stream. */
+        /* Получаем основной execution stream. */
         ABT_xstream_self(&(reduction_context->xstreams[0]));
 
-        /* Create secondary execution streams. */
+        /* Создаём дополнительные execution stream. */
         for (int i = 1; i < num_xstreams; i++) {
             ABT_xstream_create(ABT_SCHED_NULL, &(reduction_context->xstreams[i]));
         }
 
-        /* Get default pools. */
+        /* Получаем стандартные пулы для каждого execution stream. */
         for (int i = 0; i < num_xstreams; i++) {
             ABT_xstream_get_main_pools(reduction_context->xstreams[i], 1,
                                        &(reduction_context->pools[i]));
@@ -128,12 +128,12 @@ void initialize_argobots(reduction_context_t *reduction_context, int num_xstream
 }
 
 void finalize_argobots(reduction_context_t *reduction_context) {
-    /* Free ULTs. */
+    /* Освобождаем ULT. */
     for (int i = 0; i < reduction_context->num_threads; i++) {
         ABT_thread_free(&reduction_context->threads[i]);
     }    
     
-    /* Join and free secondary execution streams. */
+    /* Дожидаемся и освобождаем дополнительные execution stream. */
     for (int i = 1; i < reduction_context->num_xstreams; i++) {
         ABT_xstream_join(reduction_context->xstreams[i]);
         ABT_xstream_free(&reduction_context->xstreams[i]);
@@ -144,10 +144,10 @@ void finalize_argobots(reduction_context_t *reduction_context) {
         g_scheds = NULL;
     }
 
-    /* Finalize Argobots. */
+    /* Завершаем Argobots runtime. */
     ABT_finalize();
 
-     /* Free allocated memory. */
+     /* Освобождаем выделенную память. */
     free(reduction_context->xstreams);
     free(reduction_context->pools);
     free(reduction_context->threads);
@@ -155,7 +155,7 @@ void finalize_argobots(reduction_context_t *reduction_context) {
 
 int main(int argc, char **argv) {
     int num_xstreams = DEFAULT_XSTREAMS;
-    int num_threads = DEFAULT_THREADS;
+    int num_chunks = DEFAULT_THREADS;
     float eps;
     long long steal_operations = 0;
     long long stolen_tasks = 0;
@@ -163,21 +163,21 @@ int main(int argc, char **argv) {
     struct timespec start_real_time, end_real_time;
     double cpu_time_used;
     
-    /* Parse command line arguments if provided */
+    /* Разбираем аргументы командной строки, если они переданы. */
     if (argc > 1) {
         num_xstreams = atoi(argv[1]);
         if (num_xstreams <= 0) num_xstreams = DEFAULT_XSTREAMS;
         if (argc > 2) {
-            num_threads = atoi(argv[2]);
-            if (num_threads <= 0) num_threads = DEFAULT_THREADS;
+            num_chunks = atoi(argv[2]);
+            if (num_chunks <= 0) num_chunks = DEFAULT_THREADS;
         }
     }
     
-    printf("Running Jacobi-3D with xstreams=%d and threads=%d\n", num_xstreams, num_threads);
+    printf("Running Jacobi-3D with xstreams=%d and chunks=%d\n", num_xstreams, num_chunks);
     
-    /* Initialize Argobots */
+    /* Инициализируем Argobots runtime. */
     reduction_context_t reduction_context;
-    initialize_argobots(&reduction_context, num_xstreams, num_threads);
+    initialize_argobots(&reduction_context, num_xstreams, num_chunks);
     if (g_use_ws_scheduler) {
         if (g_use_cost_aware_scheduler) {
             ws_reset_steal_count();
@@ -201,16 +201,16 @@ int main(int argc, char **argv) {
     start = clock();
     clock_gettime(CLOCK_REALTIME, &start_real_time);
     
-    jacobi_args_t *thread_args = (jacobi_args_t *)malloc(sizeof(jacobi_args_t) * num_threads);
-    float *eps_values = (float *)malloc(sizeof(float) * num_threads);
-    int rows_per_thread = (L - 2) / num_threads;
+    jacobi_args_t *thread_args = (jacobi_args_t *)malloc(sizeof(jacobi_args_t) * num_chunks);
+    float *eps_values = (float *)malloc(sizeof(float) * num_chunks);
+    int rows_per_chunk = (L - 2) / num_chunks;
     for (int it = 1; it <= ITMAX; it++) {
-        for (int t = 0; t < num_threads; t++) {
-            thread_args[t].start_i = 1 + t * rows_per_thread;
-            thread_args[t].end_i = (t == num_threads - 1) ? L - 1 : thread_args[t].start_i + rows_per_thread;
+        for (int t = 0; t < num_chunks; t++) {
+            thread_args[t].start_i = 1 + t * rows_per_chunk;
+            thread_args[t].end_i = (t == num_chunks - 1) ? L - 1 : thread_args[t].start_i + rows_per_chunk;
             thread_args[t].eps_local = &eps_values[t];
             
-            register_task_estimate_if_needed(t % reduction_context.num_pools, (double)(rows_per_thread * L * L));
+            register_task_estimate_if_needed(t % reduction_context.num_pools, (double)(rows_per_chunk * L * L));
             ABT_thread_create(
                 reduction_context.pools[t % reduction_context.num_pools],
                 update_A_thread,
@@ -219,16 +219,16 @@ int main(int argc, char **argv) {
                 &reduction_context.threads[t]
             );
         }
-        for (int t = 0; t < num_threads; t++) {
+        for (int t = 0; t < num_chunks; t++) {
             ABT_thread_join(reduction_context.threads[t]);
             ABT_thread_free(&reduction_context.threads[t]);
         }
         
-        /* Use Argobots reduction to find maximum epsilon */
-        reduce_max_float(&reduction_context, eps_values, num_threads, &eps);
+        /* Используем редукцию Argobots, чтобы найти максимальный epsilon. */
+        reduce_max_float(&reduction_context, eps_values, num_chunks, &eps);
         
-        for (int t = 0; t < num_threads; t++) {
-            register_task_estimate_if_needed(t % reduction_context.num_pools, (double)(rows_per_thread * L * L));
+        for (int t = 0; t < num_chunks; t++) {
+            register_task_estimate_if_needed(t % reduction_context.num_pools, (double)(rows_per_chunk * L * L));
             ABT_thread_create(
                 reduction_context.pools[t % reduction_context.num_pools],
                 update_B_thread,
@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
                 &reduction_context.threads[t]
             );
         }
-        for (int t = 0; t < num_threads; t++) {
+        for (int t = 0; t < num_chunks; t++) {
             ABT_thread_join(reduction_context.threads[t]);
             ABT_thread_free(&reduction_context.threads[t]);
         }

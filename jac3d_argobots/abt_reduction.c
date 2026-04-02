@@ -18,16 +18,16 @@ static int cost_aware_enabled(void) {
 #if USE_TREE_REDUCTION
 
 typedef struct {
-    void *array;                         /* array, on which reduction will be performed */
-    size_t num_elems;                    /* number of elements to perform reduction on */
-    size_t elem_size;                    /* size of a single element */
-    void* default_reduction_value;       /* 0 for sum, 1 for multiplication, etc. */
-    void *result;                        /* where to store the result of reduction */
-    void (*reduce_func)(void *, void *); /* provided reduction function on 2 elements */
-    void **thread_results;               /* array to store thread results */
-    ABT_barrier barrier;                 /* barrier to synchronize threads */
-    int num_threads;                     /* total number of threads */
-    int thread_id;                       /* index of the current thread */
+    void *array;                         /* массив, по которому выполняется редукция */
+    size_t num_elems;                    /* число элементов для редукции */
+    size_t elem_size;                    /* размер одного элемента */
+    void* default_reduction_value;       /* нейтральный элемент: 0 для суммы, 1 для произведения и т.д. */
+    void *result;                        /* сюда записывается итог редукции */
+    void (*reduce_func)(void *, void *); /* пользовательская функция редукции двух элементов */
+    void **thread_results;               /* массив для хранения локальных результатов потоков */
+    ABT_barrier barrier;                 /* барьер для синхронизации потоков */
+    int num_threads;                     /* общее число потоков */
+    int thread_id;                       /* индекс текущего потока */
 } reduction_args_t;
 
 void reduction_thread(void *arg) {
@@ -38,7 +38,7 @@ void reduction_thread(void *arg) {
     int thread_id = reduction_args->thread_id;
     int num_threads = reduction_args->num_threads;
 
-    // Initialize local result to default value of a reduction
+    // Инициализируем локальный результат нейтральным элементом редукции.
     void *local_result = (void *)malloc(elem_size);
     memcpy(local_result, reduction_args->default_reduction_value, elem_size);
 
@@ -129,13 +129,13 @@ void reduce_common(
 #else
 
 typedef struct {
-    void *array;                         /* array, on which reduction will be performed */
-    size_t num_elems;                    /* number of elements to perform reduction on */
-    size_t elem_size;                    /* size of a single element */
-    void* default_reduction_value;       /* 0 for sum, 1 for multiplication, etc. */
-    void *result;                        /* where to store the result of reduction */
-    void (*reduce_func)(void *, void *); /* provided reduction function on 2 elements */
-    ABT_mutex mutex;                     /* mutex to perform final (among different threads) reduction */
+    void *array;                         /* массив, по которому выполняется редукция */
+    size_t num_elems;                    /* число элементов для редукции */
+    size_t elem_size;                    /* размер одного элемента */
+    void* default_reduction_value;       /* нейтральный элемент: 0 для суммы, 1 для произведения и т.д. */
+    void *result;                        /* сюда записывается итог редукции */
+    void (*reduce_func)(void *, void *); /* пользовательская функция редукции двух элементов */
+    ABT_mutex mutex;                     /* mutex для финальной редукции между потоками */
 } reduction_args_t;
 
 void reduction_thread(void *arg) {
@@ -144,7 +144,7 @@ void reduction_thread(void *arg) {
     size_t elem_size = reduction_args->elem_size;
     char *array = (char *)reduction_args->array;
     
-    // Initialize local result to default value of a reduction
+    // Инициализируем локальный результат нейтральным элементом редукции.
     void *local_result = (void *)malloc(elem_size);
     memcpy(local_result, reduction_args->default_reduction_value, elem_size);
 
@@ -213,7 +213,7 @@ void reduce_common(
 
 #endif
 
-// =================== Definitions for reduction funcs ===================
+// =================== Определения функций редукции ===================
 
 #define BODY_sum(type) *((type *)a) += *((type *)b);
 #define BODY_sub(type) *((type *)a) -= *((type *)b);
@@ -229,7 +229,7 @@ void reduce_common(
 #define DEF_HOST(func, type, type_str) \
 void reduce_##func##_##type_str##_func(void *a, void *b) { BODY_##func(type) }
 
-// Use in case when type and it's string representation are the same (for example, int, float)
+// Используется, когда тип и его строковое представление совпадают (например, int, float)
 #define DEF_HOST_SIMPLE(func, type) DEF_HOST(func, type, type)
 
 DEF_HOST_SIMPLE(sum, char);
@@ -295,7 +295,7 @@ DEF_HOST_SIMPLE(min, double);
                   &default_reduction_value, reduce_##func##_##type_str##_func, result); \
 }
 
-// Use in case when type and it's string representation are the same (for example, int, float)
+// Используется, когда тип и его строковое представление совпадают (например, int, float)
 #define DEFINE_REDFUNC_SIMPLE(func, type, default_value) DEFINE_REDFUNC(func, type, type, default_value)
 
 DEFINE_REDFUNC_SIMPLE(sum, char, 0);
@@ -353,4 +353,4 @@ DEFINE_REDFUNC_SIMPLE(sub, double, 0);
 DEFINE_REDFUNC_SIMPLE(prod, double, 1);
 DEFINE_REDFUNC_SIMPLE(max, double, DBL_MIN);
 DEFINE_REDFUNC_SIMPLE(min, double, DBL_MAX);
-// =================== End Definitions for reduction funcs ===============
+// =================== Конец определений функций редукции ===============

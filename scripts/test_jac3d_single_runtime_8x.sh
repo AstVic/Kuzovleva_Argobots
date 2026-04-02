@@ -87,10 +87,28 @@ require_command gcc "Install GCC or Clang-compatible gcc."
 resolve_argobots_flags
 resolve_scheduler_sources
 
+# В multi-runtime число чанков для каждой задачи выбирается пропорционально
+# её размеру по формуле round(size * 80 / 384).
+scaled_chunks_for_size() {
+    local size="$1"
+    local chunks=$(((size * 80 + 192) / 384))
+    local interior=$((size - 2))
+    if [ "$chunks" -lt 1 ]; then
+        chunks=1
+    fi
+    if [ "$chunks" -gt "$interior" ]; then
+        chunks="$interior"
+    fi
+    printf '%s\n' "$chunks"
+}
+
 XSTREAMS=(1 2 4 8)
-THREADS=(1 2 4 8 16)
 TASK_SIZES_STR="${TASK_SIZES_8X:-352 320 288 256 224 192 160 128}"
 read -r -a TASK_SIZES <<< "$TASK_SIZES_STR"
+TASK_CHUNKS=()
+for size in "${TASK_SIZES[@]}"; do
+    TASK_CHUNKS+=("$(scaled_chunks_for_size "$size")")
+done
 
 if [ "${#TASK_SIZES[@]}" -ne 8 ]; then
     echo "Expected exactly 8 task sizes, got ${#TASK_SIZES[@]} (${TASK_SIZES[*]})." >&2
@@ -100,9 +118,10 @@ fi
 mkdir -p results_scheduler_compare
 RESULTS="results_scheduler_compare/benchmark_single_runtime_8x.txt"
 SUMMARY="results_scheduler_compare/summary_single_runtime_8x.csv"
-echo "scheduler,xstreams,threads,task_count,total_time_seconds,total_real_time_nanos,total_steal_operations,total_stolen_tasks,verification" > "$SUMMARY"
+echo "scheduler,xstreams,size1,chunks1,size2,chunks2,size3,chunks3,size4,chunks4,size5,chunks5,size6,chunks6,size7,chunks7,size8,chunks8,task_count,total_time_seconds,total_real_time_nanos,total_steal_operations,total_stolen_tasks,verification" > "$SUMMARY"
 echo "Single-runtime 8-task Jacobi benchmark" > "$RESULTS"
 echo "task_sizes=${TASK_SIZES[*]}" >> "$RESULTS"
+echo "task_chunks=${TASK_CHUNKS[*]}" >> "$RESULTS"
 
 build_binary
 
@@ -112,19 +131,17 @@ for scheduler in old new; do
     echo "----------------------" >> "$RESULTS"
 
     for xstreams in "${XSTREAMS[@]}"; do
-        for threads in "${THREADS[@]}"; do
-            output_file="results_scheduler_compare/jac3d_${scheduler}_single_runtime_8x_x${xstreams}_t${threads}.txt"
-            ABT_WS_SCHEDULER=$scheduler ./jac3d_multi_runtime "$xstreams" "$threads" "${TASK_SIZES[@]}" > "$output_file" 2>&1
+        output_file="results_scheduler_compare/jac3d_${scheduler}_single_runtime_8x_x${xstreams}.txt"
+        ABT_WS_SCHEDULER=$scheduler ./jac3d_multi_runtime "$xstreams" "${TASK_SIZES[@]}" > "$output_file" 2>&1
 
-            total_time=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
-            total_nanos=$(grep "Real time" "$output_file" | awk '{print $NF}')
-            verification=$(grep "Verification" "$output_file" | awk '{print $NF}')
-            total_steal_ops=$(grep "Steal operations" "$output_file" | awk '{print $NF}')
-            total_stolen_tasks=$(grep "Stolen tasks" "$output_file" | awk '{print $NF}')
+        total_time=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
+        total_nanos=$(grep "Real time" "$output_file" | awk '{print $NF}')
+        verification=$(grep "Verification" "$output_file" | awk '{print $NF}')
+        total_steal_ops=$(grep "Steal operations" "$output_file" | awk '{print $NF}')
+        total_stolen_tasks=$(grep "Stolen tasks" "$output_file" | awk '{print $NF}')
 
-            echo "$scheduler,$xstreams,$threads,8,$total_time,$total_nanos,$total_steal_ops,$total_stolen_tasks,$verification" >> "$SUMMARY"
-            echo "$scheduler x=$xstreams t=$threads tasks=8 sizes=${TASK_SIZES[*]} total_time=$total_time total_steal_ops=$total_steal_ops total_stolen_tasks=$total_stolen_tasks verification=$verification" >> "$RESULTS"
-        done
+        echo "$scheduler,$xstreams,${TASK_SIZES[0]},${TASK_CHUNKS[0]},${TASK_SIZES[1]},${TASK_CHUNKS[1]},${TASK_SIZES[2]},${TASK_CHUNKS[2]},${TASK_SIZES[3]},${TASK_CHUNKS[3]},${TASK_SIZES[4]},${TASK_CHUNKS[4]},${TASK_SIZES[5]},${TASK_CHUNKS[5]},${TASK_SIZES[6]},${TASK_CHUNKS[6]},${TASK_SIZES[7]},${TASK_CHUNKS[7]},8,$total_time,$total_nanos,$total_steal_ops,$total_stolen_tasks,$verification" >> "$SUMMARY"
+        echo "$scheduler x=$xstreams {${TASK_SIZES[0]},${TASK_CHUNKS[0]}} {${TASK_SIZES[1]},${TASK_CHUNKS[1]}} {${TASK_SIZES[2]},${TASK_CHUNKS[2]}} {${TASK_SIZES[3]},${TASK_CHUNKS[3]}} {${TASK_SIZES[4]},${TASK_CHUNKS[4]}} {${TASK_SIZES[5]},${TASK_CHUNKS[5]}} {${TASK_SIZES[6]},${TASK_CHUNKS[6]}} {${TASK_SIZES[7]},${TASK_CHUNKS[7]}} total_time=$total_time total_steal_ops=$total_steal_ops total_stolen_tasks=$total_stolen_tasks verification=$verification" >> "$RESULTS"
     done
 done
 

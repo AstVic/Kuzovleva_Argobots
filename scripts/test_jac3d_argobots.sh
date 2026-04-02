@@ -95,11 +95,14 @@ mkdir -p results_scheduler_compare
 RESULTS="results_scheduler_compare/benchmark_results.txt"
 echo "Argobots Jacobi-3D Scheduler Comparison" > "$RESULTS"
 echo "=======================================" >> "$RESULTS"
-echo "scheduler,xstreams,threads,time_seconds,real_time_nanos,steal_operations,stolen_tasks,verification" > results_scheduler_compare/summary.csv
+echo "scheduler,xstreams,chunks,time_seconds,real_time_nanos,steal_operations,stolen_tasks,verification" > results_scheduler_compare/summary.csv
 
 XSTREAMS=(1 2 4 8)
-THREADS=(1 2 4 8 16)
+GRID_SIZE=384
+CHUNKS=(32 40 48 64 80)
 NUM_RUNS="${NUM_RUNS:-1}"
+
+echo "grid_size=$GRID_SIZE chunks=${CHUNKS[*]}" >> "$RESULTS"
 
 for scheduler in old new; do
     echo "" >> "$RESULTS"
@@ -107,7 +110,7 @@ for scheduler in old new; do
     echo "----------------------" >> "$RESULTS"
 
     for xstreams in "${XSTREAMS[@]}"; do
-        for threads in "${THREADS[@]}"; do
+        for chunks in "${CHUNKS[@]}"; do
             total_time=0
             total_nanos=0
             total_steal_ops=0
@@ -115,8 +118,8 @@ for scheduler in old new; do
             verification="SUCCESSFUL"
 
             for run in $(seq 1 "$NUM_RUNS"); do
-                output_file="results_scheduler_compare/jac3d_${scheduler}_L384_x${xstreams}_t${threads}_run${run}.txt"
-                ABT_WS_SCHEDULER=$scheduler ./jac3d "$xstreams" "$threads" > "$output_file" 2>&1
+                output_file="results_scheduler_compare/jac3d_${scheduler}_L384_x${xstreams}_c${chunks}_run${run}.txt"
+                ABT_WS_SCHEDULER=$scheduler ./jac3d "$xstreams" "$chunks" > "$output_file" 2>&1
                 TIME=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
                 TIME_NANOS=$(grep "Real time" "$output_file" | awk '{print $NF}')
                 VERIFICATION=$(grep "Verification" "$output_file" | awk '{print $NF}')
@@ -139,8 +142,8 @@ for scheduler in old new; do
             mean_nanos=$(printf '%s\n' "$mean_nanos" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
             mean_steal_ops=$(printf '%s\n' "$mean_steal_ops" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
             mean_stolen_tasks=$(printf '%s\n' "$mean_stolen_tasks" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
-            echo "$scheduler,$xstreams,$threads,$mean_time,$mean_nanos,$mean_steal_ops,$mean_stolen_tasks,$verification" >> results_scheduler_compare/summary.csv
-            echo "$scheduler L=384 x=$xstreams t=$threads runs=$NUM_RUNS mean_time=$mean_time mean_steal_ops=$mean_steal_ops mean_stolen_tasks=$mean_stolen_tasks verification=$verification" >> "$RESULTS"
+            echo "$scheduler,$xstreams,$chunks,$mean_time,$mean_nanos,$mean_steal_ops,$mean_stolen_tasks,$verification" >> results_scheduler_compare/summary.csv
+            echo "$scheduler L=384 x=$xstreams c=$chunks runs=$NUM_RUNS mean_time=$mean_time mean_steal_ops=$mean_steal_ops mean_stolen_tasks=$mean_stolen_tasks verification=$verification" >> "$RESULTS"
         done
     done
 done
