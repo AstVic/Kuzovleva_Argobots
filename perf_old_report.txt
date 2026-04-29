@@ -1,0 +1,743 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 3K of event 'cycles:P'
+# Event count (approx.): 103914559787
+#
+# Children      Self  Command  Shared Object         Symbol                                             
+# ........  ........  .......  ....................  ...................................................
+#
+    53.43%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de4180
+            |
+            ---0x6101d4de4180
+               |          
+               |--47.26%--0x6101d4de4400
+               |          |          
+               |          |--41.22%--0x6101d4de47c0
+               |          |          |          
+               |          |          |--34.96%--0x6101d4de4b80
+               |          |          |          |          
+               |          |          |          |--28.13%--0x6101d4de4f40
+               |          |          |          |          |          
+               |          |          |          |          |--21.64%--0x6101d4de5380
+               |          |          |          |          |          |          
+               |          |          |          |          |          |--14.62%--0x6101d4de57c0
+               |          |          |          |          |          |          |          
+               |          |          |          |          |          |          |--8.31%--0
+               |          |          |          |          |          |          |          |          
+               |          |          |          |          |          |          |           --8.25%--ABTD_ythread_func_wrapper
+               |          |          |          |          |          |          |                     |          
+               |          |          |          |          |          |          |                     |--4.34%--update_B_thread
+               |          |          |          |          |          |          |                     |          
+               |          |          |          |          |          |          |                      --3.88%--update_A_thread
+               |          |          |          |          |          |          |          
+               |          |          |          |          |          |           --6.18%--ABTD_ythread_func_wrapper
+               |          |          |          |          |          |                     |          
+               |          |          |          |          |          |                     |--3.25%--update_B_thread
+               |          |          |          |          |          |                     |          
+               |          |          |          |          |          |                      --2.93%--update_A_thread
+               |          |          |          |          |          |          
+               |          |          |          |          |           --7.00%--ABTD_ythread_func_wrapper
+               |          |          |          |          |                     |          
+               |          |          |          |          |                     |--3.80%--update_B_thread
+               |          |          |          |          |                     |          
+               |          |          |          |          |                      --3.20%--update_A_thread
+               |          |          |          |          |          
+               |          |          |          |           --6.34%--ABTD_ythread_func_wrapper
+               |          |          |          |                     |          
+               |          |          |          |                     |--3.20%--update_B_thread
+               |          |          |          |                     |          
+               |          |          |          |                      --3.15%--update_A_thread
+               |          |          |          |          
+               |          |          |           --6.73%--ABTD_ythread_func_wrapper
+               |          |          |                     |          
+               |          |          |                     |--3.39%--update_B_thread
+               |          |          |                     |          
+               |          |          |                      --3.34%--update_A_thread
+               |          |          |          
+               |          |           --6.12%--ABTD_ythread_func_wrapper
+               |          |                     |          
+               |          |                     |--3.08%--update_A_thread
+               |          |                     |          
+               |          |                      --3.04%--update_B_thread
+               |          |          
+               |           --5.93%--ABTD_ythread_func_wrapper
+               |                     |          
+               |                     |--3.03%--update_B_thread
+               |                     |          
+               |                      --2.87%--update_A_thread
+               |          
+                --6.01%--ABTD_ythread_func_wrapper
+                          |          
+                          |--3.01%--update_B_thread
+                          |          
+                           --3.00%--update_A_thread
+
+    52.58%     0.05%  jac3d    libabt.so.1.1.0       [.] ABTD_ythread_func_wrapper
+            |          
+             --52.53%--ABTD_ythread_func_wrapper
+                       |          
+                       |--27.06%--update_B_thread
+                       |          
+                        --25.44%--update_A_thread
+
+    47.26%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de4400
+            |
+            ---0x6101d4de4400
+               |          
+               |--41.22%--0x6101d4de47c0
+               |          |          
+               |          |--34.96%--0x6101d4de4b80
+               |          |          |          
+               |          |          |--28.13%--0x6101d4de4f40
+               |          |          |          |          
+               |          |          |          |--21.64%--0x6101d4de5380
+               |          |          |          |          |          
+               |          |          |          |          |--14.62%--0x6101d4de57c0
+               |          |          |          |          |          |          
+               |          |          |          |          |          |--8.31%--0
+               |          |          |          |          |          |          |          
+               |          |          |          |          |          |           --8.25%--ABTD_ythread_func_wrapper
+               |          |          |          |          |          |                     |          
+               |          |          |          |          |          |                     |--4.34%--update_B_thread
+               |          |          |          |          |          |                     |          
+               |          |          |          |          |          |                      --3.88%--update_A_thread
+               |          |          |          |          |          |          
+               |          |          |          |          |           --6.18%--ABTD_ythread_func_wrapper
+               |          |          |          |          |                     |          
+               |          |          |          |          |                     |--3.25%--update_B_thread
+               |          |          |          |          |                     |          
+               |          |          |          |          |                      --2.93%--update_A_thread
+               |          |          |          |          |          
+               |          |          |          |           --7.00%--ABTD_ythread_func_wrapper
+               |          |          |          |                     |          
+               |          |          |          |                     |--3.80%--update_B_thread
+               |          |          |          |                     |          
+               |          |          |          |                      --3.20%--update_A_thread
+               |          |          |          |          
+               |          |          |           --6.34%--ABTD_ythread_func_wrapper
+               |          |          |                     |          
+               |          |          |                     |--3.20%--update_B_thread
+               |          |          |                     |          
+               |          |          |                      --3.15%--update_A_thread
+               |          |          |          
+               |          |           --6.73%--ABTD_ythread_func_wrapper
+               |          |                     |          
+               |          |                     |--3.39%--update_B_thread
+               |          |                     |          
+               |          |                      --3.34%--update_A_thread
+               |          |          
+               |           --6.12%--ABTD_ythread_func_wrapper
+               |                     |          
+               |                     |--3.08%--update_A_thread
+               |                     |          
+               |                      --3.04%--update_B_thread
+               |          
+                --5.93%--ABTD_ythread_func_wrapper
+                          |          
+                          |--3.03%--update_B_thread
+                          |          
+                           --2.87%--update_A_thread
+
+    43.22%     0.00%  jac3d    libabt.so.1.1.0       [.] thread_main_sched_func
+            |
+            ---thread_main_sched_func
+               |          
+               |--10.85%--sched_run
+               |          
+               |--9.41%--pool_pop_shared
+               |          
+               |--7.02%--pool_get_size
+               |          
+               |--5.47%--ABT_pool_pop_thread
+               |          
+               |--5.42%--ABT_pool_get_size
+               |          
+               |--2.81%--ABT_pool_pop_thread@plt
+               |          
+                --2.08%--ABT_pool_get_size@plt
+
+    41.22%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de47c0
+            |
+            ---0x6101d4de47c0
+               |          
+               |--34.96%--0x6101d4de4b80
+               |          |          
+               |          |--28.13%--0x6101d4de4f40
+               |          |          |          
+               |          |          |--21.64%--0x6101d4de5380
+               |          |          |          |          
+               |          |          |          |--14.62%--0x6101d4de57c0
+               |          |          |          |          |          
+               |          |          |          |          |--8.31%--0
+               |          |          |          |          |          |          
+               |          |          |          |          |           --8.25%--ABTD_ythread_func_wrapper
+               |          |          |          |          |                     |          
+               |          |          |          |          |                     |--4.34%--update_B_thread
+               |          |          |          |          |                     |          
+               |          |          |          |          |                      --3.88%--update_A_thread
+               |          |          |          |          |          
+               |          |          |          |           --6.18%--ABTD_ythread_func_wrapper
+               |          |          |          |                     |          
+               |          |          |          |                     |--3.25%--update_B_thread
+               |          |          |          |                     |          
+               |          |          |          |                      --2.93%--update_A_thread
+               |          |          |          |          
+               |          |          |           --7.00%--ABTD_ythread_func_wrapper
+               |          |          |                     |          
+               |          |          |                     |--3.80%--update_B_thread
+               |          |          |                     |          
+               |          |          |                      --3.20%--update_A_thread
+               |          |          |          
+               |          |           --6.34%--ABTD_ythread_func_wrapper
+               |          |                     |          
+               |          |                     |--3.20%--update_B_thread
+               |          |                     |          
+               |          |                      --3.15%--update_A_thread
+               |          |          
+               |           --6.73%--ABTD_ythread_func_wrapper
+               |                     |          
+               |                     |--3.39%--update_B_thread
+               |                     |          
+               |                      --3.34%--update_A_thread
+               |          
+                --6.12%--ABTD_ythread_func_wrapper
+                          |          
+                          |--3.08%--update_A_thread
+                          |          
+                           --3.04%--update_B_thread
+
+    34.96%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de4b80
+            |
+            ---0x6101d4de4b80
+               |          
+               |--28.13%--0x6101d4de4f40
+               |          |          
+               |          |--21.64%--0x6101d4de5380
+               |          |          |          
+               |          |          |--14.62%--0x6101d4de57c0
+               |          |          |          |          
+               |          |          |          |--8.31%--0
+               |          |          |          |          |          
+               |          |          |          |           --8.25%--ABTD_ythread_func_wrapper
+               |          |          |          |                     |          
+               |          |          |          |                     |--4.34%--update_B_thread
+               |          |          |          |                     |          
+               |          |          |          |                      --3.88%--update_A_thread
+               |          |          |          |          
+               |          |          |           --6.18%--ABTD_ythread_func_wrapper
+               |          |          |                     |          
+               |          |          |                     |--3.25%--update_B_thread
+               |          |          |                     |          
+               |          |          |                      --2.93%--update_A_thread
+               |          |          |          
+               |          |           --7.00%--ABTD_ythread_func_wrapper
+               |          |                     |          
+               |          |                     |--3.80%--update_B_thread
+               |          |                     |          
+               |          |                      --3.20%--update_A_thread
+               |          |          
+               |           --6.34%--ABTD_ythread_func_wrapper
+               |                     |          
+               |                     |--3.20%--update_B_thread
+               |                     |          
+               |                      --3.15%--update_A_thread
+               |          
+                --6.73%--ABTD_ythread_func_wrapper
+                          |          
+                          |--3.39%--update_B_thread
+                          |          
+                           --3.34%--update_A_thread
+
+    28.13%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de4f40
+            |
+            ---0x6101d4de4f40
+               |          
+               |--21.64%--0x6101d4de5380
+               |          |          
+               |          |--14.62%--0x6101d4de57c0
+               |          |          |          
+               |          |          |--8.31%--0
+               |          |          |          |          
+               |          |          |           --8.25%--ABTD_ythread_func_wrapper
+               |          |          |                     |          
+               |          |          |                     |--4.34%--update_B_thread
+               |          |          |                     |          
+               |          |          |                      --3.88%--update_A_thread
+               |          |          |          
+               |          |           --6.18%--ABTD_ythread_func_wrapper
+               |          |                     |          
+               |          |                     |--3.25%--update_B_thread
+               |          |                     |          
+               |          |                      --2.93%--update_A_thread
+               |          |          
+               |           --7.00%--ABTD_ythread_func_wrapper
+               |                     |          
+               |                     |--3.80%--update_B_thread
+               |                     |          
+               |                      --3.20%--update_A_thread
+               |          
+                --6.34%--ABTD_ythread_func_wrapper
+                          |          
+                          |--3.20%--update_B_thread
+                          |          
+                           --3.15%--update_A_thread
+
+    27.06%    26.90%  jac3d    jac3d                 [.] update_B_thread
+            |          
+             --26.90%--0x6101d4de4180
+                       |          
+                       |--23.92%--0x6101d4de4400
+                       |          |          
+                       |          |--20.91%--0x6101d4de47c0
+                       |          |          |          
+                       |          |          |--17.90%--0x6101d4de4b80
+                       |          |          |          |          
+                       |          |          |          |--14.51%--0x6101d4de4f40
+                       |          |          |          |          |          
+                       |          |          |          |          |--11.34%--0x6101d4de5380
+                       |          |          |          |          |          |          
+                       |          |          |          |          |          |--7.54%--0x6101d4de57c0
+                       |          |          |          |          |          |          |          
+                       |          |          |          |          |          |          |--4.29%--0
+                       |          |          |          |          |          |          |          ABTD_ythread_func_wrapper
+                       |          |          |          |          |          |          |          update_B_thread
+                       |          |          |          |          |          |          |          
+                       |          |          |          |          |          |           --3.25%--ABTD_ythread_func_wrapper
+                       |          |          |          |          |          |                     update_B_thread
+                       |          |          |          |          |          |          
+                       |          |          |          |          |           --3.80%--ABTD_ythread_func_wrapper
+                       |          |          |          |          |                     update_B_thread
+                       |          |          |          |          |          
+                       |          |          |          |           --3.17%--ABTD_ythread_func_wrapper
+                       |          |          |          |                     update_B_thread
+                       |          |          |          |          
+                       |          |          |           --3.39%--ABTD_ythread_func_wrapper
+                       |          |          |                     update_B_thread
+                       |          |          |          
+                       |          |           --3.01%--ABTD_ythread_func_wrapper
+                       |          |                     update_B_thread
+                       |          |          
+                       |           --3.01%--ABTD_ythread_func_wrapper
+                       |                     update_B_thread
+                       |          
+                        --2.98%--ABTD_ythread_func_wrapper
+                                  update_B_thread
+
+    25.44%    25.30%  jac3d    jac3d                 [.] update_A_thread
+            |          
+             --25.30%--0x6101d4de4180
+                       |          
+                       |--22.30%--0x6101d4de4400
+                       |          |          
+                       |          |--19.43%--0x6101d4de47c0
+                       |          |          |          
+                       |          |          |--16.35%--0x6101d4de4b80
+                       |          |          |          |          
+                       |          |          |          |--13.04%--0x6101d4de4f40
+                       |          |          |          |          |          
+                       |          |          |          |          |--9.89%--0x6101d4de5380
+                       |          |          |          |          |          |          
+                       |          |          |          |          |          |--6.75%--0x6101d4de57c0
+                       |          |          |          |          |          |          |          
+                       |          |          |          |          |          |          |--3.88%--0
+                       |          |          |          |          |          |          |          ABTD_ythread_func_wrapper
+                       |          |          |          |          |          |          |          update_A_thread
+                       |          |          |          |          |          |          |          
+                       |          |          |          |          |          |           --2.87%--ABTD_ythread_func_wrapper
+                       |          |          |          |          |          |                     update_A_thread
+                       |          |          |          |          |          |          
+                       |          |          |          |          |           --3.14%--ABTD_ythread_func_wrapper
+                       |          |          |          |          |                     update_A_thread
+                       |          |          |          |          |          
+                       |          |          |          |           --3.15%--ABTD_ythread_func_wrapper
+                       |          |          |          |                     update_A_thread
+                       |          |          |          |          
+                       |          |          |           --3.31%--ABTD_ythread_func_wrapper
+                       |          |          |                     update_A_thread
+                       |          |          |          
+                       |          |           --3.08%--ABTD_ythread_func_wrapper
+                       |          |                     update_A_thread
+                       |          |          
+                       |           --2.87%--ABTD_ythread_func_wrapper
+                       |                     update_A_thread
+                       |          
+                        --3.00%--ABTD_ythread_func_wrapper
+                                  update_A_thread
+
+    21.64%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de5380
+            |
+            ---0x6101d4de5380
+               |          
+               |--14.62%--0x6101d4de57c0
+               |          |          
+               |          |--8.31%--0
+               |          |          |          
+               |          |           --8.25%--ABTD_ythread_func_wrapper
+               |          |                     |          
+               |          |                     |--4.34%--update_B_thread
+               |          |                     |          
+               |          |                      --3.88%--update_A_thread
+               |          |          
+               |           --6.18%--ABTD_ythread_func_wrapper
+               |                     |          
+               |                     |--3.25%--update_B_thread
+               |                     |          
+               |                      --2.93%--update_A_thread
+               |          
+                --7.00%--ABTD_ythread_func_wrapper
+                          |          
+                          |--3.80%--update_B_thread
+                          |          
+                           --3.20%--update_A_thread
+
+    14.62%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de57c0
+            |
+            ---0x6101d4de57c0
+               |          
+               |--8.31%--0
+               |          |          
+               |           --8.25%--ABTD_ythread_func_wrapper
+               |                     |          
+               |                     |--4.34%--update_B_thread
+               |                     |          
+               |                      --3.88%--update_A_thread
+               |          
+                --6.18%--ABTD_ythread_func_wrapper
+                          |          
+                          |--3.25%--update_B_thread
+                          |          
+                           --2.93%--update_A_thread
+
+    13.72%    11.84%  jac3d    jac3d                 [.] sched_run
+            |          
+            |--10.48%--thread_main_sched_func
+            |          |          
+            |          |--7.99%--sched_run
+            |          |          
+            |           --2.35%--ABT_pool_pop_thread@plt
+            |          
+            |--1.88%--sched_run
+            |          
+             --1.33%--0
+                       thread_main_sched_func
+                       |          
+                        --0.98%--sched_run
+
+    13.34%     0.00%  jac3d    [unknown]             [k] 0000000000000000
+            |
+            ---0
+               |          
+               |--8.25%--ABTD_ythread_func_wrapper
+               |          |          
+               |          |--4.34%--update_B_thread
+               |          |          
+               |           --3.88%--update_A_thread
+               |          
+                --4.99%--thread_main_sched_func
+                          |          
+                          |--1.15%--pool_pop_shared
+                          |          
+                          |--1.12%--sched_run
+                          |          
+                          |--0.82%--pool_get_size
+                          |          
+                          |--0.71%--ABT_pool_pop_thread
+                          |          
+                           --0.66%--ABT_pool_get_size
+
+    11.38%     7.65%  jac3d    libabt.so.1.1.0       [.] pool_pop_shared
+            |          
+            |--6.81%--thread_main_sched_func
+            |          |          
+            |          |--5.14%--pool_pop_shared
+            |          |          
+            |           --1.66%--ABT_pool_pop_thread
+            |          
+            |--3.72%--pool_pop_shared
+            |          
+             --0.85%--0
+                       thread_main_sched_func
+                       |          
+                        --0.55%--pool_pop_shared
+
+    10.99%     6.87%  jac3d    libabt.so.1.1.0       [.] ABT_pool_pop_thread
+            |          
+            |--5.86%--thread_main_sched_func
+            |          |          
+            |          |--3.10%--pool_pop_shared
+            |          |          
+            |          |--1.69%--sched_run
+            |          |          
+            |           --1.08%--ABT_pool_pop_thread
+            |          
+            |--4.12%--ABT_pool_pop_thread
+            |          
+             --1.01%--0
+                       thread_main_sched_func
+                       |          
+                        --0.60%--pool_pop_shared
+
+     8.91%     6.52%  jac3d    libabt.so.1.1.0       [.] ABT_pool_get_size
+            |          
+            |--5.68%--thread_main_sched_func
+            |          |          
+            |          |--3.06%--pool_get_size
+            |          |          
+            |           --2.62%--ABT_pool_get_size
+            |          
+            |--2.39%--ABT_pool_get_size
+            |          
+             --0.85%--0
+                       thread_main_sched_func
+
+     7.05%     3.55%  jac3d    libabt.so.1.1.0       [.] pool_get_size
+            |          
+            |--3.49%--pool_get_size
+            |          
+             --3.14%--thread_main_sched_func
+                       pool_get_size
+
+     4.94%     2.26%  jac3d    jac3d                 [.] ABT_pool_pop_thread@plt
+            |          
+            |--2.68%--ABT_pool_pop_thread@plt
+            |          
+             --2.10%--thread_main_sched_func
+                       |          
+                        --1.99%--ABT_pool_pop_thread
+
+     4.42%     4.28%  jac3d    jac3d                 [.] ABT_pool_get_size@plt
+            |          
+             --3.90%--thread_main_sched_func
+                       |          
+                       |--2.12%--ABT_pool_get_size
+                       |          
+                        --1.78%--ABT_pool_get_size@plt
+
+     1.32%     1.32%  jac3d    libabt.so.1.1.0       [.] ABTI_sched_has_unit
+            |          
+             --0.85%--ABTI_sched_has_unit
+
+     1.01%     0.00%  jac3d    [unknown]             [.] 0x00007ffecaa50970
+            |
+            ---0x7ffecaa50970
+
+     0.85%     0.85%  jac3d    libabt.so.1.1.0       [.] ABT_barrier_wait
+            |          
+             --0.82%--0x6101d4de4180
+                       |          
+                        --0.68%--0x6101d4de4400
+                                  |          
+                                   --0.57%--0x6101d4de47c0
+
+     0.78%     0.00%  jac3d    jac3d                 [.] _start
+            |
+            ---_start
+               __libc_start_main@@GLIBC_2.34
+               __libc_start_call_main
+               main
+
+     0.78%     0.00%  jac3d    libc.so.6             [.] __libc_start_main@@GLIBC_2.34
+            |
+            ---__libc_start_main@@GLIBC_2.34
+               __libc_start_call_main
+               main
+
+     0.78%     0.00%  jac3d    libc.so.6             [.] __libc_start_call_main
+            |
+            ---__libc_start_call_main
+               main
+
+     0.78%     0.29%  jac3d    jac3d                 [.] main
+     0.48%     0.41%  jac3d    libabt.so.1.1.0       [.] pool_is_empty
+     0.40%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc200f4b
+     0.40%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaeac551
+     0.38%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc04853b
+     0.35%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb00ca56
+     0.35%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb00bc32
+     0.34%     0.01%  jac3d    [unknown]             [k] 0xffffffffbc200bc7
+     0.33%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc0493d3
+     0.32%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb023a78
+     0.32%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb023558
+     0.31%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaed6e19
+     0.31%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22e74a
+     0.31%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22e404
+     0.29%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22dd9b
+     0.26%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb00aab9
+     0.21%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf653d6
+     0.17%     0.03%  jac3d    [unknown]             [.] 0xffffffffbc2011da
+     0.16%     0.16%  jac3d    libabt.so.1.1.0       [.] ABTI_info_check_print_all_thread_stacks
+     0.16%     0.16%  jac3d    libabt.so.1.1.0       [.] ABT_sched_has_to_stop
+     0.16%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf739bb
+     0.16%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22cbaf
+     0.16%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22c9bc
+     0.16%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb295ce4
+     0.14%     0.14%  jac3d    [unknown]             [k] 0xffffffffbc2011d3
+     0.14%     0.08%  jac3d    ld-linux-x86-64.so.2  [.] __tls_get_addr
+     0.14%     0.14%  jac3d    libabt.so.1.1.0       [.] ABT_xstream_check_events
+     0.13%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb295971
+     0.13%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb25be29
+     0.11%     0.09%  jac3d    [unknown]             [.] 0xffffffffbbfcac57
+     0.11%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb25a642
+     0.10%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc200130
+     0.10%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc04313f
+     0.09%     0.00%  jac3d    [unknown]             [.] 0xffffffffbbfcac59
+     0.09%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22cbf5
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbae07e5b
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbaf0d918
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbaf0d865
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbaf0d3b6
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbaf0d0be
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbaf01141
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbaf01001
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb237a9a
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb227d65
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb227729
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb227466
+     0.09%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb226881
+     0.09%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc200ba0
+     0.08%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf6d096
+     0.07%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb2d16e5
+     0.06%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb22628d
+     0.06%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb23b6fd
+     0.06%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb23b293
+     0.06%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb275f1a
+     0.06%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb1d6e0f
+     0.05%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf739ab
+     0.05%     0.05%  jac3d    libabt.so.1.1.0       [.] ABTI_sched_has_to_stop
+     0.05%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb00aa59
+     0.05%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf898d9
+     0.05%     0.05%  jac3d    [unknown]             [k] 0xffffffffbae66fc0
+     0.05%     0.00%  jac3d    [unknown]             [.] 0xffffffffbae66fc3
+     0.05%     0.00%  jac3d    jac3d                 [.] ABT_sched_has_to_stop@plt
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbb0468de
+     0.03%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb1d4b73
+     0.03%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb2cc716
+     0.03%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb2cb466
+     0.03%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb0468df
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbb1fdaf2
+     0.03%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb1fdaf4
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbb225175
+     0.03%     0.00%  jac3d    [unknown]             [k] 0xffffffffbb225176
+     0.03%     0.03%  jac3d    libabt.so.1.1.0       [.] ABT_self_schedule
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf9388a
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf9388e
+     0.03%     0.00%  jac3d    libabt.so.1.1.0       [.] ABTI_ythread_context_jump_with_call.constprop.0
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf872e6
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf6c932
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf872ed
+     0.03%     0.03%  jac3d    jac3d                 [.] reduction_thread
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf6c137
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf6c13b
+     0.03%     0.02%  jac3d    libabt.so.1.1.0       [.] ABTI_mem_pool_take_bucket
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbb088fbd
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf892f2
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb088fc4
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc2011df
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbb00e8c2
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb023a24
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb00e8c8
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf6c93a
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf6c93d
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc200f30
+     0.03%     0.03%  jac3d    libabt.so.1.1.0       [.] ABT_mutex_unlock
+     0.03%     0.03%  jac3d    libabt.so.1.1.0       [.] ABTI_ythread_callback_suspend_unlock
+     0.03%     0.00%  jac3d    [unknown]             [.] 0x5000007ffecaa50b
+     0.03%     0.00%  jac3d    [unknown]             [.] 0x00007ffe00000000
+     0.03%     0.00%  jac3d    [unknown]             [.] 0x0000000800000001
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf93593
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf938df
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf93597
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf6c030
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf6c034
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb00c9e5
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf6c8ca
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf6c8d0
+     0.03%     0.03%  jac3d    libabt.so.1.1.0       [.] ABTI_mutex_lock_no_recursion
+     0.03%     0.03%  jac3d    libabt.so.1.1.0       [.] __tls_get_addr@plt
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb00ca7f
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb022f33
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb0201c3
+     0.03%     0.03%  jac3d    jac3d                 [.] ABT_xstream_check_events@plt
+     0.03%     0.03%  jac3d    libabt.so.1.1.0       [.] thread_join
+     0.03%     0.00%  jac3d    [unknown]             [.] 0x00006101d4de1f80
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbaf7a7cd
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf65458
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf7ae6d
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf7a7ce
+     0.03%     0.03%  jac3d    [unknown]             [k] 0xffffffffbb047429
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf892ea
+     0.03%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb04742d
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb29590c
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb295910
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb2c3837
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb2cea44
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb2c3838
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb2cea02
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb2cea0a
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb22dbf5
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22dbf9
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb229809
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaed6de8
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22980b
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb2c9476
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb2d16bc
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb2c947a
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb257d7d
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb25a628
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb258809
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbc201618
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc20161b
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbc20128c
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbc20125e
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc20125f
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbaf3d118
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22cc34
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb27db52
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb5fc844
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf3d12a
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbc05bac0
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb22ceda
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb1d808f
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb1d70b1
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc05bac6
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbae684fb
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc04858d
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf6539f
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf5911c
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf95a92
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc046250
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbb2cea3f
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb2c3820
+     0.02%     0.02%  jac3d    [unknown]             [k] 0xffffffffbbc82145
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf93a59
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbbc6df63
+     0.02%     0.00%  jac3d    [unknown]             [.] 0xffffffffbbc82146
+     0.01%     0.01%  jac3d    [unknown]             [k] 0xffffffffbae1db75
+     0.01%     0.00%  jac3d    libabt.so.1.1.0       [.] ABTD_xstream_context_create
+     0.01%     0.00%  jac3d    libc.so.6             [.] pthread_create@GLIBC_2.2.5
+     0.01%     0.00%  jac3d    libc.so.6             [.] create_thread
+     0.01%     0.00%  jac3d    libc.so.6             [.] clone3
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbae0750a
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf05016
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf04fb6
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf048ca
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbaf03913
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb1afa28
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb1a9cfa
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb1a9a94
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb1a9842
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb1a4bae
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb19fdf5
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbb19fc5d
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbae0f295
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbae0d952
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbae1db79
+     0.01%     0.00%  jac3d    [unknown]             [.] 0xffffffffbc201700
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
