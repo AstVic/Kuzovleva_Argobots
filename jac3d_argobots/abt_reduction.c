@@ -105,7 +105,9 @@ void reduce_common(
     for (int i = 0; i < num_threads; ++i) {
         int pool_id = i % reduction_context->num_pools;
         if (cost_aware_enabled()) {
-            ws_push_task_estimate(pool_id, (double)(thread_args[i].num_elems * elem_size));
+            ws_push_task_estimate(
+                pool_id,
+                (long long)thread_args[i].num_elems * (long long)elem_size);
         }
         ABT_thread_create(
             reduction_context->pools[pool_id],
@@ -190,7 +192,9 @@ void reduce_common(
     for (int i = 0; i < num_threads; ++i) {
         int pool_id = i % reduction_context->num_pools;
         if (cost_aware_enabled()) {
-            ws_push_task_estimate(pool_id, (double)(thread_args[i].num_elems * elem_size));
+            ws_push_task_estimate(
+                pool_id,
+                (long long)thread_args[i].num_elems * (long long)elem_size);
         }
         ABT_thread_create(
             reduction_context->pools[pool_id],

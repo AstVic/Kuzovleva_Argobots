@@ -13,6 +13,10 @@
 #define DEFAULT_MAXEPS 0.5f
 #define REFERENCE_GRID_SIZE 384
 #define REFERENCE_BEST_CHUNKS 80
+#define COST_SCALE 1000LL
+#define JACOBI_PHASE_A_FACTOR 1200LL
+#define JACOBI_PHASE_B_FACTOR 1000LL
+#define JACOBI_PHASE_REDUCTION_FACTOR 50LL
 
 typedef enum {
     JACOBI_PHASE_A = 0,
@@ -94,22 +98,22 @@ static size_t cell_index(int n, int i, int j, int k)
 }
 
 /* Оценивает стоимость вычислительного чанка для cost-aware планировщика. */
-static double estimate_chunk_cost(int size, int rows, jacobi_phase_t phase)
+static long long estimate_chunk_cost(int size, int rows, jacobi_phase_t phase)
 {
-    double cells = (double)rows * (double)(size - 2) * (double)(size - 2);
-    double phase_factor = 1.0;
+    long long cells = (long long)rows * (long long)(size - 2) * (long long)(size - 2);
+    long long phase_factor = JACOBI_PHASE_B_FACTOR;
     if (phase == JACOBI_PHASE_A) {
-        phase_factor = 1.2;
+        phase_factor = JACOBI_PHASE_A_FACTOR;
     } else if (phase == JACOBI_PHASE_REDUCTION) {
-        phase_factor = 0.05;
+        phase_factor = JACOBI_PHASE_REDUCTION_FACTOR;
     }
-    return cells * phase_factor;
+    return (cells * phase_factor) / COST_SCALE;
 }
 
 /* Оценивает стоимость подзадачи редукции по числу обрабатываемых значений. */
-static double estimate_reduction_cost(int num_values)
+static long long estimate_reduction_cost(int num_values)
 {
-    return (double)num_values;
+    return (long long)num_values;
 }
 
 /* Выбирает пул для новой подзадачи. Все мелкие задачи от всех Якоби
