@@ -9,8 +9,8 @@ problem[3]_result: size=192 iterations=100 final_eps=2.488556 checksum=174379431
  Multi-Jacobi Benchmark Completed.
  Problem count      =                  4
  Time in seconds    =              45.78
- Real time (nanos)  =         9967618000
- Steal operations   =               4861
- Stolen tasks       =               9191
+ Real time (nanos)  =         7527491000
+ Steal operations   =               3998
+ Stolen tasks       =               7879
  Verification       =         SUCCESSFUL
  END OF Multi-Jacobi Benchmark

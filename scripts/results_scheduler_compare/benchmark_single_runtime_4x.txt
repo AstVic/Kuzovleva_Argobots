@@ -4,14 +4,14 @@ task_chunks=80 67 53 40
 
 Scheduler: old
 ----------------------
-old x=1 {384,80} {320,67} {256,53} {192,40} total_time=25.95 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
-old x=2 {384,80} {320,67} {256,53} {192,40} total_time=31.58 total_steal_ops=122 total_stolen_tasks=666 verification=SUCCESSFUL
-old x=4 {384,80} {320,67} {256,53} {192,40} total_time=38.97 total_steal_ops=1036 total_stolen_tasks=3243 verification=SUCCESSFUL
-old x=8 {384,80} {320,67} {256,53} {192,40} total_time=45.46 total_steal_ops=5806 total_stolen_tasks=12490 verification=SUCCESSFUL
+old x=1 {384,80} {320,67} {256,53} {192,40} total_time=15.67 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+old x=2 {384,80} {320,67} {256,53} {192,40} total_time=18.49 total_steal_ops=45 total_stolen_tasks=129 verification=SUCCESSFUL
+old x=4 {384,80} {320,67} {256,53} {192,40} total_time=31.02 total_steal_ops=1284 total_stolen_tasks=4983 verification=SUCCESSFUL
+old x=8 {384,80} {320,67} {256,53} {192,40} total_time=44.53 total_steal_ops=5235 total_stolen_tasks=11293 verification=SUCCESSFUL
 
 Scheduler: new
 ----------------------
-new x=1 {384,80} {320,67} {256,53} {192,40} total_time=26.32 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
-new x=2 {384,80} {320,67} {256,53} {192,40} total_time=32.07 total_steal_ops=298 total_stolen_tasks=471 verification=SUCCESSFUL
-new x=4 {384,80} {320,67} {256,53} {192,40} total_time=39.16 total_steal_ops=1001 total_stolen_tasks=1990 verification=SUCCESSFUL
-new x=8 {384,80} {320,67} {256,53} {192,40} total_time=45.78 total_steal_ops=4861 total_stolen_tasks=9191 verification=SUCCESSFUL
+new x=1 {384,80} {320,67} {256,53} {192,40} total_time=15.85 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=2 {384,80} {320,67} {256,53} {192,40} total_time=19.48 total_steal_ops=159 total_stolen_tasks=272 verification=SUCCESSFUL
+new x=4 {384,80} {320,67} {256,53} {192,40} total_time=31.01 total_steal_ops=1346 total_stolen_tasks=2925 verification=SUCCESSFUL
+new x=8 {384,80} {320,67} {256,53} {192,40} total_time=45.78 total_steal_ops=3998 total_stolen_tasks=7879 verification=SUCCESSFUL
