@@ -1,0 +1,2304 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 2K of event 'cycles:P'
+# Event count (approx.): 93491397425
+#
+# Children      Self  Command          Shared Object         Symbol                                       
+# ........  ........  ...............  ....................  .............................................
+#
+    94.99%    94.16%  jac3d_multi_run  jac3d_multi_runtime   [.] jacobi_chunk_run
+            |          
+            |--44.96%--0x3f000000
+            |          |          
+            |          |--1.13%--0x1f0000001a
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--1.00%--0x240000001f
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.97%--0x4c00000047
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.94%--0x1a00000015
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.90%--0x8d00000088
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.87%--0x1500000010
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.87%--0x510000004c
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.84%--0x7e00000079
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.84%--0x600000001
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.81%--0x3800000033
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.80%--0xba000000b5
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.80%--0x830000007e
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.76%--0x6a00000065
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.74%--0xb00000006
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.70%--0x6500000060
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.69%--0x920000008d
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.69%--0xf1000000ec
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.68%--0xab000000a6
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.66%--0x2e00000029
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.66%--0xbf000000ba
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.66%--0xfb000000f6
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.66%--0xa10000009c
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.65%--0x740000006f
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.64%--0x9700000092
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.64%--0xce000000c9
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.64%--0x330000002e
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.64%--0x3d00000038
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.63%--0x100000000b
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.63%--0x420000003d
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.63%--0x6f0000006a
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.60%--0xd3000000ce
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.59%--0x13f0000013b
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.59%--0xe7000000e2
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.58%--0xd8000000d3
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.57%--0x5b00000056
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.56%--0xc4000000bf
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.55%--0xf6000000f1
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.55%--0xec000000e7
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.52%--0xb0000000ab
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.52%--0xb5000000b0
+            |          |          jacobi_chunk_run
+            |          |          
+            |          |--0.52%--0x600000005b
+            |          |          jacobi_chunk_run
+            |          |          
+            |           --0.51%--0xc9000000c4
+            |                     jacobi_chunk_run
+            |          
+             --0.84%--jacobi_chunk_run
+                       |          
+                        --0.63%--0xffffffffbc200f4b
+                                  0xffffffffbc04853b
+                                  |          
+                                   --0.59%--0xffffffffbaeac551
+                                             |          
+                                              --0.56%--0xffffffffbb00ca56
+                                                        |          
+                                                         --0.52%--0xffffffffbb00bc32
+
+    45.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000003f000000
+            |
+            ---0x3f000000
+               |          
+               |--1.13%--0x1f0000001a
+               |          jacobi_chunk_run
+               |          
+               |--1.00%--0x240000001f
+               |          jacobi_chunk_run
+               |          
+               |--0.98%--0x1a00000015
+               |          jacobi_chunk_run
+               |          
+               |--0.97%--0x4c00000047
+               |          jacobi_chunk_run
+               |          
+               |--0.90%--0x8d00000088
+               |          jacobi_chunk_run
+               |          
+               |--0.87%--0x1500000010
+               |          jacobi_chunk_run
+               |          
+               |--0.87%--0x600000001
+               |          jacobi_chunk_run
+               |          
+               |--0.87%--0x510000004c
+               |          jacobi_chunk_run
+               |          
+               |--0.84%--0x7e00000079
+               |          jacobi_chunk_run
+               |          
+               |--0.81%--0x3800000033
+               |          jacobi_chunk_run
+               |          
+               |--0.80%--0xba000000b5
+               |          jacobi_chunk_run
+               |          
+               |--0.80%--0x830000007e
+               |          jacobi_chunk_run
+               |          
+               |--0.80%--0x6a00000065
+               |          jacobi_chunk_run
+               |          
+               |--0.74%--0xb00000006
+               |          jacobi_chunk_run
+               |          
+               |--0.70%--0x6500000060
+               |          jacobi_chunk_run
+               |          
+               |--0.69%--0xa10000009c
+               |          jacobi_chunk_run
+               |          
+               |--0.69%--0x920000008d
+               |          jacobi_chunk_run
+               |          
+               |--0.69%--0xf1000000ec
+               |          jacobi_chunk_run
+               |          
+               |--0.68%--0xab000000a6
+               |          jacobi_chunk_run
+               |          
+               |--0.68%--0x9700000092
+               |          jacobi_chunk_run
+               |          
+               |--0.66%--0x2e00000029
+               |          jacobi_chunk_run
+               |          
+               |--0.66%--0xbf000000ba
+               |          jacobi_chunk_run
+               |          
+               |--0.66%--0xfb000000f6
+               |          jacobi_chunk_run
+               |          
+               |--0.66%--0x420000003d
+               |          jacobi_chunk_run
+               |          
+               |--0.65%--0x740000006f
+               |          jacobi_chunk_run
+               |          
+               |--0.64%--0xce000000c9
+               |          jacobi_chunk_run
+               |          
+               |--0.64%--0x330000002e
+               |          jacobi_chunk_run
+               |          
+               |--0.64%--0x3d00000038
+               |          jacobi_chunk_run
+               |          
+               |--0.63%--0x100000000b
+               |          jacobi_chunk_run
+               |          
+               |--0.63%--0x6f0000006a
+               |          jacobi_chunk_run
+               |          
+               |--0.60%--0xd3000000ce
+               |          jacobi_chunk_run
+               |          
+               |--0.59%--0x13f0000013b
+               |          jacobi_chunk_run
+               |          
+               |--0.59%--0xe7000000e2
+               |          jacobi_chunk_run
+               |          
+               |--0.58%--0xd8000000d3
+               |          jacobi_chunk_run
+               |          
+               |--0.57%--0x5b00000056
+               |          jacobi_chunk_run
+               |          
+               |--0.56%--0xc4000000bf
+               |          jacobi_chunk_run
+               |          
+               |--0.55%--0xf6000000f1
+               |          jacobi_chunk_run
+               |          
+               |--0.55%--0xec000000e7
+               |          jacobi_chunk_run
+               |          
+               |--0.52%--0xb0000000ab
+               |          jacobi_chunk_run
+               |          
+               |--0.52%--0xb5000000b0
+               |          jacobi_chunk_run
+               |          
+               |--0.52%--0x600000005b
+               |          jacobi_chunk_run
+               |          
+               |--0.52%--0x4700000042
+               |          jacobi_chunk_run
+               |          
+                --0.51%--0xc9000000c4
+                          jacobi_chunk_run
+
+     2.55%     1.39%  jac3d_multi_run  jac3d_multi_runtime   [.] main
+            |
+            ---main
+               |          
+                --0.87%--0xffffffffbc200bc7
+                          |          
+                           --0.79%--0xffffffffbc0493d3
+                                     |          
+                                      --0.76%--0xffffffffbaed6e19
+                                                0xffffffffbb22e74a
+                                                0xffffffffbb22e404
+                                                0xffffffffbb22dd9b
+
+     1.70%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000000400000001
+            |
+            ---0x400000001
+               |          
+                --0.62%--0x5a2e0521b1c0
+
+     1.13%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000001f0000001a
+            |
+            ---0x1f0000001a
+               jacobi_chunk_run
+
+     1.00%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000240000001f
+            |
+            ---0x240000001f
+               jacobi_chunk_run
+
+     0.98%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000001a00000015
+            |
+            ---0x1a00000015
+               jacobi_chunk_run
+
+     0.97%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000004c00000047
+            |
+            ---0x4c00000047
+               jacobi_chunk_run
+
+     0.90%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000008d00000088
+            |
+            ---0x8d00000088
+               jacobi_chunk_run
+
+     0.90%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc200bc7
+            |
+            ---0xffffffffbc200bc7
+               |          
+                --0.82%--0xffffffffbc0493d3
+                          |          
+                           --0.80%--0xffffffffbaed6e19
+                                     0xffffffffbb22e74a
+                                     0xffffffffbb22e404
+                                     0xffffffffbb22dd9b
+
+     0.87%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000001500000010
+            |
+            ---0x1500000010
+               jacobi_chunk_run
+
+     0.87%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000000600000001
+            |
+            ---0x600000001
+               jacobi_chunk_run
+
+     0.87%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000510000004c
+            |
+            ---0x510000004c
+               jacobi_chunk_run
+
+     0.87%     0.73%  jac3d_multi_run  jac3d_multi_runtime   [.] sched_run
+            |          
+             --0.73%--0x400000001
+
+     0.84%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000007e00000079
+            |
+            ---0x7e00000079
+               jacobi_chunk_run
+
+     0.82%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc0493d3
+            |
+            ---0xffffffffbc0493d3
+               |          
+                --0.80%--0xffffffffbaed6e19
+                          0xffffffffbb22e74a
+                          0xffffffffbb22e404
+                          0xffffffffbb22dd9b
+
+     0.81%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000003800000033
+            |
+            ---0x3800000033
+               jacobi_chunk_run
+
+     0.80%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000ba000000b5
+            |
+            ---0xba000000b5
+               jacobi_chunk_run
+
+     0.80%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000830000007e
+            |
+            ---0x830000007e
+               jacobi_chunk_run
+
+     0.80%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaed6e19
+            |
+            ---0xffffffffbaed6e19
+               0xffffffffbb22e74a
+               0xffffffffbb22e404
+               0xffffffffbb22dd9b
+
+     0.80%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22e74a
+            |
+            ---0xffffffffbb22e74a
+               0xffffffffbb22e404
+               0xffffffffbb22dd9b
+
+     0.80%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22e404
+            |
+            ---0xffffffffbb22e404
+               0xffffffffbb22dd9b
+
+     0.80%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22dd9b
+            |
+            ---0xffffffffbb22dd9b
+
+     0.80%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000006a00000065
+            |
+            ---0x6a00000065
+               jacobi_chunk_run
+
+     0.74%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000000b00000006
+            |
+            ---0xb00000006
+               jacobi_chunk_run
+
+     0.70%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000006500000060
+            |
+            ---0x6500000060
+               jacobi_chunk_run
+
+     0.69%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000a10000009c
+            |
+            ---0xa10000009c
+               jacobi_chunk_run
+
+     0.69%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000920000008d
+            |
+            ---0x920000008d
+               jacobi_chunk_run
+
+     0.69%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000f1000000ec
+            |
+            ---0xf1000000ec
+               jacobi_chunk_run
+
+     0.68%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000ab000000a6
+            |
+            ---0xab000000a6
+               jacobi_chunk_run
+
+     0.68%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000009700000092
+            |
+            ---0x9700000092
+               jacobi_chunk_run
+
+     0.66%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000002e00000029
+            |
+            ---0x2e00000029
+               jacobi_chunk_run
+
+     0.66%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000bf000000ba
+            |
+            ---0xbf000000ba
+               jacobi_chunk_run
+
+     0.66%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000fb000000f6
+            |
+            ---0xfb000000f6
+               jacobi_chunk_run
+
+     0.66%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000420000003d
+            |
+            ---0x420000003d
+               jacobi_chunk_run
+
+     0.65%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000740000006f
+            |
+            ---0x740000006f
+               jacobi_chunk_run
+
+     0.64%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000ce000000c9
+            |
+            ---0xce000000c9
+               jacobi_chunk_run
+
+     0.64%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000330000002e
+            |
+            ---0x330000002e
+               jacobi_chunk_run
+
+     0.64%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000003d00000038
+            |
+            ---0x3d00000038
+               jacobi_chunk_run
+
+     0.63%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000100000000b
+            |
+            ---0x100000000b
+               jacobi_chunk_run
+
+     0.63%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc200f4b
+            |
+            ---0xffffffffbc200f4b
+               0xffffffffbc04853b
+               |          
+                --0.59%--0xffffffffbaeac551
+                          |          
+                           --0.56%--0xffffffffbb00ca56
+                                     |          
+                                      --0.52%--0xffffffffbb00bc32
+
+     0.63%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc04853b
+            |
+            ---0xffffffffbc04853b
+               |          
+                --0.59%--0xffffffffbaeac551
+                          |          
+                           --0.56%--0xffffffffbb00ca56
+                                     |          
+                                      --0.52%--0xffffffffbb00bc32
+
+     0.63%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000006f0000006a
+            |
+            ---0x6f0000006a
+               jacobi_chunk_run
+
+     0.62%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e0521b1c0
+            |
+            ---0x5a2e0521b1c0
+
+     0.60%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000d3000000ce
+            |
+            ---0xd3000000ce
+               jacobi_chunk_run
+
+     0.59%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000013f0000013b
+            |
+            ---0x13f0000013b
+               jacobi_chunk_run
+
+     0.59%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000e7000000e2
+            |
+            ---0xe7000000e2
+               jacobi_chunk_run
+
+     0.59%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaeac551
+            |
+            ---0xffffffffbaeac551
+               |          
+                --0.56%--0xffffffffbb00ca56
+                          |          
+                           --0.52%--0xffffffffbb00bc32
+
+     0.58%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000d8000000d3
+            |
+            ---0xd8000000d3
+               jacobi_chunk_run
+
+     0.57%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000005b00000056
+            |
+            ---0x5b00000056
+               jacobi_chunk_run
+
+     0.56%     0.00%  jac3d_multi_run  [unknown]             [k] 0000000000000000
+            |
+            ---0
+
+     0.56%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000c4000000bf
+            |
+            ---0xc4000000bf
+               jacobi_chunk_run
+
+     0.56%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00ca56
+            |
+            ---0xffffffffbb00ca56
+               |          
+                --0.52%--0xffffffffbb00bc32
+
+     0.55%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000f6000000f1
+            |
+            ---0xf6000000f1
+               jacobi_chunk_run
+
+     0.55%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000ec000000e7
+            |
+            ---0xec000000e7
+               jacobi_chunk_run
+
+     0.52%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000b0000000ab
+            |
+            ---0xb0000000ab
+               jacobi_chunk_run
+
+     0.52%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000b5000000b0
+            |
+            ---0xb5000000b0
+               jacobi_chunk_run
+
+     0.52%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000600000005b
+            |
+            ---0x600000005b
+               jacobi_chunk_run
+
+     0.52%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00bc32
+            |
+            ---0xffffffffbb00bc32
+
+     0.52%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000004700000042
+            |
+            ---0x4700000042
+               jacobi_chunk_run
+
+     0.51%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000c9000000c4
+            |
+            ---0xc9000000c4
+               jacobi_chunk_run
+
+     0.49%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000009c00000097
+     0.48%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001140000010f
+     0.45%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000002900000024
+     0.45%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000007900000074
+     0.45%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb023a78
+     0.45%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb023558
+     0.45%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e0521b000
+     0.45%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000dd000000d8
+     0.45%     0.45%  jac3d_multi_run  jac3d_multi_runtime   [.] run_one_jacobi_problem
+     0.42%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000010f0000010a
+     0.42%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000013b00000137
+     0.42%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000010a00000105
+     0.42%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e0521b540
+     0.39%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000005600000051
+     0.38%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000010500000100
+     0.38%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00aab9
+     0.38%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22cbaf
+     0.38%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22c9bc
+     0.38%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb295ce4
+     0.38%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb295971
+     0.38%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb25be29
+     0.37%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000008800000083
+     0.35%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000017f0000017b
+     0.35%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001320000012d
+     0.35%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000a6000000a1
+     0.35%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00000100000000fb
+     0.35%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001630000015f
+     0.31%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000012800000123
+     0.31%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000014f0000014b
+     0.31%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000015b00000157
+     0.31%     0.24%  jac3d_multi_run  libabt.so.1.1.0       [.] ABT_pool_pop_thread
+     0.31%     0.28%  jac3d_multi_run  libabt.so.1.1.0       [.] pool_pop_shared
+     0.28%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000e2000000dd
+     0.28%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf653d6
+     0.28%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000012700000123
+     0.28%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000015700000153
+     0.25%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22cbf5
+     0.25%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000011e00000119
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000017700000173
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001530000014f
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000012d00000128
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000012f0000012b
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000014b00000147
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001130000010f
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000011700000113
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001230000011e
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000013700000132
+     0.24%     0.24%  jac3d_multi_run  [unknown]             [k] 0xffffffffbbfcac57
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb25a642
+     0.24%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbbfcac59
+     0.21%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000015f0000015b
+     0.21%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000fb000000f7
+     0.21%     0.21%  jac3d_multi_run  libabt.so.1.1.0       [.] ABT_pool_get_size
+     0.21%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000000000000a15
+     0.21%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e0521b380
+     0.21%     0.17%  jac3d_multi_run  libabt.so.1.1.0       [.] pool_get_size
+     0.19%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc200130
+     0.19%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc04313f
+     0.18%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000017b00000177
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000010f0000010b
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000ff000000fb
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000016700000163
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf739ab
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001430000013f
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000b7000000b3
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000016f0000016b
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000011900000114
+     0.17%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00000103000000ff
+     0.16%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000eb000000e7
+     0.15%     0.00%  jac3d_multi_run  libc.so.6             [.] __munmap
+     0.15%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbae07d2f
+     0.15%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb23783b
+     0.15%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb23770d
+     0.15%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb23759f
+     0.15%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2350b8
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001730000016f
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000011b00000117
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e0521bf80
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000010b00000107
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000010700000103
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000012b00000127
+     0.14%     0.14%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb2cea3a
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2d16e5
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2cea3c
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000014700000143
+     0.14%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e052192f0
+     0.13%     0.13%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc2011d3
+     0.13%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc2011da
+     0.12%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb25a628
+     0.12%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb258809
+     0.12%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb257eff
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb233f58
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb227d65
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb227729
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb227466
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb226881
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000009f0000009b
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e0521c200
+     0.11%     0.11%  jac3d_multi_run  libabt.so.1.1.0       [.] ABTD_ythread_func_wrapper
+     0.11%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf739bb
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000f3000000ef
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf65412
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1a5eac
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000e7000000e3
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000df000000db
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000ef000000eb
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000011f0000011b
+     0.10%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000bf000000bb
+     0.08%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc200ba0
+     0.08%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb23b293
+     0.08%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb275f1a
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2d16fa
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2cfc82
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001330000012f
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43891e14438050ad
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430ac26542f0ba9d
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c3967b43b4ba8b
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4378000043770000
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf6d096
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a000043998000
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4373060143624935
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000001230000011f
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000016b00000167
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb023a32
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bb915d43a45a94
+     0.07%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc044bf3
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf6c17a
+     0.07%     0.03%  jac3d_multi_run  jac3d_multi_runtime   [.] ABT_pool_pop_thread@plt
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439f7d1543867abb
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc200f30
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4379439b4351849d
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000ab000000a7
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434b5b5c432a5dd3
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00aa59
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf898d9
+     0.07%     0.00%  jac3d_multi_run  jac3d_multi_runtime   [.] ABT_pool_get_size@plt
+     0.07%     0.07%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf6c030
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf6c034
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e05219340
+     0.07%     0.07%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb1a1acd
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1a1ad4
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438987f94368807d
+     0.07%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000e3000000df
+     0.06%     0.06%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc201618
+     0.06%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc20161b
+     0.06%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4304000043030000
+     0.06%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22cecf
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb257674
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb257678
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb2d16e0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2ce9c0
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb257750
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb257757
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc0493cb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc0493ce
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb2cc8db
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2cc8dd
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb25499f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb233fb5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb23b973
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1d6b53
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2598f5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2556e2
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb254fdc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2549a1
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc049a68
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc04938b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc049a50
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc04b11e
+     0.04%     0.00%  jac3d_multi_run  libabt.so.1.1.0       [.] ABTD_xstream_context_create
+     0.04%     0.00%  jac3d_multi_run  libc.so.6             [.] pthread_create@GLIBC_2.2.5
+     0.04%     0.00%  jac3d_multi_run  libc.so.6             [.] create_thread
+     0.04%     0.00%  jac3d_multi_run  libc.so.6             [.] clone3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbae0750a
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf05016
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf04fb6
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf048ca
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf03913
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1afa28
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1a9cfa
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1a9a94
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1a9842
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1a4bae
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb19fdf5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb19fc5d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbae0f295
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbae0d928
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc04b122
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb257642
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb257646
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb221c33
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22cdef
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb221c36
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb1fdad5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22628d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb23b6fd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1d6e0f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1d4b98
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1fdad8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43154bbb430e4489
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb2cc8cd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2cc8d1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43145071430d53bd
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb225c73
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb225c77
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437f4f1f4373da25
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f089fd43e6183d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f990e142d322cb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ce299543b9467d
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaeb8272
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaeb8279
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4295883b4281f988
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [k] 0x4390ebda437ed244
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c687b843c113e1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ca185f43b7ecab
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43645a0943473f63
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ebdeb043ea04c4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4404173343f0838d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4305efbc42eec5a9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438eebf5438d9bcf
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43acf185439a87e6
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b9ae2143a1dd0c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438df0f4437a0853
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4392ea384380ed79
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4208999141eb127f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b6e30043a45461
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4330596b431989dc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438fae1f43872193
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x426d12404255da75
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4192fb52417d6b88
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4403039f43e61a13
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43610cd043433941
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435cf3f34352ee65
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43adcd19439eb23d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c5e6a343ab05f7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439e378c438adc72
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c68d9543b26d7d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f9423342f1451f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4382edab4381af4c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434894044331b851
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438c7b75438b9c0d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4367f6ab434f1c6f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43511c2b433bad9d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c450a543b069e8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4392eacb438ec4c3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435f416443443343
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c883eb43c3033b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43689965434e298f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43892fb8437b55ad
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d9f3c043bc5e25
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437b2220435c542d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4301985742f6d5a0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x424b5f1f422e35b0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fb8cf343da5678
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f64fb043f0fb99
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4304471342e6865b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4406bf8a4400ebd0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43764f784371c9dd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4311efb142fcd939
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44044fde4402c5ad
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c1b49042a9c655
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c7002b43b2d49d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436a07c8434af281
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43037d2f42e46be5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bdac6b43b001b1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43237b2c430e8a27
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43824a8243719a59
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433f0224433846b4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440de08f4404f446
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c589a043c01c35
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43572259433cb05d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x429465d1427f89bc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f7624742d9e915
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f23bd042d1bad0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437140cf4355d961
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e0f4cf43ca3011
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000009b00000097
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4395bd8d438518da
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44218524441fb15c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4382fbe74378e0b1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42aa519b429b33e1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bed71043a7db30
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433181cd432dfd43
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b89cb343b4816b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43eb87a743e010e1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a3a6cb438f1e56
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43893b0543767cc7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436c25584355f667
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4381d0e64370b83b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434f601b4340239d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d0b51d43b51f41
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435869a7433ba4c5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ab9cab4396a255
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435559f4433c3cec
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42084edd41f03c65
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fe4a3443e22f0b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x442628d6441f052d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437d129d43629b33
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43be800d43a64d4d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439ec114438a5d69
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4387e698436c7145
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e748db43e1012b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4417125c44077100
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4403efd043eab778
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4348286843339f43
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437fbd7c4364fff7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4374e39443555a99
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b83f8b42a324cb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c228a343ad122b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cf31ec43c5106f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437f362b436b9abb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b97a2543b64e7d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ba37ad43a1d366
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x442c3c794423f0fe
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431fe7c54309fe8b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c22be943b36aed
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000b3000000af
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a576c7438f8f03
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d1b3e743cf29e4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43415e0843298ecc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4397038b438f86bb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c0555c43ac587b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cece9743b7e82b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436b249d435d05a5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439f26e84395b88c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b6bdd5439f8fda
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ca162b43b49c7d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439cbf7943993177
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fb6c8043dae398
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a834c7439b621f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43992e274385b868
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436f7b55434ffd04
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b6fb343752d8b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43068f5942f5eba9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43731ce543570487
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432e324d431c4270
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cdabb143b85050
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42caf97842b43ed0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b4356c439bb828
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bddbb843a86b37
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x423fe51c422686c2
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393cca94389b151
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438d5f10438024fe
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dbad0f43c96883
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439792f14394e5f6
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f5000043f48000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b47b0f43a6beb8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a3768d43979fdb
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbafa4ca7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [k] 0x42f5f12142e560b5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00c9b1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc05a34e
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbafa4cab
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438a9ec5437a7c3b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a9170c439fbf19
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4290133d42841ac3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435a2b69434b134c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43016f7d42e7f55f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439d3910438e15df
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4307ab3f42f143b7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43deb29043d2b7b3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a55fa44398c2e7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436b45ff436474ad
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4396a7a7438752fd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437dc97b4377dc2b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4363d2fd435983f4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b6ff5343a3f7cd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42afe85342acf264
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43753de04354af9b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4309110c42fd8d70
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c9abb543b6eaf4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42232dea421d1857
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43afd76c439b47ac
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4303b25342ee25cc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43905443438714ff
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4368c645435239dc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x441b193d44115c33
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x422ec151421303d3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42973abf4287aa10
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4307680142f86bc0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f5dc7943d9322d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c014a442a71bce
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44062d07440527fd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b3497143a295d3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4409d72b44027829
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f6162942d77fa9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4410c21144016d1f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ac6f47439c5c6b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434ce8504332762b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b5d19d43a090c3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d8b15843d615b5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438920c9437c344c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4392da6543851fb6
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ebdcbb43e6bd9d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c2800043c20000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a3e30d4390b57c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438cf0484373d341
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4391872443845d80
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a005d4386702b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440e9899440c487d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ab800043ab0000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4310367d430144e4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43be9ca043a5e733
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ae23e943a3dacd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x441c3593440f481a
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44062f4f43fb78ef
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438dadcf4374c81c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4424b3fc4421374c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4389800043890000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4308855542f11c1b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4421bc1944191801
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c8558c43c061df
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4438800044381bcd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43159a4a4300eb37
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c2237143ad7f99
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c00cf043b6a1db
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434827e3433effad
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43963ab143819ea9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a2c52543a0b15d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a7c2ca43a315f2
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434cfde143368243
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440eebd343f7c4df
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ce144b43b3aa7f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f5ca0043e9d7a7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42fe442142f0c603
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fdeab043ef1539
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c6169c43b288b3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4375c9d84361efdc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439680004395e2c4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43464a6b4333012b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b2743f43ab8f00
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b5692d429cfd8d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f102bb43d17e48
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435b5658433e76ab
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c4f1c143c19b40
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d4e7dd43bd5641
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b7ca6b43a87576
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x441d0e05441a87e4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a47ba84394a8a4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43318105432a3be1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ce0d0743c1f22c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4397000043968000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4388cead4386fc4d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f5dd4443f3f485
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435ecad74349302f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4411428343fe2ea8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439f81944396d219
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ac2a5742954bb9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b8dd9b43a5333c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b7dae343a6bc1a
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d3bc2143c216ed
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bbad9843b09ee4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439ec3a54392a4bc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438c0039437dcc9f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e6a50343db6913
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4349000043480000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43668ff343465f63
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440fcd1d43fe0e24
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f6351343d7cbd8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4385457343796988
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bb199743b6f1b1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43baffa043a78ef4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ab1070439b1dbf
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bce14543ab4c98
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4334b9a8431d9d2b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438748174372f9bd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4335c1d143204cdd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4402fb7743e412c1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43144fae4305598b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a11fb3438df86d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435a3f59433dcdd1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433bdcd74325085b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d06de843bfd427
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42390d4342255b0a
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aeb4574396f549
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00005a2e0521c5c0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c2561b43a82a25
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4412e6cf44074389
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43978a72438dd951
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d49b5843b95cd9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f0000043ef5115
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dfd72543d9bf9b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434160b0432e069b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4391933f43855ead
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f0610143e25120
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432e4a674316a2d2
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4306772342e8eb09
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43eca45b43cf67ab
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c0811542a9bb95
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4311fa0042fef80b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435ed77543477a85
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43db4b7d43cf7e0c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438155804362f37f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f8096d43d6fa0f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aa844343956537
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d3473f43ba9d93
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4122e369410e2143
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a5c8243960654
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436cbaa743599c83
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43193d14430d36f5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4425fc724420a8d5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ae7a434396c2b7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d2ecd542b89850
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440d1f0b43f6f79b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42478201422ca898
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b8bcef43a3803b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4413c91b4410a230
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a40f0b438e8c75
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439b0000439a61e1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4336823443284edb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43433f4c433b5510
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44068000440625ae
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43026ef442e7eb43
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4398800043980000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43da800043da0000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4399bf234384a888
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431fc3934309b267
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42de024542bfa33b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430cb68642f781e0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ecb35d42e76360
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc044bfb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c67fef42b12619
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d4faab43d45245
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4329990c43136a4e
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438819ad436fc76f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ff4b1443f700c4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4318c53f43101109
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44043cbd43e76877
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x425aef7c42419119
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440cefec43fb5d43
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4400730743ffb4ad
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4400adf943e46030
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43774fbf43675e04
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bebb4d43a5454d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435904c14347710d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x424108bb42251b96
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c9204343c1680f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b2000042b00000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a670b34392f774
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d005b143c1ef05
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433abbb343256c23
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43457d93433a7481
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d7800343ccfa80
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cea07743bd6d38
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d5bcf943ceba81
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c45ddd43a943c5
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf78073
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf93916
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf8cead
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf7807a
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aa2d7143945588
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fe528543e5ffb8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f44f1943f047a3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c9f9ad42c774f0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f825cb43f53ae9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e512f343dd977c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432f3413431ad5f1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437f55784367645d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4367bbd9434d64c8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b19627439940c8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fb32a943dc2ca1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44223ecd4412b7b8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4357a1f94343fc1c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a03203438e67df
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e7480943e1005b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438e8a18437baa07
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4282c72c426a0605
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437d89dd436c1b18
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a8d949439e16e4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42de220742c1217b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4317b5fe4313005e
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4406acf44405a72d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43abac70439d5541
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43823201436400a9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e55df543cf6787
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4356387b43420bf0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a93ca7439974d3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4355d72c433d7ed3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434c962c43369c7d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4350eb504330ebf4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432dd55c4315d9e7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4343977d43298eb9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e1635442d21aad
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43351d43432eafe0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ac800043abde6b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e4660d43df6cc5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bdd96b43ae058f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b13fd443af0791
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d6b6b443c82ec3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430b661742ef5abd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a4800043a3e000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436e84a3434f7749
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dbc7ed43cff3ff
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b5800043b50000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4312984942fd4afb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436f69a343520707
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43af56f343985ccf
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43798421435f6a2d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ac8079439a22bf
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431527bd43068265
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b1000043b08000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d8f73543ce6009
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433c0000433b0000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c7800043c6d915
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4345fa0f432c245b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43668b614359c928
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440eb9cd44051f2d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e04a7543d7bab5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000af000000ab
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cc825543b505b0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c8407343ac9de3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x421601ef42015990
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c727ed42ab6847
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435a6354434984ec
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d233b943cfa871
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb1a1ac1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [k] 0x434d8313433171c7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1a1ac4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439cd4674390436f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43af49a143a1f029
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b0f9b843aa223d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43308288432d01b8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44094b194404d9d7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dc000043db8000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4388000043878000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ab8dcd43a4e8c3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d13cac43ba1177
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4227b4cd4215115f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b008cc439d4c08
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dc93ff43bf28c9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438f489f437f5257
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435229cd433501cc
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4372c1b1435b4389
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4348842743359923
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439689d64382684c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x429dd893428e0015
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb00f798
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43a916ba4395f875
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb0239db
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb023847
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb0105c0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00f79f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d2ed0c43b799bd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b8000438ae4f0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4310b8614309257d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439781ad4389d088
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438a0d0f436d5680
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ca327c43bad8b5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c1177d43a78eb9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4302c0be42e2277c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439df25f4388a50d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4374177b43576bb0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434e6f5d4336eb98
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42dde1c342daa7af
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43968679438f0f8d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b3000043b25d23
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4321a2ff430f2178
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a81679439aa42c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431ad33143058ccb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4384800043840000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4215c88a420523c9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432ae94b431c566e
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4381d0294361835c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437da4b1437a3244
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a10d2f439427b7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432b2314431384d5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43273da7431376c9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a5a6b34393a028
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4412400044120000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431ee06b430afda5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43365e17431f0cb0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c74d6943b602d3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ea3aa843d79c81
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41cb723b41ba79f7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x442472f7441648f1
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a8871d4396944c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43944a094390e6e7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4332272f432263e8
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f40e5b43dc0603
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c5195143aacb29
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aaf14d43938375
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d120b043c7fee0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43150b0f431405ba
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4400a83343e57134
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ae800043ae0000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ab74df43aa800d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42aaf5a14296f868
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43db78db43da62d4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c755f843b568cd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c18b9743a77abb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433c607b432236dd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43813814435e2273
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b0000438a6509
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438cfb71438c1bb0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42edac6442e96ec9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432c6705431c94f3
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b78fb343b17b49
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f1afe743d5ed8c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4405f81243fc4e0b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c6800043c60000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cf888743c794b5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bd133443aa6615
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c3208c43a867d7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4375000043740000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4375fc64435fa698
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43db286143c36273
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438cfd2c4376fbc4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4320074b430fecef
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43301ea343186d8d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43acad8843a6eefb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4337c898431edbcd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c238d343aa30f6
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438c80d14386fcb4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f01d8d42deda5f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fd000043fc8000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4409413543ecfb80
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf99d4b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43c6c63943ade007
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf99d4e
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42a56e2642931873
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42da63d842ca9ca0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434a5cfd432e4810
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393b1e643857574
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438baa504377abc4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4351f94043506b85
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d3335c43d0a590
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aa8f71439bbb51
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f0000043ef8000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d0741d43bbe3b4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434cb45743349735
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4385d30b4367d1cf
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c0537f42aabd65
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fb843943ea8d5b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e6787f43e55add
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41ce3e4741afef8c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433b3ced4325803b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4408706443f95371
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43867d8843749c1d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b9a8ed42a0d0e5
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c139ff43b28afd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43804fbb435da7dd
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c1000043c08000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435fdfc04341d984
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c9550843b0c165
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f42c6c43df1198
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b8193f43a1eb65
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c656c343b52455
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435d5db44345a095
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4399626b43943c13
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b86a65439f923c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4243fa35423f8087
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4324832d4311aab0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f227fd43ef4c33
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4425c00044258000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e9fcf043d5c06f
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433f3deb43258b77
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43852ce84370a038
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bac3b543aa8de9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x441116c5440ebd59
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42bd3b8342abf0a7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aefa5343ae0310
+     0.04%     0.04%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf9388a
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43d7000043d68000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf9388e
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c3d96b43b5bf79
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42cbf99d42c9737d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437e0000437d0000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aea91d43aac049
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42cbe45342c8c4eb
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e2ba4843d27441
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432ae0b143137c39
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4350d15343498963
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x442c0000442bc000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bd61c043b08695
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b9e77843a2e4f2
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d0e5ff43c042d9
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43af4018439a20a7
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437ce78b436efae4
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ec098142cc101b
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4302691642f5be99
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43da000043d98000
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bf86fb43aab8e0
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x425fd241423bc49c
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4339960d4327807d
+     0.04%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4306bb7942ea12c3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b5ea63429d1e47
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b2800043b20000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a51103438a270f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x428e17f04273ef97
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ae1fa04398d76f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43602c074342ab64
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fd055843e656cd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432cafc9431070dc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4339000043380000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4328d8b4430d3983
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aeba24439f8b12
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42dfd59342c9b805
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a6a5143990921
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cc232743b51a1f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43177c334306bff8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ed719b42c5afd5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439f5ed743859227
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433c18fd43264340
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4398c8cf4396ce2f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4340a2884330f6f4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436ba9794348b3c9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434f21004337f7b4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437387a4436890a3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42721dd0424acb35
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aa7a7843a98653
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42df646142ca7ff9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b468743696efc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438efdb8437a0d84
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430dadb242fa4059
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431441ef42f84e91
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e32ba742c0b9ad
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43499495432e0b27
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42fb798342ef6303
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435cae10433fec65
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4371ad8d4357cdf5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4358ed09433519ac
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4378bbb8434ff218
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4390bb5f437d8cf0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43734288434b1b58
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d186bd43afb973
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42169a02420e93b1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439f22274389ac2d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c57b7743a59e26
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43b917a4439aebaf
+     0.03%     0.03%  jac3d_multi_run  ld-linux-x86-64.so.2  [.] __tls_get_addr
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb2468db
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb225ccf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2468de
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4394c3dd43853ff9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a6d48c438cda81
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438c3588436e4557
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c485e343b72d90
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf99e09
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43471b7d4327cd9c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf892c7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf99e0d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43acd2754390b70a
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437fd235435787fb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4307c0b542e2d115
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43756118434d6ab1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x441ce9c7441bc30b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x428ab17542677501
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a17764438810a6
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb02395e
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x4383907b435dd457
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb023965
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4298043d42801459
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43626620433f131d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4315637f42fbb171
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43981338437dfcab
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x429fb5c94285e16f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43692d704346f313
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431770c142fe270f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4327bef74325cdc6
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43839e14437e46eb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439ebd4543988f79
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a4147a438a8797
+     0.03%     0.03%  jac3d_multi_run  libabt.so.1.1.0       [.] pool_is_empty
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e6549543c75788
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4325f642430fd1d0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b8aeed439b8d49
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4310ce1642f2a398
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b1be23439da845
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4394000043938000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4304ee6f42f6f0a4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43296cf8431e48f0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43301380431475a1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b5539942a15239
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433f318543203e20
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000db000000d7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435eea884354cffc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435ded28433af225
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433b26b8431cc643
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437c1d574352179d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ac54354396b79a
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4316c40b42fe5597
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bf75c543bc33c1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435b924c4338d99b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42410d4042209d40
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431514f842f91f8f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d906bb42b5b973
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x425ad94542385ba0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4396ed83437d1a93
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4397335f438b1313
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439342ed43779901
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c5eb3d43a8a74d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4357067043334bf1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432c446d430fa3dc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433a86b5431b8295
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439fcce5438b0e93
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43844a94436e4b40
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4387bf674363fa08
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438f0993436f4c29
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42a3a47b4288deb7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b39d214396db13
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43885655436515e3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43df32a343bb325d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43476f54433c4c4f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b492454396de78
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d37bec43b2d1ef
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a159c04389952d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f72b4442d4ce74
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4376ad93434f02d1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4350f700432efc8c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430cfe5042eb8e1f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430b71f142ea3ce3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4383000043828000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439e8512438c441e
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433d99e1431ec0ec
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44184383441505e5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43be800043be0000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ac6dd94391664c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434a59f4433f1003
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4303f1c542dc7185
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43845e00435d0cb3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4352edc7432fbe58
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4352ee894330721b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d6616842b30457
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4399399343802d51
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431d65094304266d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x42bb2d9b429bc8e3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42bae670429e78a9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4211feae41f5e83f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f11e7843cb3d90
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4399cf864393cf97
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e0186042bbd75f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435cf4ab4338f3b5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433c31ab431e38fc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43504071432f1bb9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433b6fa04322f531
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bdb860439ef2c7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ee50ac43d2159b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000f7000000f3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c26cb743a32194
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4302c17342daf2cb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ffefcd42fd45cb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43849004437d4213
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4428c00044288000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4353b3d14330e228
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4289edbd4287301c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434267e743238b6d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4387f67843632819
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432cc05843108f99
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438e517c438b0ca1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436378054347e923
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43523ab0432fcdf3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b5b4043711598
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4381e04f4359aab3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433de433431f266b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41c0840041a0c667
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42eb1d1542c3f6fd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4416e42d440e1c25
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a1000043a08000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44149e984409efaf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4335d05d4317c21c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a16df843878075
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4398e45b43805488
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4384e6ac43626993
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a1800043a10000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43757c55434d0d5f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42be3940429f8d3d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f81d8943d3469d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437f2e38435660ed
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4380b93743570d5d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4372f83d435dae43
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432d6e6d43107887
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x429ffd6c4285173d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43865b1d435fef2b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4347dd30432683f7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439d840b43844891
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f5bb0543e41ec9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4330bb91431373c1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e65f1542c38148
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439d9fd1438a15d9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b77c4f43a07ca7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b4e47143ab1785
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431ccb1b4303dcae
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b807d04399e5a4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d4ecfb43b2da57
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e46d8443bf380d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4309311d42e69278
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4362fd594340ab1f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43257640430b15e2
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431d54044303b2e2
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430fdef042f081cd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e2824743bd9ca0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4347aaa9432a02ce
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433c895c431e566e
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438ec9a543707b08
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43312a9f4314b2a4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ac8965428fe30f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000013700000133
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fedcb943edad3c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439ebc1743871e8b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f0acf042c983fb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4353f2b743342f3f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a29c33438eff0e
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e56f9d43c0d525
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433f0a634320095b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43867e5f436f0b39
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43860555436d1c19
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ba3f83429c356b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b87415439a51ca
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e9364342c2881b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436b6dbb43452be5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4392809b43756ff8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bad949439f5b21
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e3797943c5b393
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4293831c427862e4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43be900743a069c5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434c6584432c7bc0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434763ab43287971
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4301c78742d9a184
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431bcead43027c43
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434cfaa0432ca73c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b61ddf4398e10d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b33d68439725a7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4302fbda4301a4bd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43856e59435ea65b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4390c6e04371e4f0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a45071438bfed0
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf93860
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43386b804319ffeb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf93865
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393711b4381a385
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4335604343186609
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c814b743a766de
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43256b19430b6e83
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437e465543565b97
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42caf95342aaf347
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438e8441436eded3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c44b8943abb43d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43af724d43933358
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43938d3d4381fe8c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43be4b77439e9eab
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4385e331435fe105
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431f5b2d4305baa5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434c83df4335a3f3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433794f1431a16a4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436f3fb1435248bc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43613fa0433c4b70
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4312131042f3c898
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434573ed432d2324
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430dc68642ed6eff
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43373fcb431ab70f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434fee45432e768b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439243ba43749797
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42fa000042f80000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x426953c4424512b1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4387d2ac43649b73
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43815aec43622bd3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x429c70c142831388
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433c39274325ad53
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x428940a5426fafd7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4387673843675145
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43274599430c61c0
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf6c03c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x42d0db0b42ae780d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf6c043
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41e26f3741bdc078
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4341384b432108fb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4354684543506157
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf99d9f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43556a7f433278e5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf99da1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431709c142fbaf03
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x428efc9e426fc8b9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4382ed78435b05bd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4193266f4174ee07
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a9cb134390aafc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c8b18543a97733
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438857b143651953
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4379ba0b435e703d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4354c7554331f050
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439fdd4743865445
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4360bf90433c4ed8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438655e34365104b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439e6a7343857e0d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430da47342f04438
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4410eb7f440fd687
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43888453436938ed
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a7e806438d7f0b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438ec01643712bfb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4378f4034353565b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438d2b06436c61d5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435f86d0433b1b2f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4398d0f7437fc7f1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d6574843b4a837
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c6acc942a7d1e2
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d55cf843b6547f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b6ce8d4298baa9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4333eedf4317a249
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c9499543ab3afd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d9b64843b5b2ac
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43834109435b03a9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41747171414a3e3c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ef7b5d42c7c574
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434ca97b432ab6c9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439efc7543865052
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a6419e43931f4c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435e72cc4339df0b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c47acf42a65d47
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c0d6fb43a2f021
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4382aaeb4359c841
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43badce0439d1e55
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4374f6a4434ec2d4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42dff7af42be2748
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b9fce0429b65f1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434419214328e036
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43575b654335fc1b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x441bd255440dd7db
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43056f9042e15758
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43824bc4435e2ae3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4340e0b343213547
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43519b6c4330c607
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439dcad0438460eb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4335388143202b17
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434221f843238185
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43342e984317ed31
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a4d0cb438c8c86
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43878f9a43636d80
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435d3879433877b7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4327cfc8430cb110
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b57eaf429a1f27
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a322b43815bf9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440e761743f7b1d0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439294d74376974c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d53dfd43b2ab04
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434f074c432d5cfb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4341f5f14321b71a
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43779533434faa41
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a42af9438ab1f0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433e40dd432054d9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431a230b4301c67a
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43916e91438bbc97
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b7a57436d6c54
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438e65e743729c49
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4386f2c94362e0bb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43003ee642dec505
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4375e7194351a111
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437ffee74358abc1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b0e67436a7955
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436ec5af434b5c7c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431229d042f54840
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431fad1c4306c881
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43986138437e3124
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a56e0f43949ecb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436b9ecf4348da30
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4359bcbd434c9bcd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43846d7443832cdc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a6369e43927621
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4326f0d4430c7d96
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44195c084415443f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438eba6d43717679
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a2a7b43837568
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438a0649436af250
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433c1575431db5f1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4389fe3b43662d13
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dd800043dd0000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435529f54331f4dd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4212721441f40940
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d0ed2143b1bb15
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4312120742f94968
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42a8d255428c9d01
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4326c319430e8d9d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438bcfee43837bd6
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b550b843974eae
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393129c437a2743
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d1ee5443b7a514
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c3b90d43a4aa5c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4352b2734332af31
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438a4bc243697c69
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4405c00044058000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436dbe654349a737
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b28a7b429704f5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43867ac943625819
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437f749f43577d1b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43766fb5435189bc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4314050b42f98948
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ba4533429e75db
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4256a9d34237bf09
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435c99af43399c00
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440f4000440f0000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430257ed42dcb9ed
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc044bf0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43722e974353b290
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438f2a33436ff52f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c0a4a143a1fb3f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f09bc542cbd703
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4398bf0343837886
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434b8698432f1313
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4355ca7b43327aff
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f91baf42d16935
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42da99b942b79c73
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43464b8b432534ee
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438599dd4363cf4d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42fc776d42d237f4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ed7ff943d61608
+     0.03%     0.03%  jac3d_multi_run  libabt.so.1.1.0       [.] ABTI_mem_alloc_ythread_mempool_desc_stack
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4384ba09435f0448
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430d00d942ec5e4f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4366c93c434086ec
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393f0154378999b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4300aa1842d73101
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436cfcb443460800
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a9e9404391c3bb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e8000043e78000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4352e1d0432fe855
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437f3ffb435596d5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4335fe2f431808e6
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4348055143299e20
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b180e5439848d7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430a301a43023e83
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439eb5074385fc18
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434a0ad0432d06f4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4301170b42dfe7b8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438e2524436e5d31
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dc13db43c1fdd0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435a5897433623cd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4307342642e5526b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431d9b2743070cfb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4319cde54302783f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d0691443b3a7e9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434878344328f3e3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43680cbb4344d154
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x426d15094246416b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434a5779432bffe9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a52e96438b5eab
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439872e14382c4cb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43de861043bbe9a0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438d4575436d848d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41ff9d3141d64be8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434391594327a681
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a9a2834390681f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437c3e944357717f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4309bbe742e6e0f7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438390d8435e8f6c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43847399435f9c00
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41e9bcfb41c76d4b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43806099435d35a0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4383ea23435f26a5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4390af234377310b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434344734323232a
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4340bf8443241ca0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438f920743754965
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x427d32254254aab5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a3a1684389a5f9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4366fed043448f04
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4244b1c342261255
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43478f5f4327ca89
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43917e25437952f0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4305441f42f67c78
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435c5f784337b077
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ad800043ad0000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431bed60430259f3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f89c5943d23c80
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43826581435a0968
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4233353f421998f5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a221df438a8479
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4314b43942fab123
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c7177143ab6864
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4396455a437d1869
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439f29954387fa45
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b0060943950730
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ec36dd42c4a959
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x428540414262cef4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4337ec64431d7c05
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d2ddd343b4bdcc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43790a80434f8763
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43203e2d4307f120
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432ffad9431448e1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4381543b435b15c7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d867f743b7ccd8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4316814f42fb1660
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44039adc43e2a8ff
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4340e73b432392c0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ea478143c6fd9b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43979a534381e759
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b8b758439e7a7c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43adfd384395c6c5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435f29c7433f567f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42cd5dc342aec29f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433512204317136a
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4396ed61437de87d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x419f8ec141878935
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43753649434e7605
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4375e6ac4350e918
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436c1c544347f763
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438eb76f4371c9d7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b95248439c16f0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4357ae3d433834eb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4351cb9d43306d55
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b43aef439897a8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43910e2d4377d399
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438fc5d143736740
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4347a9d3432bbf09
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x425196c3423076f9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d7c60f43b8f36c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438969a2436631c5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x429bd549428396b5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4320de3143075f47
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4312c6b142f4db9f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438f13bb43720db0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435a92f443366735
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438eb02243759b54
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43060c3342dfb43d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fa0c8043eb6f7c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393058d43805630
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437800f0434f2848
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4341199543213089
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393000043928000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b6c5ff43996e47
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ee792d43e6b391
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438097c64357d66b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437ead2743583397
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4321f437430aa366
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e1516742c023cd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aaabd0439e574b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435e6d08433e8343
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43712b33434d3a14
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430ce00142eff5b1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43af15bb43950ce8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d16dc443b6e421
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c8227342a95878
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42964da5427fbe64
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ea108d42c5fde5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aaab9d43926aa5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c0f97843a4274b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b5951f43af9053
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42bd449042a09cf5
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaf89272
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaf89278
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437fe8c9435a6488
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b6d170439cd935
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434bf53b432f7213
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c2a29443a6d154
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d6ef6d43b5de83
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000a30000009f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434edd2f432df09c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ae1f6443935023
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bf3cdf43a3e748
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438e5c974371bd1c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439dcb7a4385952c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43876b3f4367202b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435765d34335c770
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44051c5843e2e6e8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ac0d1043921a3d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43644ab3433fc4a5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4381b7784359f494
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4428800044284000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43714949434de09d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a8da674393ef9f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4342e5904326e511
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43770c114352ffa4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431fb5a9430a971b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437a75e74355543d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434f5ad0433164d5
+     0.03%     0.03%  jac3d_multi_run  libabt.so.1.1.0       [.] ABTI_sched_has_unit
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4345053b4324c361
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43647c8143445ae3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439f5332438567d6
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432e9f4b4312a30d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e5f51b43c8d633
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43742e4343529f5b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437f751843581001
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f73af343d2b4d0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4317df8b42fd13e3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43732c94434baa24
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430cc6b842ec7a51
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434aad48432a0cbc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4388f7444367171f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b09934368657f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432b00004329df36
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43363c234319a8f8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4355fab943335d01
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430cfa8642f2a3cf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43940dc9437b37b8
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbbfbec02
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x43108a9d42f42264
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00bc62
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb00b03d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbbfbec0b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f3b6e342cb01f3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b27de44396e878
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437eafb84354d5b0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4354f5174333d593
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a4f435438b7420
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bfcdac43a20fcf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43954496437f897b
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc044c0e
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc044c11
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4294d4244278a70d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43481211432be5c3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x427b9eeb42541d11
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433098dd43171e37
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438c632d436cde65
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x422ddb584213fb7e
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4308eda842e5c251
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4291ead14279b2f8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42bdef2c42a06bb1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4360722c433df043
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a2a3d1438b165d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433cd92b4320a5bb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4371cc91434d41cf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434cd0a3432d4e18
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x427ea90342565169
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a8f933438f9a33
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434aa2634328f462
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4311038542f2c753
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393c86c43768501
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e0800043e00000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a6d7943840ea8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b3fceb43979784
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438704474366e194
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434978d8432a3c93
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439417b943770960
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bfde4443a4cd4c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431775e34301a316
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42db0a1c42baf29b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438a694f436b3663
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432c39694313c3b7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436a871d43465767
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e0ec5d43bee387
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4313987042fc230c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43992d534380eb71
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4388ebb94367297d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4379c46943504b43
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435d1270433bc9f1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434e6d34432f0ec4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42f9810342d31530
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x430e5e9442f33080
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43501b3f432d96d8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e530b343c4dc50
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437293cb434b5c63
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434223fd4321eda7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434558b943253f2b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c1b08842a3a450
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41ba7f1d419bae11
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a48bfc438d7952
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42c47e7842a604a0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e3d27542be1adb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000d7000000d3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a80943438fd9f9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a7c89b4392bca8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x44063efb43e6abe0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4381ab16435e6973
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43000ead42d5d8f3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43004a0342d5ce34
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439e672143882f91
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a15331438a8b27
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42114c3941f24dc8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434c1bc3432da655
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4170cfc44148f4d0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a266543823984
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x422b147842105c09
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431c7051430450c0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438a6f5c436dffb8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bc800043bc0000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435a68a1433a54d7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d5b49342b568fb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cfc72343b72360
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c8340043aa4eaf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432d4e61431328b2
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d8c80142b77819
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435a3ea3433989bf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4385088343658775
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42fd507f42d68e47
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4378cd19435417e7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4384670f435cc288
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b646e4439aeb15
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43881af34362f037
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x42a7fcf1428beabf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [k] 0x434355014322ec71
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c2dc7d43a59f61
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435532954334abc5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c782b743a8edc9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432add814312c2a5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42e3ae8942bef383
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b44a6c439b0653
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4308db3d42e7492f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b59a70439c86f3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434bdffb432bd390
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a83554438e9d9c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437b701f43551ee7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4323000043220000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cfab2843aed04c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b82abc439a13be
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4365032d433ee5bb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435f755f433a437f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43befb1043a46b1f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4336119d4317e9db
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42cef8ec42b228e1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438634aa43678e08
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439d0f6743831b89
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a0667543892b87
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438821514369055d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e7bef343c74ff0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4282d6c7425b02cd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b91c57439efcb5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bad19343a0a4b1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c0f7d343a11a2d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x000000bb000000b7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438527e0435e8e45
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434ade1b432c0908
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4399645943822463
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439bc65f4383f5db
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4393e8f14378f850
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4411400044110000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aca9e143900698
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438f41c1436fe244
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4273a1a7424c2880
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433167ab4316376f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43459d6b4328e332
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431dd5ab43041b0d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c9d52b43accca5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439a12d04381fdb9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a5689c438d998f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f0faec43cb6065
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42b6fb9d4299038c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438cffe5436b9418
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4382ef8f435d5758
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436c0ae143452850
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4336342d431a09e6
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb246616
+     0.03%     0.00%  jac3d_multi_run  libabt.so.1.1.0       [.] ABTI_mem_pool_take_bucket
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb246619
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43adff1d43a16eb5
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433b03c14320a908
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432e65c84313db92
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4380c9c5435d66a0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4392ea0643788d1f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ede40543d1b5bb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c30dd543abe91f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x427ba453425d4f87
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4356c67f4338fd85
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cc77a343afa22c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43409a504320852b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4345b37c432a4256
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4348156343290fd3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433a6e80431b5f1c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437d89f7435f4fdc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43792c7f434ff6c0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a57d9f438a2658
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42a71311428c28a3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4329d01543104eb1
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42cf18ab42af4028
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41b006054194c8fb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4338cf0f431a63b6
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4369fc3843439205
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4383bd02435f561f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43f3451043d01c3f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4367906c43468f09
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433bdc8d431d9ecd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43fb0f5543d4ebdb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d73dfb43b4425d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43955cdc437a1dc0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43983c01437f6cc0
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x428e627f426d95eb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4354d0404334c424
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x427f2ee0425a3083
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431346e042f5e4ed
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438ff9c143763838
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436a2fa9434371bf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d6e66943b7d311
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436c8d7d4348f570
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437470bc434bc4e9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43287fdf430ff69b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4141cbef412174ac
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4375e41c434d7a4d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431b9071430484ab
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439d69f743869d18
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4379e38b4354a824
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d278a942b4f68f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4335a5a44317f201
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x0000000000000515
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435aa5dd4337c220
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x427c20dc42579034
+     0.03%     0.03%  jac3d_multi_run  libabt.so.1.1.0       [.] ABTI_sched_has_to_stop
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x00007ffde7117360
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437fcadf43580d75
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ff42f842d52244
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c65b7343aa616d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439332df437ccc53
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431077c442f0b888
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4398ecf24383528f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42afd59842945384
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4337a8d4431a7e13
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438f940743706c23
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43935497437730bf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x435c5021433869d7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c8f27743a89c2f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432286e4430ad9bb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4288852642672197
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439b3c0543833adb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4401800044014000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43aac3e94390929b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439355cf437bf8b8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bf142d43a1c897
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42a6be79428ae0d7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4395ca9b43807c9b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43b29c4c43966efa
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43479aed43267dd3
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d8000043d78000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4305e25d42e2bc48
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bd8a1c43a70b65
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43dd983343bbeadf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ba21f9439df251
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d8b93d43b7ecdc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41e3762841bd1967
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436d08f44345973c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x427f665b4254875f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438b432843687b34
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4336452343180461
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d6680042b2e39c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43677b204340f4fb
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43433c984324a393
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434c4b78432f55fd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4356fc24433886bf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x433594e3431a74af
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4329e0b3430fce27
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d9443942b74005
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x41da426c41b8b005
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439ba62f43853c9b
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436dba05434b6da9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x437217db434bb6b4
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42fc626742d58697
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4228000042240000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42cb0fdd42abb420
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a1682943869429
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42fd32a342d99a1d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43225dfc430773c8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42bf19cd429f470c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43cbf6fd43ad1439
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42d9544742b52fcd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434f0000434e0000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4278000042740000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436a639343479f8d
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x439047ba43764470
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431be59f43054e89
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43c62fa943a9308f
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43819d16435cce2c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x4265928842430dcd
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42bcb3bd42a0adcc
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a84789438fa359
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d027b543b1b4f8
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x42ba1a50429e7e35
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43d8d56d43b9aac7
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x438520904363dfd9
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x432d91b943140fdf
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43bda27443a25b88
+     0.03%     0.03%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc20128c
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440048e743e1bd28
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43ce292843bcffab
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x440cc000440c8000
+     0.03%     0.00%  jac3d_multi_run  [unknown]             [.] 0x436b0d94434e96e7
+     0.02%     0.02%  jac3d_multi_run  [unknown]             [k] 0xffffffffbc20125b
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbc20125e
+     0.02%     0.02%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb25a462
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb25a465
+     0.02%     0.02%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb5fc85a
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22cc34
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb27db52
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb5fc860
+     0.02%     0.02%  jac3d_multi_run  [unknown]             [k] 0xffffffffbaed5931
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbaed5935
+     0.02%     0.02%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb1d51ef
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb22ceda
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1d808f
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1d70b1
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1d6f62
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1d51f2
+     0.02%     0.02%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb22ceca
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb246610
+     0.02%     0.02%  jac3d_multi_run  [unknown]             [k] 0xffffffffbb1fd605
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb246674
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2cc7ab
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb2cc706
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0xffffffffbb1fd606
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0x434a000043490000
+     0.02%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43a005c34392a299
+     0.01%     0.00%  jac3d_multi_run  [unknown]             [.] 0x431bff78430ea4f5
+     0.01%     0.00%  jac3d_multi_run  [unknown]             [.] 0x43e2356143c38273
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#

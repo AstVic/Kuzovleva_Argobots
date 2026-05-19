@@ -4,14 +4,14 @@ task_chunks=73 67 60 53 47 40 33 27
 
 Scheduler: old
 ----------------------
-old x=1 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=19.38 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
-old x=2 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=22.08 total_steal_ops=33 total_stolen_tasks=424 verification=SUCCESSFUL
-old x=4 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=36.12 total_steal_ops=779 total_stolen_tasks=6605 verification=SUCCESSFUL
-old x=8 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=56.66 total_steal_ops=3804 total_stolen_tasks=13922 verification=SUCCESSFUL
+old x=1 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=27.93 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+old x=2 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=30.34 total_steal_ops=31 total_stolen_tasks=292 verification=SUCCESSFUL
+old x=4 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=34.61 total_steal_ops=223 total_stolen_tasks=1293 verification=SUCCESSFUL
+old x=8 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=52.79 total_steal_ops=1473 total_stolen_tasks=4043 verification=SUCCESSFUL
 
 Scheduler: new
 ----------------------
-new x=1 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=19.41 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
-new x=2 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=21.20 total_steal_ops=66 total_stolen_tasks=239 verification=SUCCESSFUL
-new x=4 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=34.78 total_steal_ops=993 total_stolen_tasks=2595 verification=SUCCESSFUL
-new x=8 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=56.69 total_steal_ops=3524 total_stolen_tasks=8493 verification=SUCCESSFUL
+new x=1 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=27.74 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL
+new x=2 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=30.93 total_steal_ops=164 total_stolen_tasks=399 verification=SUCCESSFUL
+new x=4 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=34.81 total_steal_ops=544 total_stolen_tasks=1202 verification=SUCCESSFUL
+new x=8 {352,73} {320,67} {288,60} {256,53} {224,47} {192,40} {160,33} {128,27} total_time=52.13 total_steal_ops=1465 total_stolen_tasks=2151 verification=SUCCESSFUL
