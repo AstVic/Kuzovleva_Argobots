@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
+# Числа в отчётах и CSV печатаются только с точкой: под русской локалью awk и bc
+# выдают "10,85", и строка CSV перестаёт соответствовать заголовку.
+export LC_ALL=C
+
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 cd "$SCRIPT_DIR"
@@ -118,7 +122,7 @@ fi
 mkdir -p results_scheduler_compare
 RESULTS="results_scheduler_compare/benchmark_single_runtime_8x.txt"
 SUMMARY="results_scheduler_compare/summary_single_runtime_8x.csv"
-echo "scheduler,xstreams,size1,chunks1,size2,chunks2,size3,chunks3,size4,chunks4,size5,chunks5,size6,chunks6,size7,chunks7,size8,chunks8,task_count,total_time_seconds,total_real_time_nanos,total_steal_operations,total_stolen_tasks,verification" > "$SUMMARY"
+echo "scheduler,xstreams,size1,chunks1,size2,chunks2,size3,chunks3,size4,chunks4,size5,chunks5,size6,chunks6,size7,chunks7,size8,chunks8,task_count,total_time_seconds,total_real_time_nanos,total_mono_time_nanos,total_steal_operations,total_stolen_tasks,verification" > "$SUMMARY"
 echo "Single-runtime 8-task Jacobi benchmark" > "$RESULTS"
 echo "task_sizes=${TASK_SIZES[*]}" >> "$RESULTS"
 echo "task_chunks=${TASK_CHUNKS[*]}" >> "$RESULTS"
@@ -136,11 +140,12 @@ for scheduler in old new; do
 
         total_time=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
         total_nanos=$(grep "Real time" "$output_file" | awk '{print $NF}')
+        total_mono=$(grep "Mono time" "$output_file" | awk '{print $NF}')
         verification=$(grep "Verification" "$output_file" | awk '{print $NF}')
         total_steal_ops=$(grep "Steal operations" "$output_file" | awk '{print $NF}')
         total_stolen_tasks=$(grep "Stolen tasks" "$output_file" | awk '{print $NF}')
 
-        echo "$scheduler,$xstreams,${TASK_SIZES[0]},${TASK_CHUNKS[0]},${TASK_SIZES[1]},${TASK_CHUNKS[1]},${TASK_SIZES[2]},${TASK_CHUNKS[2]},${TASK_SIZES[3]},${TASK_CHUNKS[3]},${TASK_SIZES[4]},${TASK_CHUNKS[4]},${TASK_SIZES[5]},${TASK_CHUNKS[5]},${TASK_SIZES[6]},${TASK_CHUNKS[6]},${TASK_SIZES[7]},${TASK_CHUNKS[7]},8,$total_time,$total_nanos,$total_steal_ops,$total_stolen_tasks,$verification" >> "$SUMMARY"
+        echo "$scheduler,$xstreams,${TASK_SIZES[0]},${TASK_CHUNKS[0]},${TASK_SIZES[1]},${TASK_CHUNKS[1]},${TASK_SIZES[2]},${TASK_CHUNKS[2]},${TASK_SIZES[3]},${TASK_CHUNKS[3]},${TASK_SIZES[4]},${TASK_CHUNKS[4]},${TASK_SIZES[5]},${TASK_CHUNKS[5]},${TASK_SIZES[6]},${TASK_CHUNKS[6]},${TASK_SIZES[7]},${TASK_CHUNKS[7]},8,$total_time,$total_nanos,$total_mono,$total_steal_ops,$total_stolen_tasks,$verification" >> "$SUMMARY"
         echo "$scheduler x=$xstreams {${TASK_SIZES[0]},${TASK_CHUNKS[0]}} {${TASK_SIZES[1]},${TASK_CHUNKS[1]}} {${TASK_SIZES[2]},${TASK_CHUNKS[2]}} {${TASK_SIZES[3]},${TASK_CHUNKS[3]}} {${TASK_SIZES[4]},${TASK_CHUNKS[4]}} {${TASK_SIZES[5]},${TASK_CHUNKS[5]}} {${TASK_SIZES[6]},${TASK_CHUNKS[6]}} {${TASK_SIZES[7]},${TASK_CHUNKS[7]}} total_time=$total_time total_steal_ops=$total_steal_ops total_stolen_tasks=$total_stolen_tasks verification=$verification" >> "$RESULTS"
     done
 done

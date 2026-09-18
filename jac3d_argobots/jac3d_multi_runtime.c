@@ -579,7 +579,9 @@ int main(int argc, char **argv)
 
     clock_t cpu_start = clock();
     struct timespec wall_start, wall_end;
+    struct timespec mono_start, mono_end;
     clock_gettime(CLOCK_REALTIME, &wall_start);
+    clock_gettime(CLOCK_MONOTONIC, &mono_start);
     {
         ABT_thread *problem_threads =
             (ABT_thread *)calloc((size_t)num_problems, sizeof(ABT_thread));
@@ -614,6 +616,7 @@ int main(int argc, char **argv)
 
     clock_t cpu_end = clock();
     clock_gettime(CLOCK_REALTIME, &wall_end);
+    clock_gettime(CLOCK_MONOTONIC, &mono_end);
 
     long long steal_operations = 0;
     long long stolen_tasks = 0;
@@ -643,6 +646,11 @@ int main(int argc, char **argv)
     long long real_time_nanoseconds =
         (wall_end.tv_sec - wall_start.tv_sec) * 1000000000LL +
         (wall_end.tv_nsec - wall_start.tv_nsec);
+    /* CLOCK_MONOTONIC не прыгает при синхронизации системного времени —
+     * именно эту величину следует использовать в измерениях. */
+    long long mono_time_nanoseconds =
+        (mono_end.tv_sec - mono_start.tv_sec) * 1000000000LL +
+        (mono_end.tv_nsec - mono_start.tv_nsec);
 
     finalize_runtime(&runtime);
 
@@ -656,6 +664,7 @@ int main(int argc, char **argv)
     printf(" Problem count      =       %12d\n", num_problems);
     printf(" Time in seconds    =       %12.2lf\n", cpu_time_used);
     printf(" Real time (nanos)  =       %12lld\n", real_time_nanoseconds);
+    printf(" Mono time (nanos)  =       %12lld\n", mono_time_nanoseconds);
     printf(" Steal operations   =       %12lld\n", steal_operations);
     printf(" Stolen tasks       =       %12lld\n", stolen_tasks);
     printf(" Verification       =       %12s\n",

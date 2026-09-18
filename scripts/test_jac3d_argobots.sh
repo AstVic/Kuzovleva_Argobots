@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
+# Числа в отчётах и CSV печатаются только с точкой: под русской локалью awk и bc
+# выдают "10,85", и строка CSV перестаёт соответствовать заголовку.
+export LC_ALL=C
+
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 cd "$SCRIPT_DIR"
@@ -95,7 +99,10 @@ mkdir -p results_scheduler_compare
 RESULTS="results_scheduler_compare/benchmark_results.txt"
 echo "Argobots Jacobi-3D Scheduler Comparison" > "$RESULTS"
 echo "=======================================" >> "$RESULTS"
-echo "scheduler,xstreams,chunks,time_seconds,real_time_nanos,steal_operations,stolen_tasks,verification" > results_scheduler_compare/summary.csv
+SUMMARY="results_scheduler_compare/summary.csv"
+RUNS_CSV="results_scheduler_compare/runs.csv"
+echo "scheduler,grid_size,xstreams,chunks,runs,time_seconds,real_time_nanos,mono_time_nanos,steal_operations,stolen_tasks,verification" > "$SUMMARY"
+echo "scheduler,grid_size,xstreams,chunks,run,time_seconds,real_time_nanos,mono_time_nanos,steal_operations,stolen_tasks,verification" > "$RUNS_CSV"
 
 XSTREAMS=(1 2 4 8)
 GRID_SIZE=384
@@ -113,6 +120,7 @@ for scheduler in old new; do
         for chunks in "${CHUNKS[@]}"; do
             total_time=0
             total_nanos=0
+            total_mono=0
             total_steal_ops=0
             total_stolen_tasks=0
             verification="SUCCESSFUL"
@@ -122,27 +130,32 @@ for scheduler in old new; do
                 ABT_WS_SCHEDULER=$scheduler ./jac3d "$xstreams" "$chunks" > "$output_file" 2>&1
                 TIME=$(grep "Time in seconds" "$output_file" | awk '{print $NF}')
                 TIME_NANOS=$(grep "Real time" "$output_file" | awk '{print $NF}')
+                MONO_NANOS=$(grep "Mono time" "$output_file" | awk '{print $NF}')
                 VERIFICATION=$(grep "Verification" "$output_file" | awk '{print $NF}')
                 STEAL_OPS=$(grep "Steal operations" "$output_file" | awk '{print $NF}')
                 STOLEN_TASKS=$(grep "Stolen tasks" "$output_file" | awk '{print $NF}')
                 total_time=$(echo "$total_time + $TIME" | bc -l)
                 total_nanos=$(echo "$total_nanos + $TIME_NANOS" | bc)
+                total_mono=$(echo "$total_mono + $MONO_NANOS" | bc)
                 total_steal_ops=$(echo "$total_steal_ops + $STEAL_OPS" | bc)
                 total_stolen_tasks=$(echo "$total_stolen_tasks + $STOLEN_TASKS" | bc)
                 if [ "$VERIFICATION" = "UNSUCCESSFUL" ]; then
                     verification="UNSUCCESSFUL"
                 fi
+                echo "$scheduler,$GRID_SIZE,$xstreams,$chunks,$run,$TIME,$TIME_NANOS,$MONO_NANOS,$STEAL_OPS,$STOLEN_TASKS,$VERIFICATION" >> "$RUNS_CSV"
             done
 
             mean_time=$(echo "$total_time / $NUM_RUNS" | bc -l)
             mean_nanos=$(echo "$total_nanos / $NUM_RUNS" | bc -l)
+            mean_mono=$(echo "$total_mono / $NUM_RUNS" | bc -l)
             mean_steal_ops=$(echo "$total_steal_ops / $NUM_RUNS" | bc -l)
             mean_stolen_tasks=$(echo "$total_stolen_tasks / $NUM_RUNS" | bc -l)
             mean_time=$(awk -v value="$mean_time" 'BEGIN { printf "%.2f", value + 0 }')
             mean_nanos=$(printf '%s\n' "$mean_nanos" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
+            mean_mono=$(printf '%s\n' "$mean_mono" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
             mean_steal_ops=$(printf '%s\n' "$mean_steal_ops" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
             mean_stolen_tasks=$(printf '%s\n' "$mean_stolen_tasks" | sed -E 's/^\./0./; s/(\.[0-9]*[1-9])0+$/\1/; s/\.0+$//')
-            echo "$scheduler,$xstreams,$chunks,$mean_time,$mean_nanos,$mean_steal_ops,$mean_stolen_tasks,$verification" >> results_scheduler_compare/summary.csv
+            echo "$scheduler,$GRID_SIZE,$xstreams,$chunks,$NUM_RUNS,$mean_time,$mean_nanos,$mean_mono,$mean_steal_ops,$mean_stolen_tasks,$verification" >> "$SUMMARY"
             echo "$scheduler L=384 x=$xstreams c=$chunks runs=$NUM_RUNS mean_time=$mean_time mean_steal_ops=$mean_steal_ops mean_stolen_tasks=$mean_stolen_tasks verification=$verification" >> "$RESULTS"
         done
     done

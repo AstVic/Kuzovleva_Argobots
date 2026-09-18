@@ -8,8 +8,16 @@
 #include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
+
+/* Размер сетки и число итераций задаются при сборке: -DL=192 -DITMAX=10.
+ * Без #ifndef определения ниже перекрывали -D..., и варианты jac3d_L* собирались
+ * с одним и тем же L=384. */
+#ifndef L
 #define L 384
+#endif
+#ifndef ITMAX
 #define ITMAX 100
+#endif
 
 #define DEFAULT_XSTREAMS 4
 #define DEFAULT_THREADS 4
@@ -161,6 +169,7 @@ int main(int argc, char **argv) {
     long long stolen_tasks = 0;
     clock_t start, end;
     struct timespec start_real_time, end_real_time;
+    struct timespec start_mono_time, end_mono_time;
     double cpu_time_used;
     
     /* Разбираем аргументы командной строки, если они переданы. */
@@ -200,6 +209,7 @@ int main(int argc, char **argv) {
     
     start = clock();
     clock_gettime(CLOCK_REALTIME, &start_real_time);
+    clock_gettime(CLOCK_MONOTONIC, &start_mono_time);
     
     jacobi_args_t *thread_args = (jacobi_args_t *)malloc(sizeof(jacobi_args_t) * num_chunks);
     float *eps_values = (float *)malloc(sizeof(float) * num_chunks);
@@ -253,8 +263,12 @@ int main(int argc, char **argv) {
     
     end = clock();
     clock_gettime(CLOCK_REALTIME, &end_real_time);
+    clock_gettime(CLOCK_MONOTONIC, &end_mono_time);
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     long long real_time_nanoseconds = (end_real_time.tv_sec - start_real_time.tv_sec) * 1000000000 + (end_real_time.tv_nsec - start_real_time.tv_nsec);
+    /* CLOCK_MONOTONIC не прыгает при синхронизации системного времени —
+     * именно эту величину следует использовать в измерениях. */
+    long long mono_time_nanoseconds = (end_mono_time.tv_sec - start_mono_time.tv_sec) * 1000000000LL + (end_mono_time.tv_nsec - start_mono_time.tv_nsec);
     
     free(thread_args);
     free(eps_values);
@@ -274,6 +288,8 @@ int main(int argc, char **argv) {
     printf(" Iterations        =       %12d\n", ITMAX);
     printf(" Time in seconds   =       %12.2lf\n", cpu_time_used);
     printf(" Real time (nanos) =       %12lld\n", real_time_nanoseconds);
+    printf(" Mono time (nanos) =       %12lld\n", mono_time_nanoseconds);
+    printf(" Grid size         =       %12d\n", L);
     printf(" Operation type    =     floating point\n");
     printf(" Steal operations  =       %12lld\n", steal_operations);
     printf(" Stolen tasks      =       %12lld\n", stolen_tasks);
