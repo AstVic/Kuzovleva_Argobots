@@ -11,13 +11,6 @@
 #define WS_CHEAP_TASK_COST 32LL
 
 /* ===================== ГЛОБАЛЬНАЯ СТАТИСТИКА ===================== */
-typedef struct {
-    double total_time;          // Суммарное время выполнения задач (история)
-    int task_count;             // Количество выполненных задач (история)
-} ws_global_load_t;
-
-static ws_global_load_t *g_loads = NULL;
-static ABT_mutex g_loads_mutex;
 static int g_num_xstreams = 0;
 static atomic_llong g_steal_operations;
 static atomic_llong g_stolen_tasks;
@@ -217,19 +210,8 @@ static int ws_find_victim_sampled(int self, int num, long long local_load,
         return -1;
     }
 
-    ABT_mutex_lock(g_loads_mutex);
-    for (int i = 0; i < num; i++) {
-        if (i == self) continue;
-        if (g_loads[i].total_time > best_load && g_loads[i].task_count > 0) {
-            best_load = g_loads[i].total_time;
-            victim = i;
-        }
-    }
-    ABT_mutex_unlock(g_loads_mutex);
-    if (victim >= 0 && best_load > (double)local_load * WS_LOAD_IMBALANCE_RATIO) {
-        *victim_load_out = best_load;
-        return victim;
-    }
+    /* Без метаданных пулов оценивать нагрузку нечем: кражу по стоимости
+     * не делаем, остаётся запасной путь ws_find_fallback_victim. */
     return -1;
 }
 
@@ -254,16 +236,6 @@ static void ws_execute_task_with_estimate(ABT_thread thread, int exec_rank, long
     ws_start_task_execution(exec_rank, est);
     ABT_self_schedule(thread, ABT_POOL_NULL);
     ws_finish_task_execution(exec_rank, est);
-}
-
-/* Обновление исторической статистики (после выполнения задачи) */
-void ws_update_task_time(double elapsed, int rank) {
-    ABT_mutex_lock(g_loads_mutex);
-    if (rank >= 0 && rank < g_num_xstreams) {
-        g_loads[rank].total_time += elapsed;
-        g_loads[rank].task_count++;
-    }
-    ABT_mutex_unlock(g_loads_mutex);
 }
 
 void ws_reset_steal_count(void) {
@@ -460,13 +432,6 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     g_num_xstreams = num;
     atomic_init(&g_steal_operations, 0);
     atomic_init(&g_stolen_tasks, 0);
-    g_loads = (ws_global_load_t *)calloc(num, sizeof(ws_global_load_t));
-    for (i = 0; i < num; i++) {
-        g_loads[i].total_time = 0.0;
-        g_loads[i].task_count = 0;
-    }
-    ABT_mutex_create(&g_loads_mutex);
-
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
     for (i = 0; i < num; ++i) {
@@ -491,24 +456,24 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     ABT_sched_config_free(&config);
 }
 
-/* Функция для получения текущей статистики (исторической) */
+/* Текущее состояние метаданных пулов: сколько оценочной работы стоит в
+ * очереди и сколько выполняется прямо сейчас. */
 void ws_print_global_stats(void) {
-    ABT_mutex_lock(g_loads_mutex);
-    printf("\n=== Глобальная историческая статистика планировщика ===\n");
-    for (int i = 0; i < g_num_xstreams; i++) {
-        long long current_est = 0;
-        long long current_tasks = 0;
-        if (g_pool_meta) {
-            current_est =
-                atomic_load_explicit(&g_pool_meta[i].queued_estimated, memory_order_relaxed) +
-                atomic_load_explicit(&g_pool_meta[i].running_estimated, memory_order_relaxed);
-            current_tasks =
-                atomic_load_explicit(&g_pool_meta[i].queued_count, memory_order_relaxed) +
-                atomic_load_explicit(&g_pool_meta[i].running_count, memory_order_relaxed);
-        }
-        printf("Поток %d: время=%.6f, задачи=%d, текущая_оценка=%lld, текущие_задачи=%lld\n", 
-               i, g_loads[i].total_time, g_loads[i].task_count,
-               current_est, current_tasks);
+    if (!g_pool_meta) {
+        printf("\n=== Метаданные пулов не инициализированы ===\n");
+        return;
     }
-    ABT_mutex_unlock(g_loads_mutex);
+    printf("\n=== Текущее состояние пулов планировщика ===\n");
+    for (int i = 0; i < g_num_xstreams; i++) {
+        long long queued_est =
+            atomic_load_explicit(&g_pool_meta[i].queued_estimated, memory_order_relaxed);
+        long long running_est =
+            atomic_load_explicit(&g_pool_meta[i].running_estimated, memory_order_relaxed);
+        long long queued_cnt =
+            atomic_load_explicit(&g_pool_meta[i].queued_count, memory_order_relaxed);
+        long long running_cnt =
+            atomic_load_explicit(&g_pool_meta[i].running_count, memory_order_relaxed);
+        printf("Пул %d: в очереди %lld задач на %lld, выполняется %lld задач на %lld\n",
+               i, queued_cnt, queued_est, running_cnt, running_est);
+    }
 }

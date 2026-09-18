@@ -13,6 +13,5 @@ long long ws_get_steal_count(void);
 long long ws_get_steal_ops_count(void);
 long long ws_get_stolen_tasks_count(void);
 
-/* Историческая статистика выполнения задач. */
-void ws_update_task_time(double elapsed, int rank);
+/* Печать текущего состояния метаданных пулов (отладочная). */
 void ws_print_global_stats(void);
