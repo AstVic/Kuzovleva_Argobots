@@ -52,6 +52,7 @@ apply_patch() {   # apply_patch <каталог> <патч>
     if git -C "$dir" apply --reverse --check "$patch" 2>/dev/null; then
         echo "патч уже применён: $(basename "$patch")"
     else
+        git -C "$dir" checkout -q -- .
         git -C "$dir" apply "$patch"
         echo "патч применён: $(basename "$patch")"
     fi
