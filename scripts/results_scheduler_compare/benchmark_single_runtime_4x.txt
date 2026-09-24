@@ -1,7 +1,0 @@
-Single-runtime 4-task Jacobi benchmark
-task_sizes=384 320 256 192
-task_chunks=80 67 53 40
-
-Scheduler: old
-----------------------
-old x=1 {384,80} {320,67} {256,53} {192,40} total_time=22.74 total_steal_ops=0 total_stolen_tasks=0 verification=SUCCESSFUL

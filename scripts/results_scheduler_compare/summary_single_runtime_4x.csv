@@ -1,2 +1,0 @@
-scheduler,xstreams,size1,chunks1,size2,chunks2,size3,chunks3,size4,chunks4,task_count,total_time_seconds,total_real_time_nanos,total_steal_operations,total_stolen_tasks,verification
-old,1,384,80,320,67,256,53,192,40,4,22.74,22738560724,0,0,SUCCESSFUL

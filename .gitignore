@@ -1,0 +1,6 @@
+scripts/jac3d
+scripts/jac3d_seq
+scripts/jac3d_L*
+tests/*/build/
+tests_results/
+scripts/results_scheduler_compare/
