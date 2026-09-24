@@ -6,13 +6,18 @@
 #include <string.h>
 
 #include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
+#include "../workstealing_scheduler/ws_task.h"
 
 static int cost_aware_enabled(void) {
-    const char *mode = getenv("ABT_WS_SCHEDULER");
-    if (!mode || mode[0] == '\0') {
-        return 0;
+    /* Читаем переменную окружения один раз: раньше getenv вызывался на каждую
+     * создаваемую задачу редукции. */
+    static int cached = -1;
+    if (cached < 0) {
+        const char *mode = getenv("ABT_WS_SCHEDULER");
+        cached = (mode && mode[0] != '\0' &&
+                  (strcmp(mode, "new") == 0 || strcmp(mode, "cost-aware") == 0)) ? 1 : 0;
     }
-    return strcmp(mode, "new") == 0 || strcmp(mode, "cost-aware") == 0;
+    return cached;
 }
 
 #if USE_TREE_REDUCTION
@@ -104,18 +109,21 @@ void reduce_common(
 
     for (int i = 0; i < num_threads; ++i) {
         int pool_id = i % reduction_context->num_pools;
+        long long estimate =
+            (long long)thread_args[i].num_elems * (long long)elem_size;
         if (cost_aware_enabled()) {
-            ws_push_task_estimate(
-                pool_id,
-                (long long)thread_args[i].num_elems * (long long)elem_size);
+            ws_thread_create(reduction_context->pools[pool_id], pool_id,
+                             reduction_thread, &thread_args[i], estimate,
+                             &reduction_context->threads[i]);
+        } else {
+            ABT_thread_create(
+                reduction_context->pools[pool_id],
+                reduction_thread,
+                &thread_args[i],
+                ABT_THREAD_ATTR_NULL,
+                &reduction_context->threads[i]
+            );
         }
-        ABT_thread_create(
-            reduction_context->pools[pool_id],
-            reduction_thread,
-            &thread_args[i],
-            ABT_THREAD_ATTR_NULL,
-            &reduction_context->threads[i]
-        );
     }
 
     for (int i = 0; i < num_threads; ++i) {
@@ -191,18 +199,21 @@ void reduce_common(
 
     for (int i = 0; i < num_threads; ++i) {
         int pool_id = i % reduction_context->num_pools;
+        long long estimate =
+            (long long)thread_args[i].num_elems * (long long)elem_size;
         if (cost_aware_enabled()) {
-            ws_push_task_estimate(
-                pool_id,
-                (long long)thread_args[i].num_elems * (long long)elem_size);
+            ws_thread_create(reduction_context->pools[pool_id], pool_id,
+                             reduction_thread, &thread_args[i], estimate,
+                             &(reduction_context->threads[i]));
+        } else {
+            ABT_thread_create(
+                reduction_context->pools[pool_id],
+                reduction_thread,
+                &thread_args[i],
+                ABT_THREAD_ATTR_NULL,
+                &(reduction_context->threads[i])
+            );
         }
-        ABT_thread_create(
-            reduction_context->pools[pool_id],
-            reduction_thread,
-            &thread_args[i],
-            ABT_THREAD_ATTR_NULL,
-            &(reduction_context->threads[i])
-        );
 
     }
 

@@ -6,6 +6,7 @@
 #include "abt_reduction.h"
 #include "../workstealing_scheduler/abt_workstealing_scheduler.h"
 #include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
+#include "../workstealing_scheduler/ws_task.h"
 
 #define Max(a, b) ((a) > (b) ? (a) : (b))
 
@@ -42,10 +43,14 @@ static void configure_scheduler_mode(void) {
     g_use_cost_aware_scheduler = (strcmp(scheduler_mode, "new") == 0 || strcmp(scheduler_mode, "cost-aware") == 0);
 }
 
-static inline void register_task_estimate_if_needed(int pool_id, long long estimate) {
+/* Создаёт задачу. В cost-aware режиме оценка стоимости едет вместе с ULT,
+ * в остальных режимах создаётся обычный ULT без метаданных. */
+static inline int create_task(ABT_pool pool, int pool_id, void (*fn)(void *),
+                              void *arg, long long estimate, ABT_thread *thread) {
     if (g_use_cost_aware_scheduler) {
-        ws_push_task_estimate(pool_id, estimate);
+        return ws_thread_create(pool, pool_id, fn, arg, estimate, thread);
     }
+    return ABT_thread_create(pool, fn, arg, ABT_THREAD_ATTR_NULL, thread);
 }
 
 typedef struct {
@@ -220,14 +225,12 @@ int main(int argc, char **argv) {
             thread_args[t].end_i = (t == num_chunks - 1) ? L - 1 : thread_args[t].start_i + rows_per_chunk;
             thread_args[t].eps_local = &eps_values[t];
             
-            register_task_estimate_if_needed(
-                t % reduction_context.num_pools,
-                (long long)rows_per_chunk * (long long)L * (long long)L);
-            ABT_thread_create(
+            create_task(
                 reduction_context.pools[t % reduction_context.num_pools],
+                t % reduction_context.num_pools,
                 update_A_thread,
                 &thread_args[t],
-                ABT_THREAD_ATTR_NULL,
+                (long long)rows_per_chunk * (long long)L * (long long)L,
                 &reduction_context.threads[t]
             );
         }
@@ -240,14 +243,12 @@ int main(int argc, char **argv) {
         reduce_max_float(&reduction_context, eps_values, num_chunks, &eps);
         
         for (int t = 0; t < num_chunks; t++) {
-            register_task_estimate_if_needed(
-                t % reduction_context.num_pools,
-                (long long)rows_per_chunk * (long long)L * (long long)L);
-            ABT_thread_create(
+            create_task(
                 reduction_context.pools[t % reduction_context.num_pools],
+                t % reduction_context.num_pools,
                 update_B_thread,
                 &thread_args[t],
-                ABT_THREAD_ATTR_NULL,
+                (long long)rows_per_chunk * (long long)L * (long long)L,
                 &reduction_context.threads[t]
             );
         }

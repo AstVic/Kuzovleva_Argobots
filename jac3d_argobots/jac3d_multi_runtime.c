@@ -7,6 +7,7 @@
 
 #include "../workstealing_scheduler/abt_workstealing_scheduler.h"
 #include "../workstealing_scheduler/abt_workstealing_scheduler_cost_aware.h"
+#include "../workstealing_scheduler/ws_task.h"
 
 #define DEFAULT_XSTREAMS 4
 #define DEFAULT_ITMAX 100
@@ -342,11 +343,14 @@ static int launch_problem_phase(jacobi_problem_t *problem,
         chunk_args[c].eps_local = (phase == JACOBI_PHASE_A) ? &eps_values[c] : NULL;
 
         if (runtime->use_cost_aware_scheduler) {
-            ws_push_task_estimate(pool_id,
-                                  estimate_chunk_cost(problem->size, rows, phase));
+            ws_thread_create(runtime->pools[pool_id], pool_id, jacobi_chunk_run,
+                             &chunk_args[c],
+                             estimate_chunk_cost(problem->size, rows, phase),
+                             &threads[c]);
+        } else {
+            ABT_thread_create(runtime->pools[pool_id], jacobi_chunk_run,
+                              &chunk_args[c], ABT_THREAD_ATTR_NULL, &threads[c]);
         }
-        ABT_thread_create(runtime->pools[pool_id], jacobi_chunk_run,
-                          &chunk_args[c], ABT_THREAD_ATTR_NULL, &threads[c]);
         current_row += rows;
     }
 
@@ -396,11 +400,14 @@ static int run_problem_reduction(jacobi_problem_t *problem,
         reduction_args[r].output = &reduction_outputs[r];
 
         if (runtime->use_cost_aware_scheduler) {
-            ws_push_task_estimate(pool_id, estimate_reduction_cost(len));
+            ws_thread_create(runtime->pools[pool_id], pool_id, reduction_chunk_run,
+                             &reduction_args[r], estimate_reduction_cost(len),
+                             &reduction_threads[r]);
+        } else {
+            ABT_thread_create(runtime->pools[pool_id], reduction_chunk_run,
+                              &reduction_args[r], ABT_THREAD_ATTR_NULL,
+                              &reduction_threads[r]);
         }
-        ABT_thread_create(runtime->pools[pool_id], reduction_chunk_run,
-                          &reduction_args[r], ABT_THREAD_ATTR_NULL,
-                          &reduction_threads[r]);
         current += len;
     }
 
