@@ -69,6 +69,7 @@ resolve_scheduler_sources() {
     local scheduler_root="${ABT_SCHEDULER_DIR:-$REPO_ROOT/workstealing_scheduler}"
     SCHEDULER_OLD_SRC="$scheduler_root/abt_workstealing_scheduler.c"
     SCHEDULER_NEW_SRC="$scheduler_root/abt_workstealing_scheduler_cost_aware.c"
+    SCHEDULER_TASK_SRC="$scheduler_root/ws_task.c"
 
     if [ ! -f "$SCHEDULER_OLD_SRC" ] || [ ! -f "$SCHEDULER_NEW_SRC" ]; then
         echo "Scheduler sources not found. Set ABT_SCHEDULER_DIR or verify repository layout." >&2
@@ -84,6 +85,7 @@ build_binary() {
         "$REPO_ROOT/jac3d_argobots/jac3d_multi_runtime.c" \
         "$SCHEDULER_OLD_SRC" \
         "$SCHEDULER_NEW_SRC" \
+        "$SCHEDULER_TASK_SRC" \
         $ABT_LIBS
 }
 

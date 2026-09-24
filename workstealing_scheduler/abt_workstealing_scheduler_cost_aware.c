@@ -1,4 +1,5 @@
 #include "abt_workstealing_scheduler_cost_aware.h"
+#include "ws_task.h"
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +33,14 @@ typedef struct {
 
 static pool_meta_t *g_pool_meta = NULL;
 
+/* ===================== ОТЛАДОЧНЫЕ СЧЁТЧИКИ ===================== */
+/* Обновляются только при сборке с -DWS_DEBUG_COST_CHECK; проверяют, что
+   запущенная задача получила СВОЮ оценку стоимости. */
+static atomic_llong g_dbg_dispatched;
+static atomic_llong g_dbg_wrong_estimate;
+static atomic_llong g_dbg_missing_estimate;
+static atomic_llong g_dbg_foreign_with_estimate;
+
 /* ===================== ДАННЫЕ ПЛАНИРОВЩИКА ===================== */
 typedef struct {
     uint32_t event_freq;
@@ -63,6 +72,7 @@ static int pool_meta_init_one(pool_meta_t *pm, int initial_capacity) {
     return 0;
 }
 
+#ifdef WS_LEGACY_EST_FIFO
 static int pool_meta_grow_locked(pool_meta_t *pm) {
     int newcap = pm->buf_capacity * 2;
     long long *nb = (long long *)malloc(sizeof(long long) * newcap);
@@ -83,9 +93,11 @@ static int pool_meta_grow_locked(pool_meta_t *pm) {
     pm->buf_tail = i;
     return 0;
 }
+#endif /* WS_LEGACY_EST_FIFO */
 
-/* Увеличивает суммарную оценку и счётчик задач очереди, сохраняя точную оценку задачи в FIFO. */
-void ws_push_task_estimate(int rank, long long est) {
+#ifdef WS_LEGACY_EST_FIFO
+/* Кладёт точную оценку в кольцевой FIFO пула (старый механизм сопоставления). */
+static void ws_est_fifo_push(int rank, long long est) {
     if (!g_pool_meta) return;
     if (rank < 0 || rank >= g_num_xstreams) return;
     if (est < 0) est = 0;
@@ -103,9 +115,41 @@ void ws_push_task_estimate(int rank, long long est) {
     pm->est_buffer[pm->buf_tail] = est;
     pm->buf_tail = (pm->buf_tail + 1) % pm->buf_capacity;
     ABT_mutex_unlock(pm->mutex);
+}
+#endif /* WS_LEGACY_EST_FIFO */
 
+/* Задача поставлена в очередь пула rank: учитываем её в агрегатах. */
+void ws_account_task_created(int rank, long long est) {
+    if (!g_pool_meta) return;
+    if (rank < 0 || rank >= g_num_xstreams) return;
+    if (est < 0) est = 0;
+#ifdef WS_LEGACY_EST_FIFO
+    ws_est_fifo_push(rank, est);
+#endif
+    pool_meta_t *pm = &g_pool_meta[rank];
     atomic_fetch_add_explicit(&pm->queued_estimated, est, memory_order_relaxed);
     atomic_fetch_add_explicit(&pm->queued_count, 1, memory_order_relaxed);
+}
+
+/* Задача покинула очередь пула rank (первый запуск). */
+void ws_account_task_dispatched(int rank, long long est) {
+    if (!g_pool_meta) return;
+    if (rank < 0 || rank >= g_num_xstreams) return;
+    if (est < 0) est = 0;
+    pool_meta_t *pm = &g_pool_meta[rank];
+    atomic_fetch_sub_explicit(&pm->queued_estimated, est, memory_order_relaxed);
+    atomic_fetch_sub_explicit(&pm->queued_count, 1, memory_order_relaxed);
+}
+
+/* УСТАРЕЛО: оценка теперь едет вместе с ULT (см. ws_thread_create).
+ * Работает только в сборке со старым механизмом, иначе игнорируется. */
+void ws_push_task_estimate(int rank, long long est) {
+#ifdef WS_LEGACY_EST_FIFO
+    ws_account_task_created(rank, est);
+#else
+    (void)rank;
+    (void)est;
+#endif
 }
 
 /* Списывает точную оценку задачи из FIFO очереди. */
@@ -151,6 +195,12 @@ long long ws_get_pool_estimated_load(int rank) {
     if (rank < 0 || rank >= g_num_xstreams) return 0;
     pool_meta_t *pm = &g_pool_meta[rank];
     return atomic_load_explicit(&pm->queued_estimated, memory_order_relaxed);
+}
+
+long long ws_get_pool_queued_count(int rank) {
+    if (!g_pool_meta) return 0;
+    if (rank < 0 || rank >= g_num_xstreams) return 0;
+    return atomic_load_explicit(&g_pool_meta[rank].queued_count, memory_order_relaxed);
 }
 
 static long long ws_get_pool_total_load(int rank) {
@@ -226,6 +276,45 @@ static int ws_find_fallback_victim(int self, int num, ABT_pool *pools)
         }
     }
     return -1;
+}
+
+/* Оценка стоимости задачи, которую планировщик только что достал из пула
+ * owner_rank. Основной путь читает её из самого ULT; старый путь (сборка с
+ * -DWS_LEGACY_EST_FIFO) снимает голову отдельной очереди оценок. */
+static long long ws_dispatch_cost(ABT_thread thread, int owner_rank)
+{
+    ws_task_meta *meta = ws_task_meta_of(thread);
+    (void)meta;
+#ifdef WS_DEBUG_COST_CHECK
+    atomic_fetch_add_explicit(&g_dbg_dispatched, 1, memory_order_relaxed);
+#endif
+
+#ifdef WS_LEGACY_EST_FIFO
+    long long est = ws_pop_task_estimate(owner_rank);
+#ifdef WS_DEBUG_COST_CHECK
+    if (!meta) {
+        if (est >= 0) {
+            atomic_fetch_add_explicit(&g_dbg_foreign_with_estimate, 1, memory_order_relaxed);
+        }
+    } else if (est < 0) {
+        atomic_fetch_add_explicit(&g_dbg_missing_estimate, 1, memory_order_relaxed);
+    } else if (est != meta->est) {
+        atomic_fetch_add_explicit(&g_dbg_wrong_estimate, 1, memory_order_relaxed);
+    }
+#endif
+    return (est > 0) ? est : 0;
+#else
+    if (!meta) {
+        /* Чужой ULT: primary, проснувшийся после join или барьера. Оценки у
+         * него нет, и метаданные пула он не трогает. */
+        return 0;
+    }
+    if (!meta->dispatched) {
+        meta->dispatched = 1;
+        ws_account_task_dispatched(owner_rank, meta->est);
+    }
+    return meta->est;
+#endif
 }
 
 static void ws_execute_task_with_estimate(ABT_thread thread, int exec_rank, long long est)
@@ -336,7 +425,7 @@ static void sched_run(ABT_sched sched) {
                     }
 
                     /* Мы успешно взяли задачу из жертвы — уменьшаем её метаданные */
-                    long long est = ws_pop_task_estimate(victim);
+                    long long est = ws_dispatch_cost(thread, victim);
                     stolen_from_victim++;
                     if (est > 0) {
                         stolen_cost += est;
@@ -351,7 +440,7 @@ static void sched_run(ABT_sched sched) {
 
                     ABT_pool_pop_thread(pools[0], &thread);
                     if (thread != ABT_THREAD_NULL) {
-                        long long local_est = ws_pop_task_estimate(p_data->rank);
+                        long long local_est = ws_dispatch_cost(thread, p_data->rank);
                         ws_execute_task_with_estimate(thread, p_data->rank, local_est);
                         break;
                     }
@@ -381,7 +470,7 @@ static void sched_run(ABT_sched sched) {
                         }
                         stolen_from_victim++;
                         ws_execute_task_with_estimate(
-                            thread, p_data->rank, ws_pop_task_estimate(victim_rank));
+                            thread, p_data->rank, ws_dispatch_cost(thread, victim_rank));
                     }
                     if (stolen_from_victim > 0) {
                         atomic_fetch_add_explicit(&g_steal_operations, 1, memory_order_relaxed);
@@ -392,7 +481,7 @@ static void sched_run(ABT_sched sched) {
             }
         } else {
             /* Мы взяли локальную задачу — удаляем соответствующую оценку из локальных метаданных */
-            long long est = ws_pop_task_estimate(p_data->rank);
+            long long est = ws_dispatch_cost(thread, p_data->rank);
             /* Выполняем задачу */
             ws_execute_task_with_estimate(thread, p_data->rank, est);
         }
@@ -439,6 +528,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     g_num_xstreams = num;
     atomic_init(&g_steal_operations, 0);
     atomic_init(&g_stolen_tasks, 0);
+    ws_debug_reset();
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
     for (i = 0; i < num; ++i) {
@@ -461,6 +551,30 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     
     free(sched_pools);
     ABT_sched_config_free(&config);
+}
+
+/* ===================== ОТЛАДОЧНЫЕ СЧЁТЧИКИ ===================== */
+void ws_debug_reset(void) {
+    atomic_init(&g_dbg_dispatched, 0);
+    atomic_init(&g_dbg_wrong_estimate, 0);
+    atomic_init(&g_dbg_missing_estimate, 0);
+    atomic_init(&g_dbg_foreign_with_estimate, 0);
+}
+
+long long ws_debug_dispatched(void) {
+    return atomic_load_explicit(&g_dbg_dispatched, memory_order_relaxed);
+}
+
+long long ws_debug_wrong_estimate(void) {
+    return atomic_load_explicit(&g_dbg_wrong_estimate, memory_order_relaxed);
+}
+
+long long ws_debug_missing_estimate(void) {
+    return atomic_load_explicit(&g_dbg_missing_estimate, memory_order_relaxed);
+}
+
+long long ws_debug_foreign_with_estimate(void) {
+    return atomic_load_explicit(&g_dbg_foreign_with_estimate, memory_order_relaxed);
 }
 
 /* Текущее состояние метаданных пулов: сколько оценочной работы стоит в
