@@ -90,6 +90,7 @@ resolve_argobots
 fetch_pbbsbench
 apply_patch "$PBBS_DIR" "$REPO_ROOT/patches/pbbsbench.patch"
 apply_patch "$PBBS_DIR/parlaylib" "$REPO_ROOT/patches/parlaylib.patch"
+apply_patch "$PBBS_DIR/PAM" "$REPO_ROOT/patches/pam.patch"
 build_runtime
 write_config
 
