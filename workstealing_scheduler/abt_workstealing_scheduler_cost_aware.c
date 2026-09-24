@@ -264,10 +264,10 @@ static int sched_init(ABT_sched sched, ABT_sched_config config) {
     /* Читаем конфигурацию */
     ABT_sched_config_read(config, 1, &p_data->event_freq);
     
-    /* Получаем rank текущего исполнительного потока */
-    ABT_xstream x;
-    ABT_xstream_self(&x);
-    ABT_xstream_get_rank(x, &p_data->rank);
+    /* Ранг ES здесь брать нельзя: по документации Argobots вызывающий init()
+     * не определён, и на практике init выполняется на том ES, который создаёт
+     * планировщик (обычно primary). Настоящий ранг берётся в sched_run. */
+    p_data->rank = -1;
     
     p_data->local_total_time = 0.0;
     p_data->local_task_count = 0;
@@ -299,6 +299,13 @@ static void sched_run(ABT_sched sched) {
     ABT_sched_get_num_pools(sched, &num_pools);
     pools = (ABT_pool *)malloc(num_pools * sizeof(ABT_pool));
     ABT_sched_get_pools(sched, num_pools, 0, pools);
+
+    /* sched_run уже выполняется на своём ES, поэтому ранг определяется здесь.
+     * От него зависит и учёт метаданных своего пула, и пересчёт глобального
+     * номера жертвы в локальный индекс в повёрнутом списке пулов. */
+    ABT_self_get_xstream_rank(&p_data->rank);
+    p_data->rng_state =
+        (unsigned int)time(NULL) ^ (unsigned int)(p_data->rank * 2654435761u);
 
     while (1) {
         ABT_thread thread;
