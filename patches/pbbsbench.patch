@@ -1,0 +1,44 @@
+diff --git a/common/parallelDefs b/common/parallelDefs
+index 231c0e6..5f93a38 100644
+--- a/common/parallelDefs
++++ b/common/parallelDefs
+@@ -5,17 +5,37 @@ JEMALLOCLD = $(shell jemalloc-config --libdir)
+ JEMALLOC = -L$(JEMALLOCLD) -ljemalloc 
+ endif
+ 
+-CCFLAGS = -mcx16 -O2 -g -std=c++17 -DNDEBUG -I .
++ifeq ($(shell uname -m),x86_64)
++CX16 = -mcx16
++endif
++
++CCFLAGS = $(CX16) -O2 -g -std=c++17 -DNDEBUG -I .
+ CLFLAGS = -ldl $(JEMALLOC)
+ 
++ifeq ($(shell uname -s),Darwin)
++LIBOMP := $(shell brew --prefix libomp 2>/dev/null)
++OMPFLAGS = -DPARLAY_OPENMP -Xpreprocessor -fopenmp -I$(LIBOMP)/include
++OMPLINK = -L$(LIBOMP)/lib -Wl,-rpath,$(LIBOMP)/lib -lomp
++else
+ OMPFLAGS = -DPARLAY_OPENMP -fopenmp
++OMPLINK = -fopenmp
++endif
+ CILKFLAGS = -DPARLAY_CILK -fcilkplus
+ PBBFLAGS = -DHOMEGROWN -pthread
+ 
+ ifdef OPENMP
+ CC = g++
+ CFLAGS = $(OMPFLAGS) $(CCFLAGS)
+-LFLAGS = $(OMPFLAGS) $(CLFLAGS)
++LFLAGS = $(OMPLINK) $(CLFLAGS)
++
++else ifdef ARGOBOTS
++include $(dir $(realpath $(lastword $(MAKEFILE_LIST))))argobotsConfig
++CC = g++
++CFLAGS = -DPARLAY_ARGOBOTS -I$(WSRT_ROOT) -I$(WSRT_ROOT)/workstealing_scheduler -I$(ABT_DIR)/include $(CCFLAGS)
++ifneq ($(shell uname -s),Darwin)
++NO_AS_NEEDED = -Wl,--no-as-needed
++endif
++LFLAGS = $(NO_AS_NEEDED) -L$(WSRT_LIB) -Wl,-rpath,$(WSRT_LIB) -lwsrt -L$(ABT_DIR)/lib -Wl,-rpath,$(ABT_DIR)/lib -labt -pthread $(CLFLAGS)
+ 
+ else ifdef CILK
+ CC = g++

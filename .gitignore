@@ -4,3 +4,5 @@ scripts/jac3d_L*
 tests/*/build/
 tests_results/
 scripts/results_scheduler_compare/
+build/
+third_party/pbbsbench/
