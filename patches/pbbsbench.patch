@@ -1,5 +1,5 @@
 diff --git a/common/parallelDefs b/common/parallelDefs
-index 231c0e6..5f93a38 100644
+index 231c0e6..534ad94 100644
 --- a/common/parallelDefs
 +++ b/common/parallelDefs
 @@ -5,17 +5,37 @@ JEMALLOCLD = $(shell jemalloc-config --libdir)
@@ -11,7 +11,7 @@ index 231c0e6..5f93a38 100644
 +CX16 = -mcx16
 +endif
 +
-+CCFLAGS = $(CX16) -O2 -g -std=c++17 -DNDEBUG -I .
++CCFLAGS = $(CX16) -O2 -g -std=c++17 -DNDEBUG -w -I .
  CLFLAGS = -ldl $(JEMALLOC)
  
 +ifeq ($(shell uname -s),Darwin)
