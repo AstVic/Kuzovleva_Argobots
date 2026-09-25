@@ -33,6 +33,16 @@ typedef struct {
 
 static pool_meta_t *g_pool_meta = NULL;
 
+/* ===================== НАСТРОЙКИ ===================== */
+/* Читаются из окружения один раз при создании планировщиков; 0 выключает. */
+static int g_opt_fallback_stop_on_local = 1;   /* WS_FALLBACK_STOP_ON_LOCAL */
+
+static int ws_env_flag(const char *name, int def) {
+    const char *v = getenv(name);
+    if (!v || v[0] == '\0') return def;
+    return atoi(v) != 0;
+}
+
 /* ===================== ОТЛАДОЧНЫЕ СЧЁТЧИКИ ===================== */
 /* Обновляются только при сборке с -DWS_DEBUG_COST_CHECK; проверяют, что
    запущенная задача получила СВОЮ оценку стоимости. */
@@ -471,6 +481,13 @@ static void sched_run(ABT_sched sched) {
                         stolen_from_victim++;
                         ws_execute_task_with_estimate(
                             thread, p_data->rank, ws_dispatch_cost(thread, victim_rank));
+                        if (g_opt_fallback_stop_on_local) {
+                            size_t local_size = 0;
+                            ABT_pool_get_size(pools[0], &local_size);
+                            if (local_size > 0) {
+                                break;
+                            }
+                        }
                     }
                     if (stolen_from_victim > 0) {
                         atomic_fetch_add_explicit(&g_steal_operations, 1, memory_order_relaxed);
@@ -529,6 +546,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     atomic_init(&g_steal_operations, 0);
     atomic_init(&g_stolen_tasks, 0);
     ws_debug_reset();
+    g_opt_fallback_stop_on_local = ws_env_flag("WS_FALLBACK_STOP_ON_LOCAL", 1);
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
     for (i = 0; i < num; ++i) {
