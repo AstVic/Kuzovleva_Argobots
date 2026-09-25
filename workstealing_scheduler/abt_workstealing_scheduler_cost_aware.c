@@ -3,6 +3,7 @@
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <abt.h>
 
@@ -33,11 +34,22 @@ typedef struct {
 
 static pool_meta_t *g_pool_meta = NULL;
 
+/* Метаданные разных пулов обновляются разными ES. Если они лежат в одной
+ * кэш-линии, каждое обновление вытесняет линию у соседей (ложное разделение).
+ * 128 байт - кэш-линия Apple M-серии; на x86 это две линии по 64. */
+#define WS_CACHE_LINE 128
+static size_t g_pool_meta_stride = sizeof(pool_meta_t);
+
+static inline pool_meta_t *ws_meta(int rank) {
+    return (pool_meta_t *)((char *)g_pool_meta + (size_t)rank * g_pool_meta_stride);
+}
+
 /* ===================== НАСТРОЙКИ ===================== */
 /* Читаются из окружения один раз при создании планировщиков; 0 выключает. */
 static int g_opt_fallback_stop_on_local = 1;   /* WS_FALLBACK_STOP_ON_LOCAL */
 static int g_opt_fallback_random = 1;          /* WS_FALLBACK_RANDOM */
 static int g_opt_continuation_on_thief = 1;    /* WS_CONTINUATION_ON_THIEF */
+static int g_opt_meta_padding = 1;             /* WS_META_PADDING */
 
 static int ws_env_flag(const char *name, int def) {
     const char *v = getenv(name);
@@ -113,7 +125,7 @@ static void ws_est_fifo_push(int rank, long long est) {
     if (!g_pool_meta) return;
     if (rank < 0 || rank >= g_num_xstreams) return;
     if (est < 0) est = 0;
-    pool_meta_t *pm = &g_pool_meta[rank];
+    pool_meta_t *pm = ws_meta(rank);
     ABT_mutex_lock(pm->mutex);
 
     int next_tail = (pm->buf_tail + 1) % pm->buf_capacity;
@@ -138,7 +150,7 @@ void ws_account_task_created(int rank, long long est) {
 #ifdef WS_LEGACY_EST_FIFO
     ws_est_fifo_push(rank, est);
 #endif
-    pool_meta_t *pm = &g_pool_meta[rank];
+    pool_meta_t *pm = ws_meta(rank);
     atomic_fetch_add_explicit(&pm->queued_estimated, est, memory_order_relaxed);
     atomic_fetch_add_explicit(&pm->queued_count, 1, memory_order_relaxed);
 }
@@ -148,7 +160,7 @@ void ws_account_task_dispatched(int rank, long long est) {
     if (!g_pool_meta) return;
     if (rank < 0 || rank >= g_num_xstreams) return;
     if (est < 0) est = 0;
-    pool_meta_t *pm = &g_pool_meta[rank];
+    pool_meta_t *pm = ws_meta(rank);
     atomic_fetch_sub_explicit(&pm->queued_estimated, est, memory_order_relaxed);
     atomic_fetch_sub_explicit(&pm->queued_count, 1, memory_order_relaxed);
 }
@@ -168,7 +180,7 @@ void ws_push_task_estimate(int rank, long long est) {
 long long ws_pop_task_estimate(int rank) {
     if (!g_pool_meta) return -1;
     if (rank < 0 || rank >= g_num_xstreams) return -1;
-    pool_meta_t *pm = &g_pool_meta[rank];
+    pool_meta_t *pm = ws_meta(rank);
     long long est = -1;
     ABT_mutex_lock(pm->mutex);
     if (pm->buf_head != pm->buf_tail) {
@@ -187,7 +199,7 @@ static void ws_start_task_execution(int rank, long long est) {
     pool_meta_t *pm;
     if (!g_pool_meta || est <= 0) return;
     if (rank < 0 || rank >= g_num_xstreams) return;
-    pm = &g_pool_meta[rank];
+    pm = ws_meta(rank);
     atomic_fetch_add_explicit(&pm->running_estimated, est, memory_order_relaxed);
     atomic_fetch_add_explicit(&pm->running_count, 1, memory_order_relaxed);
 }
@@ -196,7 +208,7 @@ static void ws_finish_task_execution(int rank, long long est) {
     pool_meta_t *pm;
     if (!g_pool_meta || est <= 0) return;
     if (rank < 0 || rank >= g_num_xstreams) return;
-    pm = &g_pool_meta[rank];
+    pm = ws_meta(rank);
     atomic_fetch_sub_explicit(&pm->running_estimated, est, memory_order_relaxed);
     atomic_fetch_sub_explicit(&pm->running_count, 1, memory_order_relaxed);
 }
@@ -205,20 +217,20 @@ static void ws_finish_task_execution(int rank, long long est) {
 long long ws_get_pool_estimated_load(int rank) {
     if (!g_pool_meta) return 0;
     if (rank < 0 || rank >= g_num_xstreams) return 0;
-    pool_meta_t *pm = &g_pool_meta[rank];
+    pool_meta_t *pm = ws_meta(rank);
     return atomic_load_explicit(&pm->queued_estimated, memory_order_relaxed);
 }
 
 long long ws_get_pool_queued_count(int rank) {
     if (!g_pool_meta) return 0;
     if (rank < 0 || rank >= g_num_xstreams) return 0;
-    return atomic_load_explicit(&g_pool_meta[rank].queued_count, memory_order_relaxed);
+    return atomic_load_explicit(&ws_meta(rank)->queued_count, memory_order_relaxed);
 }
 
 static long long ws_get_pool_total_load(int rank) {
     if (!g_pool_meta) return 0;
     if (rank < 0 || rank >= g_num_xstreams) return 0;
-    pool_meta_t *pm = &g_pool_meta[rank];
+    pool_meta_t *pm = ws_meta(rank);
     long long queued =
         atomic_load_explicit(&pm->queued_estimated, memory_order_relaxed);
     long long running =
@@ -569,10 +581,23 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     g_opt_fallback_stop_on_local = ws_env_flag("WS_FALLBACK_STOP_ON_LOCAL", 1);
     g_opt_fallback_random = ws_env_flag("WS_FALLBACK_RANDOM", 1);
     g_opt_continuation_on_thief = ws_env_flag("WS_CONTINUATION_ON_THIEF", 1);
+    g_opt_meta_padding = ws_env_flag("WS_META_PADDING", 1);
     /* Инициализируем pool_meta для каждого пула */
-    g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
+    g_pool_meta_stride = sizeof(pool_meta_t);
+    if (g_opt_meta_padding) {
+        g_pool_meta_stride = (sizeof(pool_meta_t) + WS_CACHE_LINE - 1) / WS_CACHE_LINE * WS_CACHE_LINE;
+    }
+    {
+        void *mem = NULL;
+        if (posix_memalign(&mem, WS_CACHE_LINE, (size_t)num * g_pool_meta_stride) != 0) {
+            mem = NULL;
+        } else {
+            memset(mem, 0, (size_t)num * g_pool_meta_stride);
+        }
+        g_pool_meta = (pool_meta_t *)mem;
+    }
     for (i = 0; i < num; ++i) {
-        if (pool_meta_init_one(&g_pool_meta[i], 1024) != 0) {
+        if (pool_meta_init_one(ws_meta(i), 1024) != 0) {
             fprintf(stderr, "Ошибка инициализации pool_meta для пула %d\n", i);
             /* продолжаем, но это плохо */
         }
@@ -627,13 +652,13 @@ void ws_print_global_stats(void) {
     printf("\n=== Текущее состояние пулов планировщика ===\n");
     for (int i = 0; i < g_num_xstreams; i++) {
         long long queued_est =
-            atomic_load_explicit(&g_pool_meta[i].queued_estimated, memory_order_relaxed);
+            atomic_load_explicit(&ws_meta(i)->queued_estimated, memory_order_relaxed);
         long long running_est =
-            atomic_load_explicit(&g_pool_meta[i].running_estimated, memory_order_relaxed);
+            atomic_load_explicit(&ws_meta(i)->running_estimated, memory_order_relaxed);
         long long queued_cnt =
-            atomic_load_explicit(&g_pool_meta[i].queued_count, memory_order_relaxed);
+            atomic_load_explicit(&ws_meta(i)->queued_count, memory_order_relaxed);
         long long running_cnt =
-            atomic_load_explicit(&g_pool_meta[i].running_count, memory_order_relaxed);
+            atomic_load_explicit(&ws_meta(i)->running_count, memory_order_relaxed);
         printf("Пул %d: в очереди %lld задач на %lld, выполняется %lld задач на %lld\n",
                i, queued_cnt, queued_est, running_cnt, running_est);
     }
