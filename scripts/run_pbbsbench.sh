@@ -8,7 +8,9 @@
 # *Check из pbbsbench.
 #
 # Переменные окружения:
-#   MODES    - режимы: homegrown openmp default randws old new
+#   MODES    - режимы: homegrown openmp default randws old new;
+#              вариант режима задаётся как метка:режим:ПЕРЕМЕННАЯ=значение,...,
+#              например new_base:new:WS_FALLBACK_STEAL_ONE=0
 #   THREADS  - число рабочих потоков (по умолчанию все ядра)
 #   SIZE     - small | full
 #   ONLY     - список реализаций через пробел, например "histogram/parallel"
@@ -82,8 +84,23 @@ sed 's/^/  /' "$ENVFILE"
 
 echo "mode,threads,benchmark,input,geomean_seconds,times,status" > "$RUNS_CSV"
 
+spec_label() { echo "${1%%:*}"; }
+
+spec_mode() {
+    local rest="${1#*:}"
+    if [ "$rest" = "$1" ]; then echo "$1"; else echo "${rest%%:*}"; fi
+}
+
+spec_env() {
+    local rest="${1#*:}"
+    [ "$rest" = "$1" ] && return
+    local vars="${rest#*:}"
+    [ "$vars" = "$rest" ] && return
+    echo "$vars" | tr ',' ' '
+}
+
 family_of() {
-    case "$1" in
+    case "$(spec_mode "$1")" in
         homegrown) echo homegrown ;;
         openmp) echo openmp ;;
         *) echo argobots ;;
@@ -100,19 +117,22 @@ build() {   # build <каталог бенчмарка> <семейство>
 }
 
 run_mode() {   # run_mode <каталог> <бенчмарк> <режим>
-    local dir="$1" bench="$2" mode="$3" log status=OK
-    log="$OUT/logs/${bench//\//_}_${mode}.txt"
+    local dir="$1" bench="$2" spec="$3" log status=OK mode label
+    mode=$(spec_mode "$spec")
+    label=$(spec_label "$spec")
+    log="$OUT/logs/${bench//\//_}_${label}.txt"
     local envs=()
     case "$mode" in
         homegrown) ;;
         openmp) envs=(OPENMP=1) ;;
         *) envs=(ABT_WS_SCHEDULER="$mode") ;;
     esac
+    for v in $(spec_env "$spec"); do envs+=("$v"); done
     if ! (cd "$dir" && env ${envs[@]+"${envs[@]}"} "$INPUTS" -r "$ROUNDS" -p "$THREADS" -k) > "$log" 2>&1 \
         || grep -q "TERMINATED ABNORMALLY" "$log"; then
         status=FAILED
     fi
-    python3 - "$log" "$mode" "$THREADS" "$bench" "$status" >> "$RUNS_CSV" <<'PY'
+    python3 - "$log" "$label" "$THREADS" "$bench" "$status" >> "$RUNS_CSV" <<'PY'
 import re, sys
 log, mode, p, bench, status = sys.argv[1:]
 for line in open(log):
@@ -121,7 +141,7 @@ for line in open(log):
         times = m.group(2).replace("'", "").replace(",", "").split()
         print(f"{mode},{p},{bench},{m.group(1)},{m.group(3)},{' '.join(times)},{status}")
 PY
-    printf "  %-10s %s\n" "$mode" "$status"
+    printf "  %-10s %s\n" "$label" "$status"
 }
 
 for bench in $BENCHES; do
@@ -135,8 +155,8 @@ for bench in $BENCHES; do
         [ ${#modes[@]} -eq 0 ] && continue
         if ! build "$dir" "$family" > "$OUT/logs/${bench//\//_}_build_${family}.txt" 2>&1; then
             for mode in "${modes[@]}"; do
-                echo "$mode,$THREADS,$bench,-,,,BUILD_FAILED" >> "$RUNS_CSV"
-                printf "  %-10s BUILD_FAILED\n" "$mode"
+                echo "$(spec_label "$mode"),$THREADS,$bench,-,,,BUILD_FAILED" >> "$RUNS_CSV"
+                printf "  %-10s BUILD_FAILED\n" "$(spec_label "$mode")"
             done
             continue
         fi
