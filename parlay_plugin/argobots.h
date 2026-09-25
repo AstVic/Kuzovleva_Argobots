@@ -17,6 +17,8 @@
 // Если в пуле своего ES уже PARLAY_ARGOBOTS_QUEUE_LIMIT готовых ULT, par_do
 // выполняет обе ветки на месте: иначе число живых ULT и их стеков растёт
 // с числом листьев дерева задач.
+// Метаданные задачи par_do хранятся на стеке вызывающего (он ждёт join),
+// а не в куче; PARLAY_ARGOBOTS_STACK_META=0 возвращает выделение в куче.
 
 #ifndef PARLAY_ARGOBOTS_STACK_SIZE
 #define PARLAY_ARGOBOTS_STACK_SIZE (1u << 20)
@@ -61,6 +63,14 @@ inline size_t argobots_queue_limit() {
   return limit;
 }
 
+inline bool argobots_stack_meta() {
+  static const bool enabled = [] {
+    const char* env = std::getenv("PARLAY_ARGOBOTS_STACK_META");
+    return !(env && env[0] != '\0' && std::atoi(env) == 0);
+  }();
+  return enabled;
+}
+
 template <typename F>
 void argobots_invoke(void* p) {
   (*static_cast<F*>(p))();
@@ -77,9 +87,12 @@ inline void argobots_par_do(Lf&& left, Rf&& right, long long estimate) {
   using R = std::remove_reference_t<Rf>;
   void* arg = const_cast<void*>(static_cast<const void*>(std::addressof(right)));
   ABT_thread thread = ABT_THREAD_NULL;
+  ws_task_meta meta;
   int rank = ws_runtime_self_rank();
   if (rank < 0 || ws_runtime_pool_size(rank) >= argobots_queue_limit() ||
-      ws_runtime_spawn(&argobots_invoke<R>, arg, estimate, &thread) != ABT_SUCCESS) {
+      ws_runtime_spawn_meta(&argobots_invoke<R>, arg, estimate,
+                            argobots_stack_meta() ? &meta : nullptr,
+                            &thread) != ABT_SUCCESS) {
     std::forward<Lf>(left)();
     std::forward<Rf>(right)();
     return;

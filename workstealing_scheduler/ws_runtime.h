@@ -3,6 +3,8 @@
 #include <abt.h>
 #include <stddef.h>
 
+#include "ws_task.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,6 +46,11 @@ size_t ws_runtime_pool_size(int rank);
  * без кражи задачи из одного пула не попадут на другие ES).
  * est - оценка стоимости, используется только режимом new. */
 int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *thread);
+
+/* То же, но в режиме new метаданные задачи размещаются в meta, которую
+ * вызывающий держит живой до завершения ULT; meta == NULL - как ws_runtime_spawn. */
+int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_meta *meta,
+                          ABT_thread *thread);
 
 /* То же, но в пул заданного ES. */
 int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,

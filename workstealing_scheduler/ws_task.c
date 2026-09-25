@@ -8,8 +8,30 @@
 static void ws_trampoline(void *p)
 {
     ws_task_meta *meta = (ws_task_meta *)p;
+    int heap = meta->heap;
     meta->fn(meta->arg);
-    free(meta);
+    if (heap) {
+        free(meta);
+    }
+}
+
+static int ws_spawn_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
+                         ABT_thread *newthread)
+{
+    int ret;
+
+    meta->est = (meta->est > 0) ? meta->est : 0;
+    meta->dispatched = 0;
+
+    /* Учитываем задачу в очереди ДО создания ULT: иначе планировщик может
+     * забрать её раньше, чем она попадёт в счётчики, и списание уйдёт в минус. */
+    ws_account_task_created(pool_rank, meta->est);
+
+    ret = ABT_thread_create(pool, ws_trampoline, meta, ABT_THREAD_ATTR_NULL, newthread);
+    if (ret != ABT_SUCCESS) {
+        ws_account_task_dispatched(pool_rank, meta->est);
+    }
+    return ret;
 }
 
 int ws_thread_create(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg,
@@ -27,19 +49,23 @@ int ws_thread_create(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg
     }
     meta->fn = fn;
     meta->arg = arg;
-    meta->est = (est > 0) ? est : 0;
-    meta->dispatched = 0;
-
-    /* Учитываем задачу в очереди ДО создания ULT: иначе планировщик может
-     * забрать её раньше, чем она попадёт в счётчики, и списание уйдёт в минус. */
-    ws_account_task_created(pool_rank, meta->est);
-
-    ret = ABT_thread_create(pool, ws_trampoline, meta, ABT_THREAD_ATTR_NULL, newthread);
+    meta->est = est;
+    meta->heap = 1;
+    ret = ws_spawn_meta(pool, pool_rank, meta, newthread);
     if (ret != ABT_SUCCESS) {
-        ws_account_task_dispatched(pool_rank, meta->est);
         free(meta);
     }
     return ret;
+}
+
+int ws_thread_create_with_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
+                               ABT_thread *newthread)
+{
+    if (!meta || !meta->fn) {
+        return ABT_ERR_INV_ARG;
+    }
+    meta->heap = 0;
+    return ws_spawn_meta(pool, pool_rank, meta, newthread);
 }
 
 ws_task_meta *ws_task_meta_of(ABT_thread thread)

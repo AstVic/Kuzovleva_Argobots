@@ -156,28 +156,50 @@ size_t ws_runtime_pool_size(int rank)
     return size;
 }
 
-int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
-                        ABT_thread *thread)
+static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
+                    ws_task_meta *meta, ABT_thread *thread)
 {
     if (!g_active || rank < 0 || rank >= g_num_xstreams) return ABT_ERR_INV_ARG;
     if (g_mode == WS_MODE_NEW) {
+        if (meta) {
+            meta->fn = fn;
+            meta->arg = arg;
+            meta->est = est;
+            return ws_thread_create_with_meta(g_pools[rank], rank, meta, thread);
+        }
         return ws_thread_create(g_pools[rank], rank, fn, arg, est, thread);
     }
     return ABT_thread_create(g_pools[rank], fn, arg, ABT_THREAD_ATTR_NULL, thread);
 }
 
-int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *thread)
+static int spawn_rank(void)
 {
     int rank;
-    if (!g_active) return ABT_ERR_UNINITIALIZED;
     if (g_mode == WS_MODE_DEFAULT) {
-        rank = (int)(atomic_fetch_add_explicit(&g_round_robin, 1, memory_order_relaxed) %
+        return (int)(atomic_fetch_add_explicit(&g_round_robin, 1, memory_order_relaxed) %
                      (unsigned)g_num_xstreams);
-    } else {
-        rank = ws_runtime_self_rank();
-        if (rank < 0) rank = 0;
     }
-    return ws_runtime_spawn_to(rank, fn, arg, est, thread);
+    rank = ws_runtime_self_rank();
+    return rank < 0 ? 0 : rank;
+}
+
+int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
+                        ABT_thread *thread)
+{
+    return spawn_to(rank, fn, arg, est, NULL, thread);
+}
+
+int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *thread)
+{
+    if (!g_active) return ABT_ERR_UNINITIALIZED;
+    return spawn_to(spawn_rank(), fn, arg, est, NULL, thread);
+}
+
+int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_meta *meta,
+                          ABT_thread *thread)
+{
+    if (!g_active) return ABT_ERR_UNINITIALIZED;
+    return spawn_to(spawn_rank(), fn, arg, est, meta, thread);
 }
 
 void ws_runtime_reset_steal_stats(void)
