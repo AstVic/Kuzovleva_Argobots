@@ -37,6 +37,7 @@ static pool_meta_t *g_pool_meta = NULL;
 /* Читаются из окружения один раз при создании планировщиков; 0 выключает. */
 static int g_opt_fallback_stop_on_local = 1;   /* WS_FALLBACK_STOP_ON_LOCAL */
 static int g_opt_fallback_random = 1;          /* WS_FALLBACK_RANDOM */
+static int g_opt_continuation_on_thief = 1;    /* WS_CONTINUATION_ON_THIEF */
 
 static int ws_env_flag(const char *name, int def) {
     const char *v = getenv(name);
@@ -335,13 +336,16 @@ static long long ws_dispatch_cost(ABT_thread thread, int owner_rank)
 #endif
 }
 
-static void ws_execute_task_with_estimate(ABT_thread thread, int exec_rank, long long est)
+/* home_pool - пул, в который ULT вернётся, если заблокируется или уступит
+ * управление; ABT_POOL_NULL оставляет прежний. */
+static void ws_execute_task_with_estimate(ABT_thread thread, int exec_rank, long long est,
+                                          ABT_pool home_pool)
 {
     if (est < 0) {
         est = 0;
     }
     ws_start_task_execution(exec_rank, est);
-    ABT_self_schedule(thread, ABT_POOL_NULL);
+    ABT_self_schedule(thread, home_pool);
     ws_finish_task_execution(exec_rank, est);
 }
 
@@ -414,6 +418,11 @@ static void sched_run(ABT_sched sched) {
     p_data->rng_state =
         (unsigned int)time(NULL) ^ (unsigned int)(p_data->rank * 2654435761u);
 
+    /* Украденная задача и её продолжение после join остаются у вора: иначе
+     * проснувшийся ULT вернётся в пул жертвы, а его дочерние задачи уже
+     * лежат в пуле вора. */
+    ABT_pool stolen_home = g_opt_continuation_on_thief ? pools[0] : ABT_POOL_NULL;
+
     while (1) {
         ABT_thread thread;
 
@@ -450,7 +459,7 @@ static void sched_run(ABT_sched sched) {
                     }
 
                     /* Выполняем задачу на текущем ES (вор) */
-                    ws_execute_task_with_estimate(thread, p_data->rank, est);
+                    ws_execute_task_with_estimate(thread, p_data->rank, est, stolen_home);
 
                     if (est > 0 && est <= WS_CHEAP_TASK_COST) {
                         break;
@@ -459,7 +468,8 @@ static void sched_run(ABT_sched sched) {
                     ABT_pool_pop_thread(pools[0], &thread);
                     if (thread != ABT_THREAD_NULL) {
                         long long local_est = ws_dispatch_cost(thread, p_data->rank);
-                        ws_execute_task_with_estimate(thread, p_data->rank, local_est);
+                        ws_execute_task_with_estimate(thread, p_data->rank, local_est,
+                                                      ABT_POOL_NULL);
                         break;
                     }
                 }
@@ -489,7 +499,8 @@ static void sched_run(ABT_sched sched) {
                         }
                         stolen_from_victim++;
                         ws_execute_task_with_estimate(
-                            thread, p_data->rank, ws_dispatch_cost(thread, victim_rank));
+                            thread, p_data->rank, ws_dispatch_cost(thread, victim_rank),
+                            stolen_home);
                         if (g_opt_fallback_stop_on_local) {
                             size_t local_size = 0;
                             ABT_pool_get_size(pools[0], &local_size);
@@ -509,7 +520,7 @@ static void sched_run(ABT_sched sched) {
             /* Мы взяли локальную задачу — удаляем соответствующую оценку из локальных метаданных */
             long long est = ws_dispatch_cost(thread, p_data->rank);
             /* Выполняем задачу */
-            ws_execute_task_with_estimate(thread, p_data->rank, est);
+            ws_execute_task_with_estimate(thread, p_data->rank, est, ABT_POOL_NULL);
         }
         
         if (++work_count >= p_data->event_freq) {
@@ -557,6 +568,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     ws_debug_reset();
     g_opt_fallback_stop_on_local = ws_env_flag("WS_FALLBACK_STOP_ON_LOCAL", 1);
     g_opt_fallback_random = ws_env_flag("WS_FALLBACK_RANDOM", 1);
+    g_opt_continuation_on_thief = ws_env_flag("WS_CONTINUATION_ON_THIEF", 1);
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
     for (i = 0; i < num; ++i) {
