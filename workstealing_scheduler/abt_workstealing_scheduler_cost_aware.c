@@ -36,6 +36,7 @@ static pool_meta_t *g_pool_meta = NULL;
 /* ===================== НАСТРОЙКИ ===================== */
 /* Читаются из окружения один раз при создании планировщиков; 0 выключает. */
 static int g_opt_fallback_stop_on_local = 1;   /* WS_FALLBACK_STOP_ON_LOCAL */
+static int g_opt_fallback_random = 1;          /* WS_FALLBACK_RANDOM */
 
 static int ws_env_flag(const char *name, int def) {
     const char *v = getenv(name);
@@ -275,10 +276,17 @@ static int ws_find_victim_sampled(int self, int num, long long local_load,
     return -1;
 }
 
-static int ws_find_fallback_victim(int self, int num, ABT_pool *pools)
+/* Первый непустой пул среди чужих. Обход начинается со случайного пула:
+ * иначе все простаивающие ES проверяют соседа первым и спорят за один пул. */
+static int ws_find_fallback_victim(int num, ABT_pool *pools, unsigned int *rng_state)
 {
-    (void)self;
-    for (int target = 1; target < num; target++) {
+    int start = 0;
+    if (num <= 1) return -1;
+    if (g_opt_fallback_random) {
+        start = (int)(rand_r(rng_state) % (unsigned int)(num - 1));
+    }
+    for (int k = 0; k < num - 1; k++) {
+        int target = 1 + (start + k) % (num - 1);
         size_t victim_size = 0;
         if (ABT_pool_get_size(pools[target], &victim_size) == ABT_SUCCESS &&
             victim_size > 0) {
@@ -462,7 +470,8 @@ static void sched_run(ABT_sched sched) {
                                               memory_order_relaxed);
                 }
             } else {
-                int fallback_local_idx = ws_find_fallback_victim(p_data->rank, num_pools, pools);
+                int fallback_local_idx =
+                    ws_find_fallback_victim(num_pools, pools, &p_data->rng_state);
                 if (fallback_local_idx >= 1) {
                     long long stolen_from_victim = 0;
                     size_t victim_size = 0;
@@ -547,6 +556,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     atomic_init(&g_stolen_tasks, 0);
     ws_debug_reset();
     g_opt_fallback_stop_on_local = ws_env_flag("WS_FALLBACK_STOP_ON_LOCAL", 1);
+    g_opt_fallback_random = ws_env_flag("WS_FALLBACK_RANDOM", 1);
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta = (pool_meta_t*)calloc(num, sizeof(pool_meta_t));
     for (i = 0; i < num; ++i) {
