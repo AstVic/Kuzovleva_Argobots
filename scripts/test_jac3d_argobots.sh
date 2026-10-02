@@ -164,6 +164,21 @@ for run in $(seq 1 "$NUM_RUNS"); do
 done
 echo "  готово: $NUM_RUNS прогонов"
 
+spec_label() { echo "${1%%:*}"; }
+
+spec_mode() {
+    local rest="${1#*:}"
+    if [ "$rest" = "$1" ]; then echo "$1"; else echo "${rest%%:*}"; fi
+}
+
+spec_env() {
+    local rest="${1#*:}"
+    [ "$rest" = "$1" ] && return
+    local vars="${rest#*:}"
+    [ "$vars" = "$rest" ] && return
+    echo "$vars" | tr ',' ' '
+}
+
 echo "== параллельные прогоны =="
 order=0
 for run in $(seq 1 "$NUM_RUNS"); do
@@ -171,8 +186,8 @@ for run in $(seq 1 "$NUM_RUNS"); do
         for c in $CHUNKS; do
             for sched in $SCHEDULERS; do
                 order=$((order + 1))
-                out=$(ABT_WS_SCHEDULER=$sched ./jac3d "$x" "$c")
-                record_run "$sched" "$x" "$c" "$run" "$order" "$out"
+                out=$(env ABT_WS_SCHEDULER="$(spec_mode "$sched")" $(spec_env "$sched") ./jac3d "$x" "$c")
+                record_run "$(spec_label "$sched")" "$x" "$c" "$run" "$order" "$out"
                 sleep "$COOLDOWN"
             done
         done
@@ -199,7 +214,8 @@ echo "scheduler,grid_size,xstreams,chunks,runs,median_mono_nanos,median_mono_sec
         "$(awk -v v="$seq_median" 'BEGIN{print v/1e9}')" "1.000" "-"
     for x in $XSTREAMS; do
         for c in $CHUNKS; do
-            for sched in $SCHEDULERS; do
+            for spec in $SCHEDULERS; do
+                sched=$(spec_label "$spec")
                 med=$(awk -F, -v s="$sched" -v x="$x" -v c="$c" \
                     '$1==s && $3==x && $4==c {print $8}' "$RUNS_CSV" | median)
                 ops=$(awk -F, -v s="$sched" -v x="$x" -v c="$c" \
