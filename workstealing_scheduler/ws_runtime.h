@@ -11,12 +11,14 @@ extern "C" {
 
 /* Режим планирования выбирается переменной окружения ABT_WS_SCHEDULER:
  *   default    - штатный планировщик Argobots, у каждого ES свой пул, кражи нет;
- *   randws     - встроенная случайная кража Argobots (ABT_SCHED_RANDWS);
+ *   randws     - встроенная случайная кража Argobots (ABT_SCHED_RANDWS) на пулах ABT_POOL_RANDWS;
+ *   randws_fifo - ABT_SCHED_RANDWS на пулах ABT_POOL_FIFO;
  *   old        - baseline work stealing;
  *   new        - cost-aware work stealing (синоним: cost-aware). */
 typedef enum {
     WS_MODE_DEFAULT = 0,
     WS_MODE_RANDWS,
+    WS_MODE_RANDWS_FIFO,
     WS_MODE_OLD,
     WS_MODE_NEW
 } ws_mode_t;

@@ -13,7 +13,7 @@ CONFIG="$PBBS_DIR/common/argobotsConfig"
 BUILD="$SCRIPT_DIR/build"
 RESULTS="$REPO_ROOT/tests_results/parlay_plugin"
 
-MODES="${MODES:-default randws old new}"
+MODES="${MODES:-default randws randws_fifo old new}"
 THREADS="${THREADS:-1 2 4 8}"
 GRAINS="${GRAINS:-default fine:PARLAY_ARGOBOTS_GRAIN_FACTOR=0.25 coarse:PARLAY_ARGOBOTS_GRAIN_FACTOR=16 min4k:PARLAY_ARGOBOTS_MIN_GRAIN=4096}"
 

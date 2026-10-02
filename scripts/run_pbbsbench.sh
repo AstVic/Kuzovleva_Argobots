@@ -8,7 +8,7 @@
 # *Check из pbbsbench.
 #
 # Переменные окружения:
-#   MODES    - режимы: sequential homegrown openmp default randws old new;
+#   MODES    - режимы: sequential homegrown openmp default randws randws_fifo old new;
 #              вариант режима задаётся как метка:режим:ПЕРЕМЕННАЯ=значение,...,
 #              например new_base:new:WS_FALLBACK_STEAL_ONE=0
 #   THREADS  - число рабочих потоков (по умолчанию все ядра)

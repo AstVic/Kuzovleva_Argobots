@@ -21,14 +21,15 @@ static ws_mode_t mode_from_env(void)
     const char *mode = getenv("ABT_WS_SCHEDULER");
     if (!mode || mode[0] == '\0' || strcmp(mode, "default") == 0) return WS_MODE_DEFAULT;
     if (strcmp(mode, "randws") == 0) return WS_MODE_RANDWS;
+    if (strcmp(mode, "randws_fifo") == 0) return WS_MODE_RANDWS_FIFO;
     if (strcmp(mode, "new") == 0 || strcmp(mode, "cost-aware") == 0) return WS_MODE_NEW;
     return WS_MODE_OLD;
 }
 
-static void create_shared_pools(int n)
+static void create_shared_pools(int n, ABT_pool_kind kind)
 {
     for (int i = 0; i < n; i++) {
-        ABT_pool_create_basic(ABT_POOL_FIFO, ABT_POOL_ACCESS_MPMC, ABT_TRUE, &g_pools[i]);
+        ABT_pool_create_basic(kind, ABT_POOL_ACCESS_MPMC, ABT_TRUE, &g_pools[i]);
     }
 }
 
@@ -78,7 +79,7 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size)
             ABT_xstream_get_main_pools(g_xstreams[i], 1, &g_pools[i]);
         }
     } else {
-        create_shared_pools(n);
+        create_shared_pools(n, g_mode == WS_MODE_RANDWS ? ABT_POOL_RANDWS : ABT_POOL_FIFO);
         if (g_mode == WS_MODE_NEW) {
             ABT_create_ws_scheds_cost_aware(n, g_pools, g_scheds);
             ws_reset_steal_count();
