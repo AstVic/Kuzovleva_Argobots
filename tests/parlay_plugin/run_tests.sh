@@ -2,7 +2,7 @@
 # Проверка корректности Argobots-плагина parlaylib во всех режимах планировщика.
 # Требует предварительного запуска scripts/setup_pbbsbench.sh.
 #
-# Переменные окружения: MODES, THREADS, PBBS_DIR.
+# Переменные окружения: MODES, THREADS, GRAINS, PBBS_DIR.
 set -euo pipefail
 export LC_ALL=C
 
@@ -15,6 +15,7 @@ RESULTS="$REPO_ROOT/tests_results/parlay_plugin"
 
 MODES="${MODES:-default randws old new}"
 THREADS="${THREADS:-1 2 4 8}"
+GRAINS="${GRAINS:-default fine:PARLAY_ARGOBOTS_GRAIN_FACTOR=0.25 coarse:PARLAY_ARGOBOTS_GRAIN_FACTOR=16 min4k:PARLAY_ARGOBOTS_MIN_GRAIN=4096}"
 
 if [ ! -f "$CONFIG" ]; then
     echo "Не найден $CONFIG. Сначала запустите scripts/setup_pbbsbench.sh." >&2
@@ -25,28 +26,34 @@ WSRT_LIB=$(awk -F' = ' '$1=="WSRT_LIB"{print $2}' "$CONFIG")
 
 mkdir -p "$BUILD" "$RESULTS"
 g++ -O2 -std=c++17 -Wall -Wextra -DPARLAY_ARGOBOTS \
-    -I"$PBBS_DIR/parlaylib/include" -I"$REPO_ROOT" -I"$REPO_ROOT/workstealing_scheduler" \
+    -isystem "$PBBS_DIR/parlaylib/include" -I"$REPO_ROOT" -I"$REPO_ROOT/workstealing_scheduler" \
     -I"$ABT_DIR/include" \
     -o "$BUILD/test_parlay_plugin" "$SCRIPT_DIR/test_parlay_plugin.cpp" \
     -L"$WSRT_LIB" -Wl,-rpath,"$WSRT_LIB" -lwsrt \
     -L"$ABT_DIR/lib" -Wl,-rpath,"$ABT_DIR/lib" -labt -pthread
 
 SUMMARY="$RESULTS/summary.csv"
-echo "mode,threads,result,seconds" > "$SUMMARY"
+echo "mode,grain,threads,result,seconds" > "$SUMMARY"
 status=0
 for mode in $MODES; do
-    for p in $THREADS; do
-        log="$RESULTS/${mode}_p${p}.txt"
-        start=$(date +%s)
-        if ABT_WS_SCHEDULER=$mode PARLAY_NUM_THREADS=$p "$BUILD/test_parlay_plugin" > "$log" 2>&1; then
-            result=PASSED
-        else
-            result=FAILED
-            status=1
-        fi
-        secs=$(( $(date +%s) - start ))
-        echo "$mode,$p,$result,$secs" >> "$SUMMARY"
-        printf "%-8s p=%-3s %s\n" "$mode" "$p" "$result"
+    for grain in $GRAINS; do
+        glabel="${grain%%:*}"
+        genv=()
+        [ "$grain" != "$glabel" ] && genv=("${grain#*:}")
+        for p in $THREADS; do
+            log="$RESULTS/${mode}_${glabel}_p${p}.txt"
+            start=$(date +%s)
+            if env ABT_WS_SCHEDULER="$mode" PARLAY_NUM_THREADS="$p" ${genv[@]+"${genv[@]}"} \
+                "$BUILD/test_parlay_plugin" > "$log" 2>&1; then
+                result=PASSED
+            else
+                result=FAILED
+                status=1
+            fi
+            secs=$(( $(date +%s) - start ))
+            echo "$mode,$glabel,$p,$result,$secs" >> "$SUMMARY"
+            printf "%-8s %-7s p=%-3s %s\n" "$mode" "$glabel" "$p" "$result"
+        done
     done
 done
 

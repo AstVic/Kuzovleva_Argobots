@@ -46,6 +46,15 @@ static void test_parallel_for() {
   parlay::parallel_for(5, 5, [&](size_t) { empty_calls++; });
   parlay::parallel_for(7, 8, [&](size_t i) { empty_calls += static_cast<long>(i); });
   check(empty_calls.load() == 7, "parallel_for on empty and single ranges");
+
+  ok = true;
+  for (size_t m = 0; m <= 300; m++) {
+    std::vector<std::atomic<int>> small(m + 3);
+    for (auto& h : small) h.store(0, std::memory_order_relaxed);
+    parlay::parallel_for(3, m + 3, [&](size_t i) { small[i].fetch_add(1, std::memory_order_relaxed); });
+    for (size_t i = 0; i < m + 3; i++) ok &= (small[i].load() == (i >= 3 ? 1 : 0));
+  }
+  check(ok, "parallel_for on short ranges");
 }
 
 static void test_par_do() {

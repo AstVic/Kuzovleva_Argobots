@@ -1,6 +1,7 @@
 #ifndef PARLAY_PLUGIN_ARGOBOTS_H_
 #define PARLAY_PLUGIN_ARGOBOTS_H_
 
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
 
@@ -61,6 +62,28 @@ inline size_t argobots_queue_limit() {
     return static_cast<size_t>(PARLAY_ARGOBOTS_QUEUE_LIMIT);
   }();
   return limit;
+}
+
+inline double argobots_grain_factor() {
+  static const double factor = [] {
+    if (const char* env = std::getenv("PARLAY_ARGOBOTS_GRAIN_FACTOR")) {
+      double v = std::strtod(env, nullptr);
+      if (v > 0) return v;
+    }
+    return 1.0;
+  }();
+  return factor;
+}
+
+inline size_t argobots_min_grain() {
+  static const size_t grain = [] {
+    if (const char* env = std::getenv("PARLAY_ARGOBOTS_MIN_GRAIN")) {
+      long v = std::atol(env);
+      if (v > 0) return static_cast<size_t>(v);
+    }
+    return static_cast<size_t>(0);
+  }();
+  return grain;
 }
 
 inline bool argobots_stack_meta() {
@@ -140,7 +163,15 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     grain = static_cast<size_t>(granularity);
   } else {
     size_t parts = 8 * num_workers();
-    grain = (n + parts - 1) / parts;
+    double factor = internal::argobots_grain_factor();
+    if (factor == 1.0) {
+      grain = (n + parts - 1) / parts;
+    } else {
+      grain = static_cast<size_t>(std::ceil(static_cast<double>(n) * factor / static_cast<double>(parts)));
+      if (grain == 0) grain = 1;
+    }
+    size_t min_grain = internal::argobots_min_grain();
+    if (grain < min_grain) grain = min_grain;
   }
   if (n <= grain) {
     for (size_t i = start; i < end; i++) f(i);
