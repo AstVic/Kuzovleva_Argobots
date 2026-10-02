@@ -8,7 +8,7 @@
 # *Check из pbbsbench.
 #
 # Переменные окружения:
-#   MODES    - режимы: homegrown openmp default randws old new;
+#   MODES    - режимы: sequential homegrown openmp default randws old new;
 #              вариант режима задаётся как метка:режим:ПЕРЕМЕННАЯ=значение,...,
 #              например new_base:new:WS_FALLBACK_STEAL_ONE=0
 #   THREADS  - число рабочих потоков (по умолчанию все ядра)
@@ -101,6 +101,7 @@ spec_env() {
 
 family_of() {
     case "$(spec_mode "$1")" in
+        sequential) echo sequential ;;
         homegrown) echo homegrown ;;
         openmp) echo openmp ;;
         *) echo argobots ;;
@@ -110,6 +111,7 @@ family_of() {
 build() {   # build <каталог бенчмарка> <семейство>
     local dir="$1" family="$2"
     case "$family" in
+        sequential) (cd "$dir" && make -s cleanall >/dev/null 2>&1; SEQUENTIAL=1 make -s) ;;
         homegrown) (cd "$dir" && make -s cleanall >/dev/null 2>&1; make -s) ;;
         openmp)    (cd "$dir" && make -s cleanall >/dev/null 2>&1; OPENMP=1 make -s) ;;
         argobots)  (cd "$dir" && make -s cleanall >/dev/null 2>&1; ARGOBOTS=1 make -s) ;;
@@ -123,7 +125,7 @@ run_mode() {   # run_mode <каталог> <бенчмарк> <режим>
     log="$OUT/logs/${bench//\//_}_${label}.txt"
     local envs=()
     case "$mode" in
-        homegrown) ;;
+        sequential|homegrown) ;;
         openmp) envs=(OPENMP=1) ;;
         *) envs=(ABT_WS_SCHEDULER="$mode") ;;
     esac
@@ -147,7 +149,7 @@ PY
 for bench in $BENCHES; do
     dir="$PBBS_DIR/benchmarks/$bench"
     echo "== $bench =="
-    for family in homegrown openmp argobots; do
+    for family in sequential homegrown openmp argobots; do
         modes=()
         for mode in $MODES; do
             [ "$(family_of "$mode")" = "$family" ] && modes+=("$mode")
