@@ -11,6 +11,7 @@ typedef struct {
 static ABT_mutex g_old_steal_mutex = ABT_MUTEX_NULL;
 static long long g_old_steal_operations = 0;
 static long long g_old_stolen_tasks = 0;
+static int g_old_steal_one = 0;
 
 void ws_old_reset_steal_count(void)
 {
@@ -89,7 +90,8 @@ static void sched_run(ABT_sched sched)
             for (target = 1; target < num_pools; target++) {
                  size_t victim_size = 0;
                 int steal_target = 1;
-                if (ABT_pool_get_size(pools[target], &victim_size) == ABT_SUCCESS && victim_size > 1) {
+                if (!g_old_steal_one &&
+                    ABT_pool_get_size(pools[target], &victim_size) == ABT_SUCCESS && victim_size > 1) {
                     steal_target = (int)(victim_size / 2);
                 }
 
@@ -147,6 +149,9 @@ void ABT_create_ws_scheds(int num, ABT_pool *pools, ABT_sched *scheds)
     ABT_sched_config config;
     ABT_pool *sched_pools;
     int i, k;
+    const char *steal_one = getenv("WS_STEAL_ONE");
+
+    g_old_steal_one = steal_one && atoi(steal_one) != 0;
 
     ABT_sched_config_var cv_event_freq = {
         .idx = 0,

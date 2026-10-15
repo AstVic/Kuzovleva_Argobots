@@ -50,6 +50,7 @@ static int g_opt_fallback_stop_on_local = 1;   /* WS_FALLBACK_STOP_ON_LOCAL */
 static int g_opt_fallback_random = 1;          /* WS_FALLBACK_RANDOM */
 static int g_opt_continuation_on_thief = 1;    /* WS_CONTINUATION_ON_THIEF */
 static int g_opt_meta_padding = 1;             /* WS_META_PADDING */
+static int g_opt_steal_one = 0;
 
 static int ws_env_flag(const char *name, int def) {
     const char *v = getenv(name);
@@ -473,6 +474,10 @@ static void sched_run(ABT_sched sched) {
                     /* Выполняем задачу на текущем ES (вор) */
                     ws_execute_task_with_estimate(thread, p_data->rank, est, stolen_home);
 
+                    if (g_opt_steal_one) {
+                        break;
+                    }
+
                     if (est > 0 && est <= WS_CHEAP_TASK_COST) {
                         break;
                     }
@@ -499,7 +504,8 @@ static void sched_run(ABT_sched sched) {
                     size_t victim_size = 0;
                     int steal_target = 1;
                     int victim_rank = (p_data->rank + fallback_local_idx) % num_pools;
-                    if (ABT_pool_get_size(pools[fallback_local_idx], &victim_size) ==
+                    if (!g_opt_steal_one &&
+                        ABT_pool_get_size(pools[fallback_local_idx], &victim_size) ==
                             ABT_SUCCESS &&
                         victim_size > 1) {
                         steal_target = (int)(victim_size / 2);
@@ -582,6 +588,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     g_opt_fallback_random = ws_env_flag("WS_FALLBACK_RANDOM", 1);
     g_opt_continuation_on_thief = ws_env_flag("WS_CONTINUATION_ON_THIEF", 1);
     g_opt_meta_padding = ws_env_flag("WS_META_PADDING", 1);
+    g_opt_steal_one = ws_env_flag("WS_STEAL_ONE", 0);
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta_stride = sizeof(pool_meta_t);
     if (g_opt_meta_padding) {
