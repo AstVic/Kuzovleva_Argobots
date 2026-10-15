@@ -1,8 +1,10 @@
 #ifndef PARLAY_PLUGIN_ARGOBOTS_H_
 #define PARLAY_PLUGIN_ARGOBOTS_H_
 
+#include <atomic>
 #include <cmath>
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
 
 #include <functional>
@@ -99,9 +101,51 @@ void argobots_invoke(void* p) {
   (*static_cast<F*>(p))();
 }
 
+struct argobots_stats {
+  const char* path = std::getenv("PARLAY_ARGOBOTS_STATS");
+  std::atomic<long> spawned{0};
+  std::atomic<long> live{0};
+  std::atomic<long> peak{0};
+
+  void on_spawn() {
+    spawned.fetch_add(1, std::memory_order_relaxed);
+    long now = live.fetch_add(1, std::memory_order_relaxed) + 1;
+    long seen = peak.load(std::memory_order_relaxed);
+    while (now > seen && !peak.compare_exchange_weak(seen, now, std::memory_order_relaxed)) {
+    }
+  }
+
+  void on_join() { live.fetch_sub(1, std::memory_order_relaxed); }
+
+  ~argobots_stats() {
+    if (!path || path[0] == '\0') return;
+    if (FILE* f = std::fopen(path, "a")) {
+      std::fprintf(f, "spawned=%ld peak_live=%ld\n", spawned.load(), peak.load());
+      std::fclose(f);
+    }
+  }
+};
+
+inline argobots_stats& argobots_get_stats() {
+  static argobots_stats stats;
+  return stats;
+}
+
+inline bool argobots_stats_enabled() {
+  static const bool enabled = [] {
+    const char* env = std::getenv("PARLAY_ARGOBOTS_STATS");
+    return env && env[0] != '\0';
+  }();
+  return enabled;
+}
+
 struct argobots_join_guard {
   ABT_thread thread;
-  ~argobots_join_guard() { ABT_thread_free(&thread); }
+  bool counted;
+  ~argobots_join_guard() {
+    ABT_thread_free(&thread);
+    if (counted) argobots_get_stats().on_join();
+  }
 };
 
 template <typename Lf, typename Rf>
@@ -120,7 +164,9 @@ inline void argobots_par_do(Lf&& left, Rf&& right, long long estimate) {
     std::forward<Rf>(right)();
     return;
   }
-  argobots_join_guard guard{thread};
+  bool counted = argobots_stats_enabled();
+  if (counted) argobots_get_stats().on_spawn();
+  argobots_join_guard guard{thread, counted};
   std::forward<Lf>(left)();
 }
 
