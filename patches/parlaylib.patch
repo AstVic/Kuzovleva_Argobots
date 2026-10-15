@@ -1,3 +1,17 @@
+diff --git a/include/parlay/internal/stream_delayed.h b/include/parlay/internal/stream_delayed.h
+index d93dc06..aa86479 100644
+--- a/include/parlay/internal/stream_delayed.h
++++ b/include/parlay/internal/stream_delayed.h
+@@ -33,8 +33,7 @@ struct forward_delayed_sequence {
+ 
+     iterator(Iter ii, size_t n) : ii(ii), count(n) {}
+     iterator& operator++() {
+-      ++ii;
+-      count--;
++      if (--count != 0) ++ii;
+       return *this; }
+     iterator operator++(int) {
+       iterator tmp = *this;
 diff --git a/include/parlay/parallel.h b/include/parlay/parallel.h
 index 5f32807..39ae320 100644
 --- a/include/parlay/parallel.h

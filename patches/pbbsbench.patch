@@ -47,3 +47,16 @@ index 231c0e6..009f9b6 100644
  
  else ifdef CILK
  CC = g++
+diff --git a/common/runTests.py b/common/runTests.py
+index 293e41b..b57da52 100644
+--- a/common/runTests.py
++++ b/common/runTests.py
+@@ -20,6 +20,8 @@ def shellGetOutput(str) :
+   
+   if (len(err) > 0):
+       raise NameError(str+"\n"+output+err)
++  if (process.returncode != 0):
++      raise NameError(str+"\nexit code "+repr(process.returncode)+"\n"+output)
+   return output
+ 
+ def stripFloat(val) :
