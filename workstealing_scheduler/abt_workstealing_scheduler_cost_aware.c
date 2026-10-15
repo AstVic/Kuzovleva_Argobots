@@ -439,7 +439,7 @@ static void sched_run(ABT_sched sched) {
         ABT_thread thread;
 
          /* 1) Пытаемся взять задачу из локальной очереди (local index 0). */
-        ABT_pool_pop_thread(pools[0], &thread);
+        ABT_pool_pop_thread_ex(pools[0], &thread, ABT_POOL_CONTEXT_OWNER_PRIMARY);
         
         if (thread == ABT_THREAD_NULL) {
             /* Локальная очередь пуста - ищем, у кого красть (по текущим оценкам) */
@@ -458,7 +458,7 @@ static void sched_run(ABT_sched sched) {
                 }
 
                 while (stolen_cost < target_cost) {
-                    ABT_pool_pop_thread(pools[victim_local_idx], &thread);
+                    ABT_pool_pop_thread_ex(pools[victim_local_idx], &thread, ABT_POOL_CONTEXT_OWNER_SECONDARY);
                     if (thread == ABT_THREAD_NULL) {
                         break;
                     }
@@ -477,7 +477,7 @@ static void sched_run(ABT_sched sched) {
                         break;
                     }
 
-                    ABT_pool_pop_thread(pools[0], &thread);
+                    ABT_pool_pop_thread_ex(pools[0], &thread, ABT_POOL_CONTEXT_OWNER_PRIMARY);
                     if (thread != ABT_THREAD_NULL) {
                         long long local_est = ws_dispatch_cost(thread, p_data->rank);
                         ws_execute_task_with_estimate(thread, p_data->rank, local_est,
@@ -505,7 +505,7 @@ static void sched_run(ABT_sched sched) {
                         steal_target = (int)(victim_size / 2);
                     }
                     for (int s = 0; s < steal_target; s++) {
-                        ABT_pool_pop_thread(pools[fallback_local_idx], &thread);
+                        ABT_pool_pop_thread_ex(pools[fallback_local_idx], &thread, ABT_POOL_CONTEXT_OWNER_SECONDARY);
                         if (thread == ABT_THREAD_NULL) {
                             break;
                         }

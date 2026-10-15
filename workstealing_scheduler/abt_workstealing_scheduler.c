@@ -82,7 +82,7 @@ static void sched_run(ABT_sched sched)
 
     while (1) {
         ABT_thread thread;
-        ABT_pool_pop_thread(pools[0], &thread);
+        ABT_pool_pop_thread_ex(pools[0], &thread, ABT_POOL_CONTEXT_OWNER_PRIMARY);
         
         if (thread == ABT_THREAD_NULL) {
             /* Try to steal from other pools */
@@ -96,7 +96,7 @@ static void sched_run(ABT_sched sched)
                 int stole_any = 0;
                 long long stolen_from_victim = 0;
                 for (int s = 0; s < steal_target; s++) {
-                    ABT_pool_pop_thread(pools[target], &thread);
+                    ABT_pool_pop_thread_ex(pools[target], &thread, ABT_POOL_CONTEXT_OWNER_SECONDARY);
                     if (thread == ABT_THREAD_NULL) {
                         break;
                     }
