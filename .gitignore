@@ -6,3 +6,5 @@ tests_results/
 scripts/results_scheduler_compare/
 build/
 third_party/pbbsbench/
+scripts/jac3d_multi_runtime
+scripts/perf_*
