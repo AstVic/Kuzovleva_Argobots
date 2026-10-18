@@ -8,7 +8,6 @@
 #include <abt.h>
 
 #define WS_VICTIM_SAMPLE_SIZE 3
-#define WS_LOAD_IMBALANCE_RATIO 1.15
 #define WS_MIN_STEAL_COST 1LL
 #define WS_CHEAP_TASK_COST 32LL
 
@@ -254,7 +253,7 @@ static int ws_pick_random_other_pool(unsigned int *rng_state, int self, int num)
     return victim;
 }
 
-static int ws_find_victim_sampled(int self, int num, long long local_load,
+static int ws_find_victim_sampled(int self, int num,
                                   unsigned int *rng_state, long long *victim_load_out) {
     int victim = -1;
     long long best_load = 0;
@@ -276,9 +275,7 @@ static int ws_find_victim_sampled(int self, int num, long long local_load,
                 victim = candidate;
             }
         }
-        if (victim >= 0 &&
-            best_load > WS_MIN_STEAL_COST &&
-            (double)best_load > (double)local_load * WS_LOAD_IMBALANCE_RATIO) {
+        if (victim >= 0 && best_load > WS_MIN_STEAL_COST) {
             *victim_load_out = best_load;
             return victim;
         }
@@ -444,14 +441,13 @@ static void sched_run(ABT_sched sched) {
         
         if (thread == ABT_THREAD_NULL) {
             /* Локальная очередь пуста - ищем, у кого красть (по текущим оценкам) */
-            long long local_load = ws_get_pool_total_load(p_data->rank);
             long long victim_load = 0;
-            int victim = ws_find_victim_sampled(p_data->rank, num_pools, local_load,
+            int victim = ws_find_victim_sampled(p_data->rank, num_pools,
                                                &p_data->rng_state, &victim_load);
             
             if (victim >= 0) {
                 int victim_local_idx = global_to_local_pool_index(p_data->rank, victim, num_pools);
-                long long target_cost = (victim_load - local_load) / 2;
+                long long target_cost = victim_load / 2;
                 long long stolen_cost = 0;
                 long long stolen_from_victim = 0;
                 if (target_cost < WS_MIN_STEAL_COST) {
