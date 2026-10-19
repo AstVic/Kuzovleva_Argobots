@@ -143,11 +143,12 @@ run_mode() {   # run_mode <каталог> <бенчмарк> <режим> <пр
     mode=$(spec_mode "$spec")
     label=$(spec_label "$spec")
     log="$OUT/logs/${bench//\//_}_${label}_p${pass}.txt"
+    local stats="$OUT/logs/${bench//\//_}_${label}_p${pass}.stats"
     local envs=()
     case "$mode" in
         sequential|homegrown) ;;
         openmp) envs=(OPENMP=1) ;;
-        *) envs=(ABT_WS_SCHEDULER="$mode") ;;
+        *) envs=(ABT_WS_SCHEDULER="$mode" WS_STATS="$stats") ;;
     esac
     for v in $(spec_env "$spec"); do envs+=("$v"); done
     install_binaries "$dir" "$(family_of "$spec")"
