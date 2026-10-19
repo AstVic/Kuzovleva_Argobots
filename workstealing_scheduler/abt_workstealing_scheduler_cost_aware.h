@@ -16,6 +16,20 @@ long long ws_pop_task_estimate(int rank);
 long long ws_get_pool_estimated_load(int rank);
 long long ws_get_pool_queued_count(int rank);
 void ws_reset_steal_count(void);
+
+typedef struct {
+    long long local_tasks;
+    long long steal_ops_est;
+    long long stolen_est;
+    long long steal_ops_fallback;
+    long long stolen_fallback;
+    long long empty_victims;
+    long long stolen_zero_est;
+    long long stolen_resumed;
+    long long idle_iterations;
+} ws_sched_stats;
+
+void ws_get_sched_stats(ws_sched_stats *out);
 long long ws_get_steal_count(void);
 long long ws_get_steal_ops_count(void);
 long long ws_get_stolen_tasks_count(void);

@@ -16,6 +16,27 @@ static int g_num_xstreams = 0;
 static atomic_llong g_steal_operations;
 static atomic_llong g_stolen_tasks;
 
+enum {
+    WS_STAT_LOCAL,
+    WS_STAT_STEAL_OPS_EST,
+    WS_STAT_STOLEN_EST,
+    WS_STAT_STEAL_OPS_FB,
+    WS_STAT_STOLEN_FB,
+    WS_STAT_EMPTY_VICTIM,
+    WS_STAT_STOLEN_ZERO_EST,
+    WS_STAT_STOLEN_RESUMED,
+    WS_STAT_IDLE,
+    WS_STAT_COUNT
+};
+
+typedef struct {
+    atomic_llong v[WS_STAT_COUNT];
+} ws_es_stats_t;
+
+static char *g_es_stats = NULL;
+static int g_es_stats_num = 0;
+static size_t g_es_stats_stride = 0;
+
 /* ===================== МЕТАДАННЫЕ О ТЕКУЩИХ ОЧЕРЕДЯХ ===================== */
 /* Для каждой очереди храним атомарные агрегаты и FIFO буфер точных оценок.
    Mutex защищает только кольцевой FIFO буфер. */
@@ -41,6 +62,58 @@ static size_t g_pool_meta_stride = sizeof(pool_meta_t);
 
 static inline pool_meta_t *ws_meta(int rank) {
     return (pool_meta_t *)((char *)g_pool_meta + (size_t)rank * g_pool_meta_stride);
+}
+
+static inline void ws_stat_add(int rank, int k, long long d) {
+    atomic_llong *c;
+    if (!g_es_stats || rank < 0 || rank >= g_es_stats_num) return;
+    c = &((ws_es_stats_t *)(g_es_stats + (size_t)rank * g_es_stats_stride))->v[k];
+    atomic_store_explicit(c, atomic_load_explicit(c, memory_order_relaxed) + d,
+                          memory_order_relaxed);
+}
+
+static void ws_stats_alloc(int num) {
+    size_t stride = (sizeof(ws_es_stats_t) + WS_CACHE_LINE - 1) / WS_CACHE_LINE * WS_CACHE_LINE;
+    void *mem = NULL;
+    if (g_es_stats && g_es_stats_num == num) {
+        memset(g_es_stats, 0, (size_t)num * g_es_stats_stride);
+        return;
+    }
+    free(g_es_stats);
+    g_es_stats = NULL;
+    g_es_stats_num = 0;
+    if (posix_memalign(&mem, WS_CACHE_LINE, (size_t)num * stride) != 0) return;
+    memset(mem, 0, (size_t)num * stride);
+    g_es_stats = (char *)mem;
+    g_es_stats_stride = stride;
+    g_es_stats_num = num;
+}
+
+static void ws_stat_stolen(int rank, ABT_thread thread, long long est) {
+    if (!ws_task_meta_of(thread)) {
+        ws_stat_add(rank, WS_STAT_STOLEN_RESUMED, 1);
+    } else if (est <= 0) {
+        ws_stat_add(rank, WS_STAT_STOLEN_ZERO_EST, 1);
+    }
+}
+
+void ws_get_sched_stats(ws_sched_stats *out) {
+    long long t[WS_STAT_COUNT] = {0};
+    for (int r = 0; g_es_stats && r < g_es_stats_num; r++) {
+        ws_es_stats_t *st = (ws_es_stats_t *)(g_es_stats + (size_t)r * g_es_stats_stride);
+        for (int k = 0; k < WS_STAT_COUNT; k++) {
+            t[k] += atomic_load_explicit(&st->v[k], memory_order_relaxed);
+        }
+    }
+    out->local_tasks = t[WS_STAT_LOCAL];
+    out->steal_ops_est = t[WS_STAT_STEAL_OPS_EST];
+    out->stolen_est = t[WS_STAT_STOLEN_EST];
+    out->steal_ops_fallback = t[WS_STAT_STEAL_OPS_FB];
+    out->stolen_fallback = t[WS_STAT_STOLEN_FB];
+    out->empty_victims = t[WS_STAT_EMPTY_VICTIM];
+    out->stolen_zero_est = t[WS_STAT_STOLEN_ZERO_EST];
+    out->stolen_resumed = t[WS_STAT_STOLEN_RESUMED];
+    out->idle_iterations = t[WS_STAT_IDLE];
 }
 
 /* ===================== НАСТРОЙКИ ===================== */
@@ -462,6 +535,7 @@ static void sched_run(ABT_sched sched) {
 
                     /* Мы успешно взяли задачу из жертвы — уменьшаем её метаданные */
                     long long est = ws_dispatch_cost(thread, victim);
+                    ws_stat_stolen(p_data->rank, thread, est);
                     stolen_from_victim++;
                     if (est > 0) {
                         stolen_cost += est;
@@ -481,6 +555,7 @@ static void sched_run(ABT_sched sched) {
                     ABT_pool_pop_thread_ex(pools[0], &thread, ABT_POOL_CONTEXT_OWNER_PRIMARY);
                     if (thread != ABT_THREAD_NULL) {
                         long long local_est = ws_dispatch_cost(thread, p_data->rank);
+                        ws_stat_add(p_data->rank, WS_STAT_LOCAL, 1);
                         ws_execute_task_with_estimate(thread, p_data->rank, local_est,
                                                       ABT_POOL_NULL);
                         break;
@@ -491,6 +566,11 @@ static void sched_run(ABT_sched sched) {
                     atomic_fetch_add_explicit(&g_steal_operations, 1, memory_order_relaxed);
                     atomic_fetch_add_explicit(&g_stolen_tasks, stolen_from_victim,
                                               memory_order_relaxed);
+                    ws_stat_add(p_data->rank, WS_STAT_STEAL_OPS_EST, 1);
+                    ws_stat_add(p_data->rank, WS_STAT_STOLEN_EST, stolen_from_victim);
+                } else {
+                    ws_stat_add(p_data->rank, WS_STAT_EMPTY_VICTIM, 1);
+                    ws_stat_add(p_data->rank, WS_STAT_IDLE, 1);
                 }
             } else {
                 int fallback_local_idx =
@@ -511,10 +591,10 @@ static void sched_run(ABT_sched sched) {
                         if (thread == ABT_THREAD_NULL) {
                             break;
                         }
+                        long long fb_est = ws_dispatch_cost(thread, victim_rank);
+                        ws_stat_stolen(p_data->rank, thread, fb_est);
                         stolen_from_victim++;
-                        ws_execute_task_with_estimate(
-                            thread, p_data->rank, ws_dispatch_cost(thread, victim_rank),
-                            stolen_home);
+                        ws_execute_task_with_estimate(thread, p_data->rank, fb_est, stolen_home);
                         if (g_opt_fallback_stop_on_local) {
                             size_t local_size = 0;
                             ABT_pool_get_size(pools[0], &local_size);
@@ -527,12 +607,19 @@ static void sched_run(ABT_sched sched) {
                         atomic_fetch_add_explicit(&g_steal_operations, 1, memory_order_relaxed);
                         atomic_fetch_add_explicit(&g_stolen_tasks, stolen_from_victim,
                                                   memory_order_relaxed);
+                        ws_stat_add(p_data->rank, WS_STAT_STEAL_OPS_FB, 1);
+                        ws_stat_add(p_data->rank, WS_STAT_STOLEN_FB, stolen_from_victim);
+                    } else {
+                        ws_stat_add(p_data->rank, WS_STAT_IDLE, 1);
                     }
+                } else {
+                    ws_stat_add(p_data->rank, WS_STAT_IDLE, 1);
                 }
             }
         } else {
             /* Мы взяли локальную задачу — удаляем соответствующую оценку из локальных метаданных */
             long long est = ws_dispatch_cost(thread, p_data->rank);
+            ws_stat_add(p_data->rank, WS_STAT_LOCAL, 1);
             /* Выполняем задачу */
             ws_execute_task_with_estimate(thread, p_data->rank, est, ABT_POOL_NULL);
         }
@@ -585,6 +672,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     g_opt_continuation_on_thief = ws_env_flag("WS_CONTINUATION_ON_THIEF", 1);
     g_opt_meta_padding = ws_env_flag("WS_META_PADDING", 1);
     g_opt_steal_one = ws_env_flag("WS_STEAL_ONE", 0);
+    ws_stats_alloc(num);
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta_stride = sizeof(pool_meta_t);
     if (g_opt_meta_padding) {
