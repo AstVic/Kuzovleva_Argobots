@@ -158,11 +158,15 @@ run_mode() {   # run_mode <каталог> <бенчмарк> <режим> <пр
     python3 - "$log" "$label" "$THREADS" "$bench" "$pass" "$status" >> "$RUNS_CSV" <<'PY'
 import re, sys
 log, mode, p, bench, npass, status = sys.argv[1:]
+rows = 0
 for line in open(log):
     m = re.match(r"(\S+) : .* : (.*), geomean = ([0-9.]+)", line)
     if m:
         times = m.group(2).replace("'", "").replace(",", "").split()
         print(f"{mode},{p},{bench},{m.group(1)},{npass},{m.group(3)},{' '.join(times)},{status}")
+        rows += 1
+if rows == 0:
+    print(f"{mode},{p},{bench},-,{npass},,,FAILED")
 PY
     printf "  %-3s %-16s %s\n" "$pass" "$label" "$status"
 }
