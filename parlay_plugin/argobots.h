@@ -30,10 +30,6 @@
 #define PARLAY_ARGOBOTS_STACK_SIZE (1u << 20)
 #endif
 
-#ifndef PARLAY_ARGOBOTS_QUEUE_LIMIT
-#define PARLAY_ARGOBOTS_QUEUE_LIMIT 8
-#endif
-
 namespace parlay {
 
 namespace internal {
@@ -116,7 +112,8 @@ inline size_t argobots_queue_limit() {
       long v = std::atol(env);
       if (v > 0) return static_cast<size_t>(v);
     }
-    return static_cast<size_t>(PARLAY_ARGOBOTS_QUEUE_LIMIT);
+    int workers = ws_runtime_num_workers();
+    return static_cast<size_t>(workers > 0 ? workers : 1);
   }();
   return limit;
 }
