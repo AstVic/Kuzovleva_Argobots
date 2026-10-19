@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "ws_runtime.h"
 #include "abt_workstealing_scheduler.h"
 #include "abt_workstealing_scheduler_cost_aware.h"
@@ -7,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 static int g_active = 0;
 static ws_mode_t g_mode = WS_MODE_DEFAULT;
@@ -109,6 +111,42 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size)
     return ABT_SUCCESS;
 }
 
+const char *ws_runtime_prog_name(void)
+{
+#if defined(__APPLE__)
+    return getprogname();
+#elif defined(__GLIBC__)
+    return program_invocation_short_name;
+#else
+    return "-";
+#endif
+}
+
+static void dump_stats(void)
+{
+    const char *path = getenv("WS_STATS");
+    FILE *f;
+    if (!path || path[0] == '\0') return;
+    if (g_mode != WS_MODE_NEW && g_mode != WS_MODE_OLD) return;
+    f = fopen(path, "a");
+    if (!f) return;
+    if (g_mode == WS_MODE_NEW) {
+        ws_sched_stats st;
+        ws_get_sched_stats(&st);
+        fprintf(f,
+                "prog=%s mode=new local=%lld steal_ops_est=%lld stolen_est=%lld "
+                "steal_ops_fallback=%lld stolen_fallback=%lld empty_victims=%lld "
+                "stolen_zero_est=%lld stolen_resumed=%lld idle=%lld\n",
+                ws_runtime_prog_name(), st.local_tasks, st.steal_ops_est, st.stolen_est,
+                st.steal_ops_fallback, st.stolen_fallback, st.empty_victims,
+                st.stolen_zero_est, st.stolen_resumed, st.idle_iterations);
+    } else {
+        fprintf(f, "prog=%s mode=old steal_ops=%lld stolen=%lld\n", ws_runtime_prog_name(),
+                ws_old_get_steal_ops_count(), ws_old_get_stolen_tasks_count());
+    }
+    fclose(f);
+}
+
 void ws_runtime_finalize(void)
 {
     if (!g_active) return;
@@ -118,6 +156,7 @@ void ws_runtime_finalize(void)
         ABT_xstream_join(g_xstreams[i]);
         ABT_xstream_free(&g_xstreams[i]);
     }
+    dump_stats();
     ABT_finalize();
 
     free(g_xstreams);

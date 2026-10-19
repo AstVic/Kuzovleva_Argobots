@@ -32,6 +32,8 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size);
 /* Останавливает ES и завершает Argobots. Вызывается с primary ULT. */
 void ws_runtime_finalize(void);
 
+const char *ws_runtime_prog_name(void);
+
 int ws_runtime_is_active(void);
 ws_mode_t ws_runtime_mode(void);
 int ws_runtime_num_workers(void);
