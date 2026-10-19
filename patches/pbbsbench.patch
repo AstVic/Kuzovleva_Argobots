@@ -1,3 +1,29 @@
+diff --git a/benchmarks/removeDuplicates/bench/dedupTime.C b/benchmarks/removeDuplicates/bench/dedupTime.C
+index 02f30e7..a3738dc 100644
+--- a/benchmarks/removeDuplicates/bench/dedupTime.C
++++ b/benchmarks/removeDuplicates/bench/dedupTime.C
+@@ -43,7 +43,7 @@ int timeDedup(sequence<sequence<char>> const &In, int rounds, char* outFile) {
+        [&] () {R = dedup(A);},
+        [] () {});
+   if (outFile != NULL) writeSequenceToFile(R, outFile);
+-  return 1;
++  return 0;
+ }
+ 
+ int main(int argc, char* argv[]) {
+diff --git a/benchmarks/suffixArray/bench/SACheck.C b/benchmarks/suffixArray/bench/SACheck.C
+index 85c59a9..8f993ab 100644
+--- a/benchmarks/suffixArray/bench/SACheck.C
++++ b/benchmarks/suffixArray/bench/SACheck.C
+@@ -66,7 +66,7 @@ bool isSorted(parlay::sequence<uchar> const &s, parlay::sequence<long> const &SA
+ 	 << error+1 << endl;
+     return 0;
+   }
+-  return 0;
++  return 1;
+ }
+ 
+ int main(int argc, char* argv[]) {
 diff --git a/common/parallelDefs b/common/parallelDefs
 index 231c0e6..009f9b6 100644
 --- a/common/parallelDefs
