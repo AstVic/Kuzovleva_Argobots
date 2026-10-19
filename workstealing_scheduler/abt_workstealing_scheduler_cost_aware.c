@@ -8,7 +8,6 @@
 #include <abt.h>
 
 #define WS_VICTIM_SAMPLE_SIZE 3
-#define WS_MIN_STEAL_COST 1LL
 #define WS_CHEAP_TASK_COST 32LL
 
 /* ===================== ГЛОБАЛЬНАЯ СТАТИСТИКА ===================== */
@@ -123,6 +122,9 @@ static int g_opt_fallback_random = 1;          /* WS_FALLBACK_RANDOM */
 static int g_opt_continuation_on_thief = 1;    /* WS_CONTINUATION_ON_THIEF */
 static int g_opt_meta_padding = 1;             /* WS_META_PADDING */
 static int g_opt_steal_one = 0;
+static int g_opt_victim_queued = 1;
+static int g_opt_cheap_absolute = 0;
+static double g_opt_cheap_fraction = 0.0625;
 
 static int ws_env_flag(const char *name, int def) {
     const char *v = getenv(name);
@@ -342,13 +344,14 @@ static int ws_find_victim_sampled(int self, int num,
             if (candidate < 0) {
                 continue;
             }
-            cur = ws_get_pool_total_load(candidate);
+            cur = g_opt_victim_queued ? ws_get_pool_estimated_load(candidate)
+                                      : ws_get_pool_total_load(candidate);
             if (cur > best_load) {
                 best_load = cur;
                 victim = candidate;
             }
         }
-        if (victim >= 0 && best_load > WS_MIN_STEAL_COST) {
+        if (victim >= 0 && best_load > 0) {
             *victim_load_out = best_load;
             return victim;
         }
@@ -523,8 +526,8 @@ static void sched_run(ABT_sched sched) {
                 long long target_cost = victim_load / 2;
                 long long stolen_cost = 0;
                 long long stolen_from_victim = 0;
-                if (target_cost < WS_MIN_STEAL_COST) {
-                    target_cost = WS_MIN_STEAL_COST;
+                if (target_cost < 1) {
+                    target_cost = 1;
                 }
 
                 while (stolen_cost < target_cost) {
@@ -548,7 +551,9 @@ static void sched_run(ABT_sched sched) {
                         break;
                     }
 
-                    if (est > 0 && est <= WS_CHEAP_TASK_COST) {
+                    if (est > 0 && (g_opt_cheap_absolute
+                                        ? est <= WS_CHEAP_TASK_COST
+                                        : (double)est < g_opt_cheap_fraction * (double)target_cost)) {
                         break;
                     }
 
@@ -672,6 +677,17 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
     g_opt_continuation_on_thief = ws_env_flag("WS_CONTINUATION_ON_THIEF", 1);
     g_opt_meta_padding = ws_env_flag("WS_META_PADDING", 1);
     g_opt_steal_one = ws_env_flag("WS_STEAL_ONE", 0);
+    {
+        const char *vl = getenv("WS_VICTIM_LOAD");
+        const char *cf = getenv("WS_CHEAP_FRACTION");
+        g_opt_victim_queued = !(vl && strcmp(vl, "total") == 0);
+        g_opt_cheap_absolute = ws_env_flag("WS_CHEAP_ABSOLUTE", 0);
+        g_opt_cheap_fraction = 0.0625;
+        if (cf && cf[0] != '\0') {
+            double v = strtod(cf, NULL);
+            if (v >= 0) g_opt_cheap_fraction = v;
+        }
+    }
     ws_stats_alloc(num);
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta_stride = sizeof(pool_meta_t);
