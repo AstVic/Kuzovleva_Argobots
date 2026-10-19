@@ -2,6 +2,8 @@
 #define PARLAY_PLUGIN_ARGOBOTS_H_
 
 #include <atomic>
+#include <chrono>
+#include <climits>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
@@ -9,6 +11,7 @@
 
 #include <functional>
 #include <memory>
+#include <string_view>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -44,15 +47,67 @@ inline int argobots_default_num_workers() {
   return n > 0 ? static_cast<int>(n) : 1;
 }
 
+inline void argobots_noop(void*) {}
+
+inline long argobots_measure_fork_ns() {
+  using clk = std::chrono::steady_clock;
+  long best = LONG_MAX;
+  for (int rep = 0; rep < 3; rep++) {
+    auto t0 = clk::now();
+    for (int i = 0; i < 64; i++) {
+      ws_task_meta meta;
+      ABT_thread thread = ABT_THREAD_NULL;
+      if (ws_runtime_spawn_meta(&argobots_noop, nullptr, 0, &meta, &thread) == ABT_SUCCESS) {
+        ABT_thread_free(&thread);
+      }
+    }
+    long ns = static_cast<long>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(clk::now() - t0).count() / 64);
+    if (ns < best) best = ns;
+  }
+  return best > 0 ? best : 1;
+}
+
+inline std::atomic<long>& argobots_fork_ns_slot() {
+  static std::atomic<long> ns{0};
+  return ns;
+}
+
 struct argobots_runtime {
   argobots_runtime() {
     ws_runtime_init(argobots_default_num_workers(), PARLAY_ARGOBOTS_STACK_SIZE);
+    argobots_fork_ns_slot().store(argobots_measure_fork_ns(), std::memory_order_relaxed);
   }
   ~argobots_runtime() { ws_runtime_finalize(); }
 };
 
 inline void argobots_ensure_runtime() {
   static argobots_runtime runtime;
+}
+
+inline long argobots_fork_ns() {
+  argobots_ensure_runtime();
+  return argobots_fork_ns_slot().load(std::memory_order_relaxed);
+}
+
+inline bool argobots_grain_probe() {
+  static const bool probe = [] {
+    const char* env = std::getenv("PARLAY_ARGOBOTS_GRAIN");
+    return !(env && std::string_view(env) == "fixed");
+  }();
+  return probe;
+}
+
+inline long argobots_target_ns() {
+  static const long target = [] {
+    long factor = 10;
+    if (const char* env = std::getenv("PARLAY_ARGOBOTS_PROBE_FACTOR")) {
+      long v = std::atol(env);
+      if (v > 0) factor = v;
+    }
+    return factor * argobots_fork_ns();
+  }();
+  return target;
 }
 
 inline size_t argobots_queue_limit() {
@@ -120,7 +175,8 @@ struct argobots_stats {
   ~argobots_stats() {
     if (!path || path[0] == '\0') return;
     if (FILE* f = std::fopen(path, "a")) {
-      std::fprintf(f, "spawned=%ld peak_live=%ld\n", spawned.load(), peak.load());
+      std::fprintf(f, "prog=%s spawned=%ld peak_live=%ld fork_ns=%ld\n", ws_runtime_prog_name(),
+                   spawned.load(), peak.load(), argobots_fork_ns_slot().load());
       std::fclose(f);
     }
   }
@@ -202,6 +258,25 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
   size_t n = end - start;
   if (n == 1) {
     f(start);
+    return;
+  }
+  if (granularity <= 0 && internal::argobots_grain_probe()) {
+    using clk = std::chrono::steady_clock;
+    const long target = internal::argobots_target_ns();
+    size_t done = 0;
+    size_t sz = 1;
+    while (true) {
+      if (sz > n - done) sz = n - done;
+      auto t0 = clk::now();
+      for (size_t i = start + done; i < start + done + sz; i++) f(i);
+      long ns = static_cast<long>(
+          std::chrono::duration_cast<std::chrono::nanoseconds>(clk::now() - t0).count());
+      done += sz;
+      if (done == n) return;
+      if (ns >= target) break;
+      sz *= 2;
+    }
+    internal::argobots_parallel_for(start + done, end, f, done);
     return;
   }
   size_t grain;

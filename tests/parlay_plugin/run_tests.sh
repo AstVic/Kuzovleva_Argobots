@@ -15,7 +15,7 @@ RESULTS="$REPO_ROOT/tests_results/parlay_plugin"
 
 MODES="${MODES:-default randws randws_fifo old new}"
 THREADS="${THREADS:-1 2 4 8}"
-GRAINS="${GRAINS:-default fine:PARLAY_ARGOBOTS_GRAIN_FACTOR=0.25 coarse:PARLAY_ARGOBOTS_GRAIN_FACTOR=16 min4k:PARLAY_ARGOBOTS_MIN_GRAIN=4096}"
+GRAINS="${GRAINS:-default fixed:PARLAY_ARGOBOTS_GRAIN=fixed fine:PARLAY_ARGOBOTS_GRAIN=fixed,PARLAY_ARGOBOTS_GRAIN_FACTOR=0.25 coarse:PARLAY_ARGOBOTS_GRAIN=fixed,PARLAY_ARGOBOTS_GRAIN_FACTOR=16 min4k:PARLAY_ARGOBOTS_GRAIN=fixed,PARLAY_ARGOBOTS_MIN_GRAIN=4096}"
 
 if [ ! -f "$CONFIG" ]; then
     echo "Не найден $CONFIG. Сначала запустите scripts/setup_pbbsbench.sh." >&2
@@ -39,7 +39,7 @@ for mode in $MODES; do
     for grain in $GRAINS; do
         glabel="${grain%%:*}"
         genv=()
-        [ "$grain" != "$glabel" ] && genv=("${grain#*:}")
+        [ "$grain" != "$glabel" ] && IFS=, read -r -a genv <<< "${grain#*:}"
         for p in $THREADS; do
             log="$RESULTS/${mode}_${glabel}_p${p}.txt"
             start=$(date +%s)
