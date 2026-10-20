@@ -124,6 +124,22 @@ long long ws_task_cost_lookup(void (*fn)(void *), int depth)
     return g_cost_avg[rank];
 }
 
+static void ws_assign_cost(ws_task_meta *meta)
+{
+    ws_task_meta *parent = ws_task_self_meta();
+    meta->depth = parent ? parent->depth + 1 : 1;
+    if (meta->est <= 0) {
+        if (parent && parent->est > 1) {
+            meta->est = parent->est / 2;
+        } else {
+            meta->est = ws_task_cost_lookup(meta->fn, meta->depth);
+        }
+    }
+    if (parent && meta->est > 0) {
+        parent->est = parent->est > meta->est ? parent->est - meta->est : 0;
+    }
+}
+
 /* Переходник: разворачивает метаданные и вызывает настоящую функцию задачи.
  * Метаданные живут до конца задачи — планировщик читает оценку до запуска. */
 static void ws_trampoline(void *p)
@@ -148,6 +164,9 @@ static int ws_spawn_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
     meta->est = (meta->est > 0) ? meta->est : 0;
     meta->dispatched = 0;
     meta->depth = 0;
+    if (g_cost) {
+        ws_assign_cost(meta);
+    }
 
     /* Учитываем задачу в очереди ДО создания ULT: иначе планировщик может
      * забрать её раньше, чем она попадёт в счётчики, и списание уйдёт в минус. */

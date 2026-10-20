@@ -233,15 +233,20 @@ inline void argobots_par_do(Lf&& left, Rf&& right, long long estimate) {
 }
 
 template <typename F>
-void argobots_parallel_for(size_t start, size_t end, F& f, size_t grain) {
+void argobots_parallel_for(size_t start, size_t end, F& f, size_t grain, double unit) {
   if (end - start <= grain) {
     for (size_t i = start; i < end; i++) f(i);
     return;
   }
   size_t mid = start + (end - start) / 2;
-  argobots_par_do([&] { argobots_parallel_for(start, mid, f, grain); },
-                  [&] { argobots_parallel_for(mid, end, f, grain); },
-                  static_cast<long long>(end - mid));
+  long long estimate = 0;
+  if (unit > 0) {
+    estimate = static_cast<long long>(static_cast<double>(end - mid) * unit);
+    if (estimate < 1) estimate = 1;
+  }
+  argobots_par_do([&] { argobots_parallel_for(start, mid, f, grain, unit); },
+                  [&] { argobots_parallel_for(mid, end, f, grain, unit); },
+                  estimate);
 }
 
 }  // namespace internal
@@ -271,6 +276,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     const long target = internal::argobots_target_ns();
     size_t done = 0;
     size_t sz = 1;
+    double unit = 1.0;
     while (true) {
       if (sz > n - done) sz = n - done;
       auto t0 = clk::now();
@@ -279,10 +285,14 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
           std::chrono::duration_cast<std::chrono::nanoseconds>(clk::now() - t0).count());
       done += sz;
       if (done == n) return;
-      if (ns >= target) break;
+      if (ns >= target) {
+        unit = static_cast<double>(ns) / static_cast<double>(sz);
+        break;
+      }
       sz *= 2;
     }
-    internal::argobots_parallel_for(start + done, end, f, done);
+    internal::argobots_parallel_for(start + done, end, f, done,
+                                    ws_task_cost_enabled() ? unit : 1.0);
     return;
   }
   size_t grain;
@@ -304,7 +314,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     for (size_t i = start; i < end; i++) f(i);
     return;
   }
-  internal::argobots_parallel_for(start, end, f, grain);
+  internal::argobots_parallel_for(start, end, f, grain, ws_task_cost_enabled() ? 0.0 : 1.0);
 }
 
 template <typename Lf, typename Rf>
