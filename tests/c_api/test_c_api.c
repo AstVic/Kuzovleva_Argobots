@@ -1,8 +1,10 @@
 #include "ws_parallel.h"
+#include "ws_task.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 static int failures = 0;
 
@@ -87,6 +89,24 @@ static void zone_task(void *p)
     ws_parallel_for(z->lo, z->hi, mark, &a);
 }
 
+static volatile double work_sink;
+
+static void busy(long lo, long hi, void *p)
+{
+    (void)p;
+    double s = 0;
+    for (long i = lo; i < hi; i++) {
+        for (int k = 0; k < 200; k++) s += (double)(i ^ k) * 1e-9;
+    }
+    work_sink = s;
+}
+
+static void hinted_task(void *p)
+{
+    long n = *(long *)p;
+    ws_parallel_for(0, n, busy, NULL);
+}
+
 int main(void)
 {
     const long n = 200000;
@@ -147,6 +167,30 @@ int main(void)
         }
         check(all_once(hits, n), "group reused for several rounds");
         ws_group_free(g);
+    }
+
+    {
+        long sizes[12];
+        ws_group *g = ws_group_create();
+        double e0, w0, e1, w1, err;
+        long long n0, n1, tasks;
+        for (int k = 0; k < 12; k++) sizes[k] = 2000L * (k + 1);
+        ws_task_cost_accuracy(&e0, &w0, &n0);
+        for (int round = 0; round < 12; round++) {
+            for (int k = 0; k < 12; k++) ws_group_spawn(g, hinted_task, &sizes[k], sizes[k]);
+            ws_group_wait(g);
+        }
+        ws_group_free(g);
+        ws_task_cost_accuracy(&e1, &w1, &n1);
+        err = w1 > w0 ? (e1 - e0) / (w1 - w0) : 0.0;
+        tasks = n1 - n0;
+        printf("estimate error %.3f over %lld tasks\n", err, tasks);
+        if (ws_num_workers() > sysconf(_SC_NPROCESSORS_ONLN)) {
+            printf("%-48s skipped (more workers than cores)\n", "estimates of nested hinted tasks are accurate");
+        } else {
+            check(!ws_task_cost_enabled() || (tasks > 0 && err < 0.5),
+                  "estimates of nested hinted tasks are accurate");
+        }
     }
 
     ws_finalize();
