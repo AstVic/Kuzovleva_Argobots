@@ -251,6 +251,17 @@ void ws_task_wait_end(long long start)
     if (self) self->wait_ns += ws_now_ns() - start;
 }
 
+/* Часы работы вызывающей задачи: время минус ожидание детей плюс работа завершившихся детей.
+ * Разность двух отсчётов - работа, сделанная задачей между ними, без ожидания и чужих задач,
+ * выполненных за время ожидания. Вне задачи рантайма или без оценок - обычное время. */
+long long ws_task_work_clock(void)
+{
+    ws_task_meta *self = g_cost ? ws_task_self_meta() : NULL;
+    long long now = ws_now_ns();
+    if (!self) return now;
+    return now - self->wait_ns + __atomic_load_n(&self->child_work, __ATOMIC_ACQUIRE);
+}
+
 /* Точность оценок по всем ES: сумма |оценка - работа|, сумма работы и число учтённых задач.
  * Взвешенная ошибка - abs_err / work. */
 void ws_task_cost_accuracy(double *abs_err, double *work, long long *count)

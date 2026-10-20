@@ -234,6 +234,18 @@ int ws_num_workers(void)
  * Для old и new сначала проба: 1, 2, 4... итерации на месте до целевого времени, затем деление
  * остатка; если задана cost, деление и оценки идут по стоимости диапазона, а не по числу итераций.
  * Для чужих планировщиков - кусок n/(8P) по числу итераций. */
+/* Порция пробы: выполняет итерации [lo, hi) в вызывающей задаче, пишет в ns её работу
+ * (без ожидания вложенных задач) и возвращает время на единицу стоимости или 0. */
+static double ws_probe_batch(const ws_pf_ctx *c, long lo, long hi, long long *ns)
+{
+    long long start = ws_task_work_clock();
+    double work;
+    c->body(lo, hi, c->arg);
+    *ns = ws_task_work_clock() - start;
+    work = c->cost ? c->cost(lo, hi, c->cost_arg) : (double)(hi - lo);
+    return work > 0 ? (double)*ns / work : 0.0;
+}
+
 static void ws_parallel_for_keyed(long lo, long hi, ws_range_body body, void *arg,
                                   ws_range_cost cost, void *cost_arg, const void *key);
 
@@ -265,23 +277,36 @@ static void ws_parallel_for_keyed(long lo, long hi, ws_range_body body, void *ar
         long target = ws_target_ns();
         long done = 0;
         long sz = 1;
+        long grain = 0;
+        double prev_rate = 0.0;
         while (1) {
-            long start, ns;
+            long long ns;
+            double rate;
             if (sz > n - done) sz = n - done;
-            start = ws_now_ns();
-            body(lo + done, lo + done + sz, arg);
-            ns = ws_now_ns() - start;
+            rate = ws_probe_batch(&c, lo + done, lo + done + sz, &ns);
             done += sz;
             if (done == n) return;
-            if (ns >= target) {
-                double work = c.cost ? c.cost(lo + done - sz, lo + done, cost_arg) : (double)sz;
-                if (ws_task_cost_enabled() && work > 0) c.unit = (double)ns / work;
-                break;
+            if (grain == 0 && ns < target) {
+                prev_rate = rate;
+                sz *= 2;
+                continue;
             }
-            sz *= 2;
+            if (grain == 0) {
+                grain = done;
+                /* Первая же порция дошла до цели: для оценки нужен второй замер. */
+                if (prev_rate <= 0.0) {
+                    prev_rate = rate;
+                    continue;
+                }
+            }
+            /* Вытеснение потока ОС только удлиняет замер, поэтому из двух последних
+             * порций берётся меньшее время на единицу работы. */
+            if (prev_rate > 0.0 && (rate <= 0.0 || prev_rate < rate)) rate = prev_rate;
+            if (ws_task_cost_enabled() && rate > 0.0) c.unit = rate;
+            break;
         }
-        c.grain = done;
-        c.grain_cost = c.cost ? c.cost(lo, lo + done, cost_arg) : 0.0;
+        c.grain = grain;
+        c.grain_cost = c.cost ? c.cost(lo, lo + grain, cost_arg) : 0.0;
         ws_pf_run(&c, lo + done, hi);
         return;
     }

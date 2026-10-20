@@ -72,6 +72,9 @@ int ws_task_join(ABT_thread *thread);
 long long ws_task_wait_begin(void);
 void ws_task_wait_end(long long start);
 
+/* Часы работы вызывающей задачи: разность отсчётов - её работа без ожидания детей. */
+long long ws_task_work_clock(void);
+
 /* Точность оценок: сумма |оценка - работа|, сумма работы и число учтённых задач. */
 void ws_task_cost_accuracy(double *abs_err, double *work, long long *count);
 

@@ -299,26 +299,38 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     return;
   }
   if (granularity <= 0 && internal::argobots_grain_probe()) {
-    using clk = std::chrono::steady_clock;
     const long target = internal::argobots_target_ns();
     size_t done = 0;
     size_t sz = 1;
+    size_t grain = 0;
     double unit = 1.0;
+    double prev_unit = 0.0;
     while (true) {
       if (sz > n - done) sz = n - done;
-      auto t0 = clk::now();
+      long long t0 = ws_task_work_clock();
       for (size_t i = start + done; i < start + done + sz; i++) f(i);
-      long ns = static_cast<long>(
-          std::chrono::duration_cast<std::chrono::nanoseconds>(clk::now() - t0).count());
+      long long ns = ws_task_work_clock() - t0;
       done += sz;
       if (done == n) return;
-      if (ns >= target) {
-        unit = static_cast<double>(ns) / static_cast<double>(sz);
-        break;
+      double cur = static_cast<double>(ns) / static_cast<double>(sz);
+      if (grain == 0 && ns < target) {
+        prev_unit = cur;
+        sz *= 2;
+        continue;
       }
-      sz *= 2;
+      if (grain == 0) {
+        grain = done;
+        // Первая же порция дошла до цели: для оценки нужен второй замер.
+        if (prev_unit <= 0.0) {
+          prev_unit = cur;
+          continue;
+        }
+      }
+      // Вытеснение потока ОС только удлиняет замер: берётся меньшее из двух последних порций.
+      unit = (prev_unit > 0.0 && prev_unit < cur) ? prev_unit : cur;
+      break;
     }
-    internal::argobots_parallel_for(start + done, end, f, done,
+    internal::argobots_parallel_for(start + done, end, f, grain,
                                     ws_task_cost_enabled() ? unit : 1.0);
     return;
   }
