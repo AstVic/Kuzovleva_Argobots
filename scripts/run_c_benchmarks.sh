@@ -111,7 +111,7 @@ run_one() {
     if ! grep -qiE "verification (being performed for class [A-Z] *)?successful|verification +successful|verification += +SUCCESSFUL|^ *VERIFICATION SUCCESSFUL" "$log"; then
         status=FAILED
     fi
-    seconds=$(awk -F= '/Time in seconds/{gsub(/ /,"",$2); print $2}' "$log" | head -1)
+    seconds=$(awk -F= '/Real time \(nanos\)/{gsub(/ /,"",$2); printf "%.6f", $2 / 1e9; exit}' "$log")
     echo "$program,$(class_for "$program"),$label,$THREADS,$pass,$seconds,$status" >> "$RUNS_CSV"
     printf "  %-3s %-10s %-14s %10s %s\n" "$pass" "$program" "$label" "${seconds:-?}" "$status"
 }
