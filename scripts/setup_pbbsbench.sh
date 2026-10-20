@@ -61,7 +61,7 @@ apply_patch() {   # apply_patch <каталог> <патч>
 build_runtime() {
     echo "== сборка libwsrt =="
     local srcs=() lib
-    for src in abt_workstealing_scheduler abt_workstealing_scheduler_cost_aware ws_task ws_runtime; do
+    for src in abt_workstealing_scheduler abt_workstealing_scheduler_cost_aware ws_task ws_runtime ws_parallel; do
         srcs+=("$REPO_ROOT/workstealing_scheduler/$src.c")
     done
     mkdir -p "$WSRT_BUILD"

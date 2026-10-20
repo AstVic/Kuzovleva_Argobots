@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 static int g_active = 0;
 static ws_mode_t g_mode = WS_MODE_DEFAULT;
@@ -263,6 +264,15 @@ int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task
 {
     if (!g_active) return ABT_ERR_UNINITIALIZED;
     return spawn_to(spawn_rank(), fn, arg, 0, hint, meta, thread);
+}
+
+int ws_runtime_default_workers(void)
+{
+    const char *env = getenv("WS_NUM_THREADS");
+    long n;
+    if (env && atoi(env) > 0) return atoi(env);
+    n = sysconf(_SC_NPROCESSORS_ONLN);
+    return n > 0 ? (int)n : 1;
 }
 
 void ws_runtime_reset_steal_stats(void)
