@@ -36,7 +36,9 @@ void ws_parallel_reduce(long lo, long hi, size_t elem_size, const void *identity
 
 typedef struct ws_group ws_group;
 
-/* Группа независимых задач: создать, добавить задачи, дождаться всех. */
+/* Группа независимых задач: создать, добавить задачи, дождаться всех.
+ * Задачи группы не должны ждать друг друга или создателя до ws_group_wait:
+ * в режимах old и new они могут начаться только в ws_group_wait (порядок LPT). */
 ws_group *ws_group_create(void);
 int ws_group_spawn(ws_group *group, void (*fn)(void *), void *arg, long long hint);
 void ws_group_wait(ws_group *group);

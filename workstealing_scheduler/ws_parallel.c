@@ -32,8 +32,16 @@ typedef struct {
 } ws_pf_range;
 
 /* Группа задач: созданные ULT, которые ещё нужно дождаться. */
+typedef struct {
+    void (*fn)(void *);
+    void *arg;
+    long long hint;
+    size_t seq;
+    ABT_thread thread;
+} ws_group_item;
+
 struct ws_group {
-    ABT_thread *threads;
+    ws_group_item *items;
     size_t count;
     size_t capacity;
 };
@@ -375,11 +383,41 @@ ws_group *ws_group_create(void)
     return (ws_group *)calloc(1, sizeof(ws_group));
 }
 
-/* Создаёт задачу fn(arg) в группе с подсказкой стоимости hint (0 - нет подсказки).
- * Вне рантайма или при ошибке задача выполняется сразу. */
+/* Порядок LPT: в режимах old и new задачи группы создаются в ws_group_wait по убыванию
+ * подсказки, чтобы крупные задачи начинались первыми. WS_LPT=0 выключает. */
+static int ws_lpt_enabled(void)
+{
+    const char *env = getenv("WS_LPT");
+    if (env && strcmp(env, "0") == 0) return 0;
+    return ws_tuned();
+}
+
+/* Сравнение для сортировки: подсказка по убыванию, при равенстве - порядок добавления. */
+static int ws_group_item_cmp(const void *a, const void *b)
+{
+    const ws_group_item *x = (const ws_group_item *)a;
+    const ws_group_item *y = (const ws_group_item *)b;
+    if (x->hint != y->hint) return x->hint > y->hint ? -1 : 1;
+    return x->seq < y->seq ? -1 : (x->seq > y->seq ? 1 : 0);
+}
+
+/* Создаёт ULT задачи группы; если не удалось, выполняет задачу сразу. */
+static void ws_group_start(ws_group_item *item)
+{
+    item->thread = ABT_THREAD_NULL;
+    if (ws_runtime_spawn_hint(item->fn, item->arg, item->hint, NULL, &item->thread) !=
+        ABT_SUCCESS) {
+        item->thread = ABT_THREAD_NULL;
+        item->fn(item->arg);
+    }
+}
+
+/* Добавляет задачу fn(arg) в группу с подсказкой стоимости hint (0 - нет подсказки).
+ * При порядке LPT задача только запоминается и создаётся в ws_group_wait, иначе
+ * создаётся сразу. Вне рантайма или при ошибке задача выполняется сразу. */
 int ws_group_spawn(ws_group *group, void (*fn)(void *), void *arg, long long hint)
 {
-    ABT_thread thread = ABT_THREAD_NULL;
+    ws_group_item *item;
     if (!group) return ABT_ERR_INV_ARG;
     if (!ws_runtime_is_active() || ws_runtime_self_rank() < 0) {
         fn(arg);
@@ -387,19 +425,22 @@ int ws_group_spawn(ws_group *group, void (*fn)(void *), void *arg, long long hin
     }
     if (group->count == group->capacity) {
         size_t cap = group->capacity ? group->capacity * 2 : 16;
-        ABT_thread *grown = (ABT_thread *)realloc(group->threads, cap * sizeof(ABT_thread));
+        ws_group_item *grown = (ws_group_item *)realloc(group->items, cap * sizeof(*grown));
         if (!grown) {
             fn(arg);
             return ABT_SUCCESS;
         }
-        group->threads = grown;
+        group->items = grown;
         group->capacity = cap;
     }
-    if (ws_runtime_spawn_hint(fn, arg, hint, NULL, &thread) != ABT_SUCCESS) {
-        fn(arg);
-        return ABT_SUCCESS;
-    }
-    group->threads[group->count++] = thread;
+    item = &group->items[group->count];
+    item->fn = fn;
+    item->arg = arg;
+    item->hint = hint > 0 ? hint : 0;
+    item->seq = group->count;
+    item->thread = ABT_THREAD_NULL;
+    group->count++;
+    if (!ws_lpt_enabled()) ws_group_start(item);
     return ABT_SUCCESS;
 }
 
@@ -407,10 +448,18 @@ int ws_group_spawn(ws_group *group, void (*fn)(void *), void *arg, long long hin
 void ws_group_wait(ws_group *group)
 {
     long long start;
-    if (!group) return;
+    if (!group || group->count == 0) return;
+    if (ws_lpt_enabled()) {
+        qsort(group->items, group->count, sizeof(ws_group_item), ws_group_item_cmp);
+        for (size_t i = 0; i < group->count; i++) {
+            ws_group_start(&group->items[i]);
+        }
+    }
     start = ws_task_wait_begin();
     for (size_t i = 0; i < group->count; i++) {
-        ABT_thread_free(&group->threads[i]);
+        if (group->items[i].thread != ABT_THREAD_NULL) {
+            ABT_thread_free(&group->items[i].thread);
+        }
     }
     ws_task_wait_end(start);
     group->count = 0;
@@ -421,6 +470,6 @@ void ws_group_free(ws_group *group)
 {
     if (!group) return;
     ws_group_wait(group);
-    free(group->threads);
+    free(group->items);
     free(group);
 }
