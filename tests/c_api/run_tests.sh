@@ -53,6 +53,8 @@ for p in $THREADS; do
     run new "$p" ABT_WS_SCHEDULER=new
     run new_iters "$p" ABT_WS_SCHEDULER=new WS_COST=iters
     run new_fixed "$p" ABT_WS_SCHEDULER=new WS_GRAIN=fixed
+    run new_off "$p" ABT_WS_SCHEDULER=new WS_COST=off
+    run new_nolpt "$p" ABT_WS_SCHEDULER=new WS_LPT=0
 done
 
 echo "Результаты: $RESULTS"

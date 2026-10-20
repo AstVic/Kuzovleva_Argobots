@@ -48,6 +48,27 @@ static void heavy(long lo, long hi, void *p)
     }
 }
 
+typedef struct {
+    long hint;
+    int order;
+} order_arg;
+
+static int g_order_next;
+
+static void order_task(void *p)
+{
+    order_arg *a = (order_arg *)p;
+    a->order = __atomic_fetch_add(&g_order_next, 1, __ATOMIC_RELAXED);
+}
+
+static int lpt_expected(void)
+{
+    const char *mode = getenv("ABT_WS_SCHEDULER");
+    const char *lpt = getenv("WS_LPT");
+    if (lpt && strcmp(lpt, "0") == 0) return 0;
+    return mode && (strcmp(mode, "old") == 0 || strcmp(mode, "new") == 0);
+}
+
 static void sum_body(long lo, long hi, void *partial, void *p)
 {
     const double *v = (const double *)p;
@@ -167,6 +188,32 @@ int main(void)
         }
         check(all_once(hits, n), "group reused for several rounds");
         ws_group_free(g);
+    }
+
+    {
+        static const long hints[8] = {3, 0, 7, 1, 7, 5, 2, 4};
+        order_arg o[8];
+        ws_group *g = ws_group_create();
+        int all = 1, sorted = 1;
+        g_order_next = 0;
+        for (int k = 0; k < 8; k++) {
+            o[k].hint = hints[k];
+            o[k].order = -1;
+            ws_group_spawn(g, order_task, &o[k], hints[k]);
+        }
+        ws_group_wait(g);
+        ws_group_free(g);
+        for (int k = 0; k < 8; k++) {
+            if (o[k].order < 0) all = 0;
+            for (int m = 0; m < 8; m++) {
+                if (o[k].hint > o[m].hint && o[k].order > o[m].order) sorted = 0;
+                if (o[k].hint == o[m].hint && k < m && o[k].order > o[m].order) sorted = 0;
+            }
+        }
+        check(all, "group runs every task");
+        if (ws_num_workers() == 1 && lpt_expected()) {
+            check(sorted, "group starts tasks by decreasing hint (LPT)");
+        }
     }
 
     {
