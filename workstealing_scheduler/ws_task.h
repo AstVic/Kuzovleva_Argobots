@@ -24,6 +24,11 @@ typedef struct ws_task_meta {
     int heap;             /* 1 = выделена ws_thread_create, освобождается после задачи */
     int depth;            /* глубина вложенности: 1 у задач главного потока */
     long long hint;       /* подсказка стоимости в единицах программы, 0 - нет */
+    const void *key;      /* ключ истории: функция тела задачи; NULL - fn */
+    struct ws_task_meta *parent; /* задача, создавшая эту, или NULL */
+    long long est0;       /* оценка при создании, для учёта точности */
+    long long wait_ns;    /* время ожидания детей; пишет только сама задача */
+    long long child_work; /* работа завершившихся детей, атомарные сложения */
 } ws_task_meta;
 
 /* Создаёт ULT с привязанной оценкой стоимости и учитывает его в метаданных
@@ -55,7 +60,17 @@ int ws_task_cost_enabled(void);
 /* Метаданные выполняемой задачи или NULL. */
 ws_task_meta *ws_task_self_meta(void);
 /* Оценка из истории для задачи с функцией fn на глубине depth; 0, если истории нет. */
-long long ws_task_cost_lookup(void (*fn)(void *), int depth);
+long long ws_task_cost_lookup(const void *key, int depth);
+
+/* Ждёт и освобождает ULT задачи; время ожидания не входит в работу вызывающей задачи. */
+int ws_task_join(ABT_thread *thread);
+
+/* Границы ожидания нескольких задач (например, группы), с тем же учётом времени. */
+long long ws_task_wait_begin(void);
+void ws_task_wait_end(long long start);
+
+/* Точность оценок: сумма |оценка - работа|, сумма работы и число учтённых задач. */
+void ws_task_cost_accuracy(double *abs_err, double *work, long long *count);
 
 #ifdef __cplusplus
 }

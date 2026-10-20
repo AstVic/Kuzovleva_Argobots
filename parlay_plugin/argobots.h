@@ -224,7 +224,7 @@ struct argobots_join_guard {
   ABT_thread thread;
   bool counted;
   ~argobots_join_guard() {
-    ABT_thread_free(&thread);
+    ws_task_join(&thread);
     if (counted) argobots_get_stats().on_join();
   }
 };

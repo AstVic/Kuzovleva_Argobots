@@ -15,6 +15,7 @@
 /* Общие параметры одного параллельного цикла. */
 typedef struct {
     ws_range_body body;     /* тело цикла */
+    const void *key;        /* ключ истории стоимости: функция тела пользователя */
     void *arg;              /* его аргумент */
     ws_range_cost cost;     /* стоимость диапазона или NULL - деление по числу итераций */
     void *cost_arg;
@@ -190,14 +191,15 @@ static void ws_pf_run(const ws_pf_ctx *c, long lo, long hi)
     right.lo = mid;
     right.hi = hi;
     if (!ws_can_spawn() ||
-        ws_runtime_spawn_meta(ws_pf_task, &right, ws_pf_estimate(c, mid, hi), &meta, &thread) !=
+        ws_runtime_spawn_keyed(ws_pf_task, &right, ws_pf_estimate(c, mid, hi), c->key,
+                               &meta, &thread) !=
             ABT_SUCCESS) {
         ws_pf_run(c, lo, mid);
         ws_pf_run(c, mid, hi);
         return;
     }
     ws_pf_run(c, lo, mid);
-    ABT_thread_free(&thread);
+    ws_task_join(&thread);
 }
 
 /* Запускает рантайм на num_workers ES (0 - WS_NUM_THREADS или число ядер), стек ULT 1 МБ. */
@@ -224,8 +226,19 @@ int ws_num_workers(void)
  * Для old и new сначала проба: 1, 2, 4... итерации на месте до целевого времени, затем деление
  * остатка; если задана cost, деление и оценки идут по стоимости диапазона, а не по числу итераций.
  * Для чужих планировщиков - кусок n/(8P) по числу итераций. */
+static void ws_parallel_for_keyed(long lo, long hi, ws_range_body body, void *arg,
+                                  ws_range_cost cost, void *cost_arg, const void *key);
+
 void ws_parallel_for_cost(long lo, long hi, ws_range_body body, void *arg, ws_range_cost cost,
                           void *cost_arg)
+{
+    ws_parallel_for_keyed(lo, hi, body, arg, cost, cost_arg, (const void *)body);
+}
+
+/* Параллельный цикл с явным ключом истории: им пользуются обёртки вроде редукции, чтобы
+ * разные пользовательские тела не смешивались в одной записи. */
+static void ws_parallel_for_keyed(long lo, long hi, ws_range_body body, void *arg,
+                                  ws_range_cost cost, void *cost_arg, const void *key)
 {
     ws_pf_ctx c;
     long n = hi - lo;
@@ -235,6 +248,7 @@ void ws_parallel_for_cost(long lo, long hi, ws_range_body body, void *arg, ws_ra
         return;
     }
     c.body = body;
+    c.key = key;
     c.arg = arg;
     c.cost = ws_tuned() ? cost : NULL;
     c.cost_arg = cost_arg;
@@ -287,6 +301,7 @@ void ws_parallel_for_grain(long lo, long hi, long grain, ws_range_body body, voi
         return;
     }
     c.body = body;
+    c.key = (const void *)body;
     c.arg = arg;
     c.cost = NULL;
     c.cost_arg = NULL;
@@ -347,7 +362,7 @@ void ws_parallel_reduce(long lo, long hi, size_t elem_size, const void *identity
     for (long b = 0; b < r.blocks; b++) {
         memcpy(r.partials + (size_t)b * elem_size, identity, elem_size);
     }
-    ws_parallel_for(0, r.blocks, ws_reduce_blocks, &r);
+    ws_parallel_for_keyed(0, r.blocks, ws_reduce_blocks, &r, NULL, NULL, (const void *)body);
     for (long b = 0; b < r.blocks; b++) {
         combine(result, r.partials + (size_t)b * elem_size, arg);
     }
@@ -391,10 +406,13 @@ int ws_group_spawn(ws_group *group, void (*fn)(void *), void *arg, long long hin
 /* Ждёт все задачи группы; после возврата группу можно использовать снова. */
 void ws_group_wait(ws_group *group)
 {
+    long long start;
     if (!group) return;
+    start = ws_task_wait_begin();
     for (size_t i = 0; i < group->count; i++) {
         ABT_thread_free(&group->threads[i]);
     }
+    ws_task_wait_end(start);
     group->count = 0;
 }
 

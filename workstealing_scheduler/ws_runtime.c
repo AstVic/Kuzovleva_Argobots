@@ -151,10 +151,17 @@ static void dump_stats(void)
         fprintf(f,
                 "prog=%s mode=new local=%lld steal_ops_est=%lld stolen_est=%lld "
                 "steal_ops_fallback=%lld stolen_fallback=%lld empty_victims=%lld "
-                "stolen_zero_est=%lld stolen_resumed=%lld idle=%lld\n",
+                "stolen_zero_est=%lld stolen_resumed=%lld idle=%lld",
                 ws_runtime_prog_name(), st.local_tasks, st.steal_ops_est, st.stolen_est,
                 st.steal_ops_fallback, st.stolen_fallback, st.empty_victims,
                 st.stolen_zero_est, st.stolen_resumed, st.idle_iterations);
+        if (ws_task_cost_enabled()) {
+            double err, work;
+            long long n;
+            ws_task_cost_accuracy(&err, &work, &n);
+            fprintf(f, " est_error=%.4f est_tasks=%lld", work > 0 ? err / work : 0.0, n);
+        }
+        fprintf(f, "\n");
     } else {
         fprintf(f, "prog=%s mode=old steal_ops=%lld stolen=%lld\n", ws_runtime_prog_name(),
                 ws_old_get_steal_ops_count(), ws_old_get_stolen_tasks_count());
@@ -232,7 +239,7 @@ size_t ws_runtime_pool_size(int rank)
 /* Создаёт задачу в пуле ES rank. В режиме new - через ws_task с оценкой est и подсказкой
  * hint (метаданные в meta или в куче), в остальных режимах - обычный ULT. */
 static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est, long long hint,
-                    ws_task_meta *meta, ABT_thread *thread)
+                    const void *key, ws_task_meta *meta, ABT_thread *thread)
 {
     if (!g_active || rank < 0 || rank >= g_num_xstreams) return ABT_ERR_INV_ARG;
     if (g_mode == WS_MODE_NEW) {
@@ -241,6 +248,7 @@ static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est, long
             meta->arg = arg;
             meta->est = est;
             meta->hint = hint;
+            meta->key = key;
             return ws_thread_create_with_meta(g_pools[rank], rank, meta, thread);
         }
         return ws_thread_create_hint(g_pools[rank], rank, fn, arg, est, hint, thread);
@@ -264,14 +272,14 @@ static int spawn_rank(void)
 int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
                         ABT_thread *thread)
 {
-    return spawn_to(rank, fn, arg, est, 0, NULL, thread);
+    return spawn_to(rank, fn, arg, est, 0, NULL, NULL, thread);
 }
 
 /* Создаёт задачу в пуле своего ES с оценкой est. */
 int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *thread)
 {
     if (!g_active) return ABT_ERR_UNINITIALIZED;
-    return spawn_to(spawn_rank(), fn, arg, est, 0, NULL, thread);
+    return spawn_to(spawn_rank(), fn, arg, est, 0, NULL, NULL, thread);
 }
 
 /* Создаёт задачу с метаданными в памяти вызывающего (meta живёт до завершения задачи). */
@@ -279,7 +287,15 @@ int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_
                           ABT_thread *thread)
 {
     if (!g_active) return ABT_ERR_UNINITIALIZED;
-    return spawn_to(spawn_rank(), fn, arg, est, 0, meta, thread);
+    return spawn_to(spawn_rank(), fn, arg, est, 0, NULL, meta, thread);
+}
+
+/* Создаёт задачу с метаданными в meta и ключом истории key (функция тела задачи). */
+int ws_runtime_spawn_keyed(void (*fn)(void *), void *arg, long long est, const void *key,
+                           ws_task_meta *meta, ABT_thread *thread)
+{
+    if (!g_active) return ABT_ERR_UNINITIALIZED;
+    return spawn_to(spawn_rank(), fn, arg, est, 0, key, meta, thread);
 }
 
 /* Создаёт задачу с подсказкой стоимости hint в единицах программы. */
@@ -287,7 +303,7 @@ int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task
                           ABT_thread *thread)
 {
     if (!g_active) return ABT_ERR_UNINITIALIZED;
-    return spawn_to(spawn_rank(), fn, arg, 0, hint, meta, thread);
+    return spawn_to(spawn_rank(), fn, arg, 0, hint, NULL, meta, thread);
 }
 
 /* Число ES по умолчанию: WS_NUM_THREADS или число ядер. */

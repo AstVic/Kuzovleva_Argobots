@@ -61,6 +61,10 @@ int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *t
 int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_meta *meta,
                           ABT_thread *thread);
 
+/* Создаёт задачу с метаданными в meta и ключом истории key (функция тела задачи). */
+int ws_runtime_spawn_keyed(void (*fn)(void *), void *arg, long long est, const void *key,
+                           ws_task_meta *meta, ABT_thread *thread);
+
 /* Создаёт задачу в пуле своего ES с подсказкой стоимости hint (единицы программы). */
 int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task_meta *meta,
                           ABT_thread *thread);
