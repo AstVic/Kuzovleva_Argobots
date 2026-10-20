@@ -86,10 +86,18 @@ inline long argobots_fork_ns() {
   return argobots_fork_ns_slot().load(std::memory_order_relaxed);
 }
 
+inline bool argobots_tuned_mode() {
+  argobots_ensure_runtime();
+  ws_mode_t mode = ws_runtime_mode();
+  return mode == WS_MODE_OLD || mode == WS_MODE_NEW;
+}
+
 inline bool argobots_grain_probe() {
   static const bool probe = [] {
     const char* env = std::getenv("PARLAY_ARGOBOTS_GRAIN");
-    return !(env && std::string_view(env) == "fixed");
+    if (env && std::string_view(env) == "fixed") return false;
+    if (env && std::string_view(env) == "probe") return true;
+    return argobots_tuned_mode();
   }();
   return probe;
 }
@@ -112,6 +120,7 @@ inline size_t argobots_queue_limit() {
       long v = std::atol(env);
       if (v > 0) return static_cast<size_t>(v);
     }
+    if (!argobots_tuned_mode()) return static_cast<size_t>(8);
     int workers = ws_runtime_num_workers();
     return static_cast<size_t>(workers > 0 ? workers : 1);
   }();
