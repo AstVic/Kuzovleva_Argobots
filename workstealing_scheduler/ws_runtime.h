@@ -56,6 +56,9 @@ int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *t
 int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_meta *meta,
                           ABT_thread *thread);
 
+int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task_meta *meta,
+                          ABT_thread *thread);
+
 /* То же, но в пул заданного ES. */
 int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
                         ABT_thread *thread);

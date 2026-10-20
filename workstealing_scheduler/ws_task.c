@@ -7,6 +7,8 @@
 
 #define WS_COST_SLOTS 1024
 #define WS_COST_PROBES 8
+#define WS_COST_HINT_DEPTH (-1)
+#define WS_COST_HINT_SCALE 1024
 
 typedef struct {
     void (*fn)(void *);
@@ -109,6 +111,12 @@ ws_task_meta *ws_task_self_meta(void)
     return ws_task_meta_of(self);
 }
 
+static ws_cost_slot *ws_cost_find_self(void (*fn)(void *), int depth)
+{
+    ws_cost_slot *table = ws_cost_table(ws_cost_rank());
+    return table ? ws_cost_find(table, fn, depth, 0) : NULL;
+}
+
 long long ws_task_cost_lookup(void (*fn)(void *), int depth)
 {
     int rank = ws_cost_rank();
@@ -128,6 +136,13 @@ static void ws_assign_cost(ws_task_meta *meta)
 {
     ws_task_meta *parent = ws_task_self_meta();
     meta->depth = parent ? parent->depth + 1 : 1;
+    if (meta->est <= 0 && meta->hint > 0) {
+        ws_cost_slot *slot = ws_cost_find_self(meta->fn, WS_COST_HINT_DEPTH);
+        if (slot && slot->ns > 0) {
+            meta->est = meta->hint * slot->ns / WS_COST_HINT_SCALE;
+            if (meta->est < 1) meta->est = 1;
+        }
+    }
     if (meta->est <= 0) {
         if (parent && parent->est > 1) {
             meta->est = parent->est / 2;
@@ -149,7 +164,11 @@ static void ws_trampoline(void *p)
     long long start = g_cost ? ws_now_ns() : 0;
     meta->fn(meta->arg);
     if (g_cost) {
-        ws_cost_record(meta->fn, meta->depth, ws_now_ns() - start);
+        long long ns = ws_now_ns() - start;
+        ws_cost_record(meta->fn, meta->depth, ns);
+        if (meta->hint > 0) {
+            ws_cost_record(meta->fn, WS_COST_HINT_DEPTH, ns * WS_COST_HINT_SCALE / meta->hint);
+        }
     }
     if (heap) {
         free(meta);
@@ -164,8 +183,11 @@ static int ws_spawn_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
     meta->est = (meta->est > 0) ? meta->est : 0;
     meta->dispatched = 0;
     meta->depth = 0;
+    if (meta->hint < 0) meta->hint = 0;
     if (g_cost) {
         ws_assign_cost(meta);
+    } else if (meta->est == 0) {
+        meta->est = meta->hint;
     }
 
     /* Учитываем задачу в очереди ДО создания ULT: иначе планировщик может
@@ -182,6 +204,12 @@ static int ws_spawn_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
 int ws_thread_create(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg,
                      long long est, ABT_thread *newthread)
 {
+    return ws_thread_create_hint(pool, pool_rank, fn, arg, est, 0, newthread);
+}
+
+int ws_thread_create_hint(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg,
+                          long long est, long long hint, ABT_thread *newthread)
+{
     ws_task_meta *meta;
     int ret;
 
@@ -195,6 +223,7 @@ int ws_thread_create(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg
     meta->fn = fn;
     meta->arg = arg;
     meta->est = est;
+    meta->hint = hint;
     meta->heap = 1;
     ret = ws_spawn_meta(pool, pool_rank, meta, newthread);
     if (ret != ABT_SUCCESS) {

@@ -211,7 +211,7 @@ size_t ws_runtime_pool_size(int rank)
     return size;
 }
 
-static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
+static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est, long long hint,
                     ws_task_meta *meta, ABT_thread *thread)
 {
     if (!g_active || rank < 0 || rank >= g_num_xstreams) return ABT_ERR_INV_ARG;
@@ -220,9 +220,10 @@ static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
             meta->fn = fn;
             meta->arg = arg;
             meta->est = est;
+            meta->hint = hint;
             return ws_thread_create_with_meta(g_pools[rank], rank, meta, thread);
         }
-        return ws_thread_create(g_pools[rank], rank, fn, arg, est, thread);
+        return ws_thread_create_hint(g_pools[rank], rank, fn, arg, est, hint, thread);
     }
     return ABT_thread_create(g_pools[rank], fn, arg, ABT_THREAD_ATTR_NULL, thread);
 }
@@ -241,20 +242,27 @@ static int spawn_rank(void)
 int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
                         ABT_thread *thread)
 {
-    return spawn_to(rank, fn, arg, est, NULL, thread);
+    return spawn_to(rank, fn, arg, est, 0, NULL, thread);
 }
 
 int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *thread)
 {
     if (!g_active) return ABT_ERR_UNINITIALIZED;
-    return spawn_to(spawn_rank(), fn, arg, est, NULL, thread);
+    return spawn_to(spawn_rank(), fn, arg, est, 0, NULL, thread);
 }
 
 int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_meta *meta,
                           ABT_thread *thread)
 {
     if (!g_active) return ABT_ERR_UNINITIALIZED;
-    return spawn_to(spawn_rank(), fn, arg, est, meta, thread);
+    return spawn_to(spawn_rank(), fn, arg, est, 0, meta, thread);
+}
+
+int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task_meta *meta,
+                          ABT_thread *thread)
+{
+    if (!g_active) return ABT_ERR_UNINITIALIZED;
+    return spawn_to(spawn_rank(), fn, arg, 0, hint, meta, thread);
 }
 
 void ws_runtime_reset_steal_stats(void)

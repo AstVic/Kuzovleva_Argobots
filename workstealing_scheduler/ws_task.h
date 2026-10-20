@@ -23,12 +23,16 @@ typedef struct ws_task_meta {
     int dispatched;       /* 1 = задача уже запускалась, из очереди списана */
     int heap;             /* 1 = выделена ws_thread_create, освобождается после задачи */
     int depth;
+    long long hint;
 } ws_task_meta;
 
 /* Создаёт ULT с привязанной оценкой стоимости и учитывает его в метаданных
  * пула pool_rank. Заменяет пару ws_push_task_estimate + ABT_thread_create. */
 int ws_thread_create(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg,
                      long long est, ABT_thread *newthread);
+
+int ws_thread_create_hint(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg,
+                          long long est, long long hint, ABT_thread *newthread);
 
 /* То же, но память под метаданные даёт вызывающий: заполняет fn, arg, est
  * и держит структуру живой до завершения ULT (например, на своём стеке до
