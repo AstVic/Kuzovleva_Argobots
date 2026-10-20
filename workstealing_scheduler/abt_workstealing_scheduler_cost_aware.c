@@ -7,7 +7,6 @@
 #include <time.h>
 #include <abt.h>
 
-#define WS_VICTIM_SAMPLE_SIZE 3
 #define WS_CHEAP_TASK_COST 32LL
 
 /* ===================== ГЛОБАЛЬНАЯ СТАТИСТИКА ===================== */
@@ -125,6 +124,21 @@ static int g_opt_steal_one = 0;
 static int g_opt_victim_queued = 1;
 static int g_opt_cheap_absolute = 0;
 static double g_opt_cheap_fraction = 0.0625;
+static int g_victim_sample = 1;
+
+static int ws_victim_sample_for(int num) {
+    const char *env = getenv("WS_VICTIM_SAMPLE");
+    int k = 0;
+    if (env && atoi(env) > 0) {
+        k = atoi(env);
+    } else {
+        while ((1LL << (k + 1)) <= (long long)num) k++;
+        if ((long long)num * num >= (1LL << (2 * k + 1))) k++;
+    }
+    if (k > num - 1) k = num - 1;
+    if (k < 1) k = 1;
+    return k;
+}
 
 static int ws_env_flag(const char *name, int def) {
     const char *v = getenv(name);
@@ -335,8 +349,8 @@ static int ws_find_victim_sampled(int self, int num,
 
     if (g_pool_meta) {
         int sample_count = num - 1;
-        if (sample_count > WS_VICTIM_SAMPLE_SIZE) {
-            sample_count = WS_VICTIM_SAMPLE_SIZE;
+        if (sample_count > g_victim_sample) {
+            sample_count = g_victim_sample;
         }
         for (int s = 0; s < sample_count; s++) {
             int candidate = ws_pick_random_other_pool(rng_state, self, num);
@@ -688,6 +702,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
             if (v >= 0) g_opt_cheap_fraction = v;
         }
     }
+    g_victim_sample = ws_victim_sample_for(num);
     ws_stats_alloc(num);
     /* Инициализируем pool_meta для каждого пула */
     g_pool_meta_stride = sizeof(pool_meta_t);
