@@ -93,8 +93,12 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size)
     } else {
         create_shared_pools(n, pool_kind_for_mode(g_mode));
         if (g_mode == WS_MODE_NEW) {
+            const char *cost = getenv("WS_COST");
             ABT_create_ws_scheds_cost_aware(n, g_pools, g_scheds);
             ws_reset_steal_count();
+            if (!(cost && strcmp(cost, "iters") == 0)) {
+                ws_task_cost_init(n);
+            }
         } else if (g_mode == WS_MODE_OLD) {
             ABT_create_ws_scheds(n, g_pools, g_scheds);
             ws_old_reset_steal_count();
@@ -158,6 +162,7 @@ void ws_runtime_finalize(void)
     }
     dump_stats();
     ABT_finalize();
+    ws_task_cost_finalize();
 
     free(g_xstreams);
     free(g_pools);

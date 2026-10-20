@@ -22,6 +22,7 @@ typedef struct ws_task_meta {
     long long est;        /* оценка стоимости задачи */
     int dispatched;       /* 1 = задача уже запускалась, из очереди списана */
     int heap;             /* 1 = выделена ws_thread_create, освобождается после задачи */
+    int depth;
 } ws_task_meta;
 
 /* Создаёт ULT с привязанной оценкой стоимости и учитывает его в метаданных
@@ -38,6 +39,12 @@ int ws_thread_create_with_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
 /* Метаданные ULT, если он создан ws_thread_create; иначе NULL
  * (primary ULT, проснувшийся после join или барьера, любой чужой ULT). */
 ws_task_meta *ws_task_meta_of(ABT_thread thread);
+
+int ws_task_cost_init(int num_ranks);
+void ws_task_cost_finalize(void);
+int ws_task_cost_enabled(void);
+ws_task_meta *ws_task_self_meta(void);
+long long ws_task_cost_lookup(void (*fn)(void *), int depth);
 
 #ifdef __cplusplus
 }
