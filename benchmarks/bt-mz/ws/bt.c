@@ -74,6 +74,7 @@ double timer_read(int);
 #include "header.h"
 #include "ws_parallel.h"
 
+/* Аргумент задачи одной зоны: номер зоны и размеры всех зон. */
 typedef struct {
     int zone;
     int *nx;
@@ -82,6 +83,7 @@ typedef struct {
     int *nz;
 } bt_zone_job;
 
+/* Задача зоны: один шаг adi для неё. */
 static void bt_adi_task(void *p)
 {
     bt_zone_job *z = (bt_zone_job *)p;
@@ -89,6 +91,8 @@ static void bt_adi_task(void *p)
     adi (&rho_i[start1[zone-1]-1],&us[start1[zone-1]-1],&vs[start1[zone-1]-1],&ws[start1[zone-1]-1],&qs[start1[zone-1]-1],&square[start1[zone-1]-1],&rhs[start5[zone-1]-1],&forcing[start5[zone-1]-1],&u[start5[zone-1]-1],z->nx[zone-1],z->nxmax[zone-1],z->ny[zone-1],z->nz[zone-1]);
 }
 
+/* Шаг adi по всем зонам: зона - задача группы с подсказкой стоимости nx*ny*nz,
+ * затем ожидание всех зон (как граница параллельной области OpenMP). */
 static void bt_adi_zones(int proc_num_zones, int *proc_zone_id, int *nx, int *nxmax, int *ny,
                          int *nz)
 {

@@ -1,6 +1,8 @@
 #include "header.h"
 #include "ws_parallel.h"
 
+/* Исходная функция compute_rhs, в которой каждый цикл #pragma omp for стал частью ws_part,
+ * выполняемой на итерациях [ws_lo, ws_hi). */
 void compute_rhs_part (orho_i,ous,ovs,ows,oqs,osquare,orhs,oforcing,ou,nx,nxmax,ny,nz,ws_part,ws_lo,ws_hi)
 // beg param
        void *orho_i;
@@ -351,6 +353,7 @@ double (*rho_i)[(ny-1)-(0)+1][(nxmax-1)-(0)+1] = (double (*)[(ny-1)-(0)+1][(nxma
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
+/* Аргументы compute_rhs и номер выполняемой части. */
 typedef struct {
     void * orho_i;
     void * ous;
@@ -368,12 +371,15 @@ typedef struct {
     int part;
 } compute_rhs_job;
 
+/* Тело параллельного цикла: часть j->part на итерациях [lo, hi). */
 static void compute_rhs_body(long lo, long hi, void *p)
 {
     compute_rhs_job *j = (compute_rhs_job *)p;
     compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, j->part, lo, hi);
 }
 
+/* compute_rhs с тем же интерфейсом, что в исходной программе: части выполняются по очереди,
+ * каждая - параллельным циклом по своему диапазону (барьер после каждой, как без nowait). */
 void compute_rhs (orho_i,ous,ovs,ows,oqs,osquare,orhs,oforcing,ou,nx,nxmax,ny,nz)
 // beg param
        void *orho_i;

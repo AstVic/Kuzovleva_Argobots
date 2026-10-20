@@ -1,6 +1,8 @@
 #include "header.h"
 #include "ws_parallel.h"
 
+/* Исходная функция add, в которой каждый цикл #pragma omp for стал частью ws_part,
+ * выполняемой на итерациях [ws_lo, ws_hi). */
 void add_part (ou,orhs,nx,nxmax,ny,nz,ws_part,ws_lo,ws_hi)
 // beg param
        void *ou;
@@ -55,6 +57,7 @@ double (*u)[(ny-1)-(0)+1][(nxmax-1)-(0)+1][5] = (double (*)[(ny-1)-(0)+1][(nxmax
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
+/* Аргументы add и номер выполняемой части. */
 typedef struct {
     void * ou;
     void * orhs;
@@ -65,12 +68,15 @@ typedef struct {
     int part;
 } add_job;
 
+/* Тело параллельного цикла: часть j->part на итерациях [lo, hi). */
 static void add_body(long lo, long hi, void *p)
 {
     add_job *j = (add_job *)p;
     add_part(j->ou, j->orhs, j->nx, j->nxmax, j->ny, j->nz, j->part, lo, hi);
 }
 
+/* add с тем же интерфейсом, что в исходной программе: части выполняются по очереди,
+ * каждая - параллельным циклом по своему диапазону (барьер после каждой, как без nowait). */
 void add (ou,orhs,nx,nxmax,ny,nz)
 // beg param
        void *ou;

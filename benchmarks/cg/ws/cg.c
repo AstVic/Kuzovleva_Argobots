@@ -412,17 +412,21 @@ int main(int argc, char *argv[])
 // Floaging point arrays here are named as in NPB1 spec discussion of 
 // CG algorithm
 //---------------------------------------------------------------------
+/* Коэффициенты текущей итерации CG и векторы умножения матрицы на вектор,
+ * которые читают тела циклов. */
 static double cg_alpha;
 static double cg_beta;
 static const double *cg_vec_in;
 static double *cg_vec_out;
 
+/* Объединение частичных сумм редукции. */
 static void cg_add_double(void *acc, const void *partial, void *arg)
 {
   (void)arg;
   *(double *)acc += *(const double *)partial;
 }
 
+/* Объединение пары частичных сумм. */
 static void cg_add_pair(void *acc, const void *partial, void *arg)
 {
   (void)arg;
@@ -430,6 +434,7 @@ static void cg_add_pair(void *acc, const void *partial, void *arg)
   ((double *)acc)[1] += ((const double *)partial)[1];
 }
 
+/* Начальные значения q, z, r, p. */
 static void cg_init_body(long lo, long hi, void *arg)
 {
   (void)arg;
@@ -441,6 +446,7 @@ static void cg_init_body(long lo, long hi, void *arg)
   }
 }
 
+/* Вклад в r·r. */
 static void cg_rr_body(long lo, long hi, void *partial, void *arg)
 {
   (void)arg;
@@ -449,12 +455,14 @@ static void cg_rr_body(long lo, long hi, void *partial, void *arg)
   *(double *)partial += s;
 }
 
+/* Стоимость строк [lo, hi): число ненулевых элементов плюс число строк. */
 static double cg_row_cost(long lo, long hi, void *arg)
 {
   (void)arg;
   return (double)(rowstr[hi] - rowstr[lo]) + (double)(hi - lo);
 }
 
+/* Строки [lo, hi) произведения разреженной матрицы на вектор cg_vec_in. */
 static void cg_matvec_body(long lo, long hi, void *arg)
 {
   (void)arg;
@@ -467,6 +475,7 @@ static void cg_matvec_body(long lo, long hi, void *arg)
   }
 }
 
+/* Вклад в p·q. */
 static void cg_pq_body(long lo, long hi, void *partial, void *arg)
 {
   (void)arg;
@@ -475,6 +484,7 @@ static void cg_pq_body(long lo, long hi, void *partial, void *arg)
   *(double *)partial += s;
 }
 
+/* z += alpha·p, r -= alpha·q и вклад в r·r. */
 static void cg_update_body(long lo, long hi, void *partial, void *arg)
 {
   (void)arg;
@@ -487,12 +497,14 @@ static void cg_update_body(long lo, long hi, void *partial, void *arg)
   *(double *)partial += s;
 }
 
+/* p = r + beta·p. */
 static void cg_p_body(long lo, long hi, void *arg)
 {
   (void)arg;
   for (long j = lo; j < hi; j++) p[j] = r[j] + cg_beta*p[j];
 }
 
+/* Вклад в ||x - r||^2. */
 static void cg_resid_body(long lo, long hi, void *partial, void *arg)
 {
   (void)arg;
@@ -504,6 +516,7 @@ static void cg_resid_body(long lo, long hi, void *partial, void *arg)
   *(double *)partial += s;
 }
 
+/* Вклады в x·z и z·z. */
 static void cg_norm_body(long lo, long hi, void *partial, void *arg)
 {
   (void)arg;
@@ -516,12 +529,14 @@ static void cg_norm_body(long lo, long hi, void *partial, void *arg)
   ((double *)partial)[1] += s2;
 }
 
+/* x = norm·z. */
 static void cg_scale_body(long lo, long hi, void *arg)
 {
   double norm = *(const double *)arg;
   for (long j = lo; j < hi; j++) x[j] = norm * z[j];
 }
 
+/* out = A·in с делением строк по числу ненулевых. */
 static void cg_matvec(const double *in, double *out)
 {
   cg_vec_in = in;
@@ -529,6 +544,7 @@ static void cg_matvec(const double *in, double *out)
   ws_parallel_for_cost(0, lastrow - firstrow + 1, cg_matvec_body, NULL, cg_row_cost, NULL);
 }
 
+/* x·z и z·z одной детерминированной редукцией. */
 static void cg_norms(double *norm_temp1, double *norm_temp2)
 {
   double zero[2] = {0.0, 0.0};
@@ -539,6 +555,8 @@ static void cg_norms(double *norm_temp1, double *norm_temp2)
   *norm_temp2 = res[1];
 }
 
+/* 25 итераций метода сопряжённых градиентов на API рантайма: циклы - ws_parallel_for,
+ * скалярные произведения - ws_parallel_reduce. */
 static void conj_grad(int colidx[],
                       int rowstr[],
                       double x[],

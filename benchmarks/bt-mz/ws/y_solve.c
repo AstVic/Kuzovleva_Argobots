@@ -1,6 +1,8 @@
 #include "header.h"
 #include "ws_parallel.h"
 
+/* Исходная функция y_solve, в которой каждый цикл #pragma omp for стал частью ws_part,
+ * выполняемой на итерациях [ws_lo, ws_hi). */
 void y_solve_part (orho_i,oqs,osquare,ou,orhs,nx,nxmax,ny,nz,ws_part,ws_lo,ws_hi)
 // beg param
        void *orho_i;
@@ -335,6 +337,7 @@ double (*rho_i)[(ny-1)-(0)+1][(nxmax-1)-(0)+1] = (double (*)[(ny-1)-(0)+1][(nxma
       return;
 }//end
 
+/* Аргументы y_solve и номер выполняемой части. */
 typedef struct {
     void * orho_i;
     void * oqs;
@@ -348,12 +351,15 @@ typedef struct {
     int part;
 } y_solve_job;
 
+/* Тело параллельного цикла: часть j->part на итерациях [lo, hi). */
 static void y_solve_body(long lo, long hi, void *p)
 {
     y_solve_job *j = (y_solve_job *)p;
     y_solve_part(j->orho_i, j->oqs, j->osquare, j->ou, j->orhs, j->nx, j->nxmax, j->ny, j->nz, j->part, lo, hi);
 }
 
+/* y_solve с тем же интерфейсом, что в исходной программе: части выполняются по очереди,
+ * каждая - параллельным циклом по своему диапазону (барьер после каждой, как без nowait). */
 void y_solve (orho_i,oqs,osquare,ou,orhs,nx,nxmax,ny,nz)
 // beg param
        void *orho_i;
