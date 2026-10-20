@@ -74,8 +74,17 @@ ENVFILE="$OUT/environment.txt"
         echo "cores efficiency: $(sysctl -n hw.perflevel1.logicalcpu 2>/dev/null || echo n/a)"
         echo "power: $(pmset -g batt 2>/dev/null | head -1)"
     else
+        echo "cpu: $(lscpu 2>/dev/null | awk -F: '/^Model name/{sub(/^ +/, "", $2); print $2; exit}')"
         echo "cores: $(nproc)"
+        lscpu 2>/dev/null | grep -E '^(Socket\(s\)|Core\(s\) per socket|Thread\(s\) per core|NUMA node\(s\)|NUMA node[0-9]+ CPU\(s\))' | sed 's/^/lscpu: /'
+        if command -v numactl >/dev/null 2>&1; then
+            numactl -H 2>/dev/null | grep -E '^(available|node [0-9]+ (cpus|size))' | sed 's/^/numa: /'
+        fi
+        echo "governor: $(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo n/a)"
+        echo "smt: $(cat /sys/devices/system/cpu/smt/control 2>/dev/null || echo n/a)"
     fi
+    echo "ABT_SET_AFFINITY: ${ABT_SET_AFFINITY:-unset}"
+    echo "OMP: OMP_PROC_BIND=${OMP_PROC_BIND:-unset} OMP_PLACES=${OMP_PLACES:-unset} OMP_WAIT_POLICY=${OMP_WAIT_POLICY:-unset}"
     echo "compiler: $(g++ --version | head -1)"
     echo "git: $(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo n/a) $(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo n/a)"
     echo "pbbsbench: $(git -C "$PBBS_DIR" rev-parse --short HEAD 2>/dev/null || echo n/a)"
