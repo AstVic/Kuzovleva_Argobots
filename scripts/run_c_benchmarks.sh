@@ -1,10 +1,11 @@
 #!/bin/bash
-# Сравнение планировщиков на C-программах из benchmarks/: NPB CG и NPB BT-MZ.
+# Сравнение планировщиков на C-программах из benchmarks/: NPB CG, NPB BT-MZ
+# и синтетическая нагрузка hetero (параметры - переменные HETERO_*, см. hetero.c).
 # Режимы запускаются по кругу PASSES раз со сдвигом порядка,
 # каждый запуск проверяется встроенной верификацией программы.
 #
 # Переменные окружения:
-#   PROGRAMS  - cg bt-mz
+#   PROGRAMS  - cg bt-mz hetero
 #   MODES     - seq omp default randws randws_fifo old new; вариант режима -
 #               метка:режим:ПЕРЕМЕННАЯ=значение,..., например omp_dyn:omp:OMP_SCHEDULE=dynamic
 #   THREADS   - число потоков (по умолчанию все ядра)
@@ -58,6 +59,7 @@ RUNS_CSV="$OUT/runs.csv"
     echo "compiler: $(${CC:-cc} --version 2>/dev/null | head -1)"
     echo "git: $(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo n/a) $(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo n/a)"
     echo "params: PROGRAMS='$PROGRAMS' MODES='$MODES' THREADS=$THREADS CG_CLASS=$CG_CLASS BT_CLASS=$BT_CLASS PASSES=$PASSES"
+    echo "hetero: HETERO_TASKS=${HETERO_TASKS:-64} HETERO_ROUNDS=${HETERO_ROUNDS:-20} HETERO_SPREAD=${HETERO_SPREAD:-100} HETERO_NOISE=${HETERO_NOISE:-0} HETERO_UNIT=${HETERO_UNIT:-50000} HETERO_SEED=${HETERO_SEED:-1}"
 } | tee "$OUT/environment.txt"
 echo "program,class,mode,threads,pass,seconds,status" > "$RUNS_CSV"
 
@@ -84,6 +86,7 @@ binary_for() {
     case "$program" in
         cg) echo "$BUILD/cg/$CG_CLASS/cg.$variant" ;;
         bt-mz) echo "$BUILD/bt-mz/$BT_CLASS/bt-mz.$variant" ;;
+        hetero) echo "$BUILD/hetero/hetero.$variant" ;;
     esac
 }
 
@@ -91,6 +94,7 @@ class_for() {
     case "$1" in
         cg) echo "$CG_CLASS" ;;
         bt-mz) echo "$BT_CLASS" ;;
+        hetero) echo "s${HETERO_SPREAD:-100}n${HETERO_NOISE:-0}" ;;
         *) echo "-" ;;
     esac
 }

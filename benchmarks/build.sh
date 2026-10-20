@@ -117,5 +117,15 @@ build_bt() {
     done
 }
 
+build_hetero() {
+    local src="$SCRIPT_DIR/hetero/hetero.c" out="$BUILD/hetero"
+    mkdir -p "$out"
+    build_variant seq "$out/hetero.seq" "$src"
+    build_variant omp "$out/hetero.omp" "$src"
+    build_variant ws "$out/hetero.ws" -DHETERO_WS "$src"
+    echo "hetero: $(ls "$out" | tr '\n' ' ')"
+}
+
 build_cg
 if [ -d "$SCRIPT_DIR/bt-mz" ]; then build_bt; fi
+build_hetero
