@@ -4,7 +4,7 @@
 #   omp - исходная OpenMP-версия,
 #   ws  - версия на API рантайма (ws_parallel.h).
 #
-# Переменные окружения: CG_CLASSES, ARGOBOTS_INSTALL_DIR, CC.
+# Переменные окружения: CG_CLASSES, BT_CLASSES, ARGOBOTS_INSTALL_DIR, CC.
 # Результат: benchmarks/build/<программа>/<вариант>/...
 set -euo pipefail
 export LC_ALL=C
@@ -14,6 +14,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCHED="$REPO_ROOT/workstealing_scheduler"
 BUILD="$SCRIPT_DIR/build"
 CG_CLASSES="${CG_CLASSES:-S W A B C}"
+BT_CLASSES="${BT_CLASSES:-S W A B}"
 CC="${CC:-cc}"
 CFLAGS="-std=gnu11 -O3 -ffp-contract=off -w"
 
@@ -90,4 +91,31 @@ build_cg() {
     done
 }
 
+build_bt() {
+    local dir="$SCRIPT_DIR/bt-mz" class out src variant files
+    for class in $BT_CLASSES; do
+        out="$BUILD/bt-mz/$class"
+        mkdir -p "$out"
+        cp "$dir/params/npbparams_$class.h" "$out/npbparams.h"
+        for variant in seq omp ws; do
+            files=()
+            src="$dir/original"
+            for f in "$src"/*.c; do
+                if [ "$variant" = "ws" ] && [ -f "$dir/ws/$(basename "$f")" ]; then
+                    files+=("$dir/ws/$(basename "$f")")
+                else
+                    files+=("$f")
+                fi
+            done
+            local extra=()
+            if [ "$variant" != "omp" ]; then extra=(-I"$dir/serial"); fi
+            build_variant "$variant" "$out/bt-mz.$variant" ${extra[@]+"${extra[@]}"} -I"$out" -I"$src" -I"$dir/common" \
+                "${files[@]}" "$dir/common/c_print_results.c" "$dir/common/c_timers.c" \
+                "$dir/common/wtime.c"
+        done
+        echo "bt-mz $class: $(ls "$out" | grep -v '\.h$' | tr '\n' ' ')"
+    done
+}
+
 build_cg
+if [ -d "$SCRIPT_DIR/bt-mz" ]; then build_bt; fi
