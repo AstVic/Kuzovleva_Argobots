@@ -22,8 +22,8 @@ typedef struct ws_task_meta {
     long long est;        /* оценка стоимости задачи */
     int dispatched;       /* 1 = задача уже запускалась, из очереди списана */
     int heap;             /* 1 = выделена ws_thread_create, освобождается после задачи */
-    int depth;
-    long long hint;
+    int depth;            /* глубина вложенности: 1 у задач главного потока */
+    long long hint;       /* подсказка стоимости в единицах программы, 0 - нет */
 } ws_task_meta;
 
 /* Создаёт ULT с привязанной оценкой стоимости и учитывает его в метаданных
@@ -31,6 +31,8 @@ typedef struct ws_task_meta {
 int ws_thread_create(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg,
                      long long est, ABT_thread *newthread);
 
+/* То же, что ws_thread_create, плюс подсказка стоимости hint в единицах программы;
+ * рантайм переводит её в наносекунды по истории выполнения задач с той же функцией. */
 int ws_thread_create_hint(ABT_pool pool, int pool_rank, void (*fn)(void *), void *arg,
                           long long est, long long hint, ABT_thread *newthread);
 
@@ -44,10 +46,15 @@ int ws_thread_create_with_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
  * (primary ULT, проснувшийся после join или барьера, любой чужой ULT). */
 ws_task_meta *ws_task_meta_of(ABT_thread thread);
 
+/* Включает оценки в наносекундах и историю выполнения для num_ranks ES. */
 int ws_task_cost_init(int num_ranks);
+/* Выключает оценки в наносекундах и освобождает историю. */
 void ws_task_cost_finalize(void);
+/* 1, если оценки в наносекундах включены. */
 int ws_task_cost_enabled(void);
+/* Метаданные выполняемой задачи или NULL. */
 ws_task_meta *ws_task_self_meta(void);
+/* Оценка из истории для задачи с функцией fn на глубине depth; 0, если истории нет. */
 long long ws_task_cost_lookup(void (*fn)(void *), int depth);
 
 #ifdef __cplusplus

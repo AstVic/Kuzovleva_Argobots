@@ -13,10 +13,14 @@ void ws_account_task_dispatched(int rank, long long est);
  * сборке со старым механизмом (-DWS_LEGACY_EST_FIFO), иначе игнорируется. */
 void ws_push_task_estimate(int rank, long long est);
 long long ws_pop_task_estimate(int rank);
+/* Сумма оценок задач в очереди пула rank. */
 long long ws_get_pool_estimated_load(int rank);
+/* Число задач в очереди пула rank. */
 long long ws_get_pool_queued_count(int rank);
+/* Обнуляет счётчики краж планировщика new. */
 void ws_reset_steal_count(void);
 
+/* Счётчики планировщика new, просуммированные по всем ES. */
 typedef struct {
     long long local_tasks;
     long long steal_ops_est;
@@ -29,7 +33,9 @@ typedef struct {
     long long idle_iterations;
 } ws_sched_stats;
 
+/* Заполняет out текущими счётчиками. */
 void ws_get_sched_stats(ws_sched_stats *out);
+/* Число украденных задач, операций кражи и украденных задач (синонимы для старого кода). */
 long long ws_get_steal_count(void);
 long long ws_get_steal_ops_count(void);
 long long ws_get_stolen_tasks_count(void);

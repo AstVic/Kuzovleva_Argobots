@@ -11,14 +11,17 @@
 #include <errno.h>
 #include <unistd.h>
 
+/* Состояние рантайма: режим, ES, их пулы и планировщики (индекс - номер ES). */
 static int g_active = 0;
 static ws_mode_t g_mode = WS_MODE_DEFAULT;
 static int g_num_xstreams = 0;
 static ABT_xstream *g_xstreams = NULL;
 static ABT_pool *g_pools = NULL;
 static ABT_sched *g_scheds = NULL;
+/* Счётчик раздачи задач по кругу в режиме default. */
 static atomic_uint g_round_robin;
 
+/* Режим планирования из ABT_WS_SCHEDULER; неизвестное значение означает old. */
 static ws_mode_t mode_from_env(void)
 {
     const char *mode = getenv("ABT_WS_SCHEDULER");
@@ -29,6 +32,7 @@ static ws_mode_t mode_from_env(void)
     return WS_MODE_OLD;
 }
 
+/* Тип пула для режима: randws - дек, randws_fifo - FIFO, old и new - по WS_POOL. */
 static ABT_pool_kind pool_kind_for_mode(ws_mode_t mode)
 {
     const char *pool;
@@ -39,6 +43,7 @@ static ABT_pool_kind pool_kind_for_mode(ws_mode_t mode)
     return ABT_POOL_FIFO;
 }
 
+/* Создаёт по одному пулу MPMC на каждый ES. */
 static void create_shared_pools(int n, ABT_pool_kind kind)
 {
     for (int i = 0; i < n; i++) {
@@ -59,6 +64,9 @@ static void create_randws_scheds(int n)
     free(rotated);
 }
 
+/* Запускает Argobots на num_xstreams ES в режиме из ABT_WS_SCHEDULER: пулы, планировщики,
+ * а в режиме new - ещё и историю оценок (если не WS_COST=iters). Вызывающий становится
+ * главным ULT на ES 0. */
 int ws_runtime_init(int num_xstreams, size_t default_stack_size)
 {
     int n = (num_xstreams > 0) ? num_xstreams : 1;
@@ -116,6 +124,7 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size)
     return ABT_SUCCESS;
 }
 
+/* Короткое имя программы для строк статистики. */
 const char *ws_runtime_prog_name(void)
 {
 #if defined(__APPLE__)
@@ -127,6 +136,7 @@ const char *ws_runtime_prog_name(void)
 #endif
 }
 
+/* Дописывает счётчики планировщика в файл WS_STATS, если переменная задана. */
 static void dump_stats(void)
 {
     const char *path = getenv("WS_STATS");
@@ -152,6 +162,7 @@ static void dump_stats(void)
     fclose(f);
 }
 
+/* Останавливает ES, выводит статистику, завершает Argobots и освобождает таблицы истории. */
 void ws_runtime_finalize(void)
 {
     if (!g_active) return;
@@ -174,21 +185,25 @@ void ws_runtime_finalize(void)
     g_num_xstreams = 0;
 }
 
+/* 1, если рантайм инициализирован. */
 int ws_runtime_is_active(void)
 {
     return g_active;
 }
 
+/* Текущий режим планирования. */
 ws_mode_t ws_runtime_mode(void)
 {
     return g_mode;
 }
 
+/* Число ES. */
 int ws_runtime_num_workers(void)
 {
     return g_active ? g_num_xstreams : 1;
 }
 
+/* Номер ES вызывающего или -1 вне рантайма. */
 int ws_runtime_self_rank(void)
 {
     int rank;
@@ -198,12 +213,14 @@ int ws_runtime_self_rank(void)
     return rank;
 }
 
+/* Пул ES rank. */
 ABT_pool ws_runtime_pool(int rank)
 {
     if (!g_active || rank < 0 || rank >= g_num_xstreams) return ABT_POOL_NULL;
     return g_pools[rank];
 }
 
+/* Число готовых задач в пуле ES rank. */
 size_t ws_runtime_pool_size(int rank)
 {
     size_t size = 0;
@@ -212,6 +229,8 @@ size_t ws_runtime_pool_size(int rank)
     return size;
 }
 
+/* Создаёт задачу в пуле ES rank. В режиме new - через ws_task с оценкой est и подсказкой
+ * hint (метаданные в meta или в куче), в остальных режимах - обычный ULT. */
 static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est, long long hint,
                     ws_task_meta *meta, ABT_thread *thread)
 {
@@ -229,6 +248,7 @@ static int spawn_to(int rank, void (*fn)(void *), void *arg, long long est, long
     return ABT_thread_create(g_pools[rank], fn, arg, ABT_THREAD_ATTR_NULL, thread);
 }
 
+/* Пул для новой задачи: свой ES, а в режиме default - по кругу, так как кражи нет. */
 static int spawn_rank(void)
 {
     int rank;
@@ -240,18 +260,21 @@ static int spawn_rank(void)
     return rank < 0 ? 0 : rank;
 }
 
+/* Создаёт задачу в пуле заданного ES. */
 int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
                         ABT_thread *thread)
 {
     return spawn_to(rank, fn, arg, est, 0, NULL, thread);
 }
 
+/* Создаёт задачу в пуле своего ES с оценкой est. */
 int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *thread)
 {
     if (!g_active) return ABT_ERR_UNINITIALIZED;
     return spawn_to(spawn_rank(), fn, arg, est, 0, NULL, thread);
 }
 
+/* Создаёт задачу с метаданными в памяти вызывающего (meta живёт до завершения задачи). */
 int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_meta *meta,
                           ABT_thread *thread)
 {
@@ -259,6 +282,7 @@ int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_
     return spawn_to(spawn_rank(), fn, arg, est, 0, meta, thread);
 }
 
+/* Создаёт задачу с подсказкой стоимости hint в единицах программы. */
 int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task_meta *meta,
                           ABT_thread *thread)
 {
@@ -266,6 +290,7 @@ int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task
     return spawn_to(spawn_rank(), fn, arg, 0, hint, meta, thread);
 }
 
+/* Число ES по умолчанию: WS_NUM_THREADS или число ядер. */
 int ws_runtime_default_workers(void)
 {
     const char *env = getenv("WS_NUM_THREADS");
@@ -275,12 +300,14 @@ int ws_runtime_default_workers(void)
     return n > 0 ? (int)n : 1;
 }
 
+/* Обнуляет счётчики краж текущего планировщика. */
 void ws_runtime_reset_steal_stats(void)
 {
     if (g_mode == WS_MODE_NEW) ws_reset_steal_count();
     else if (g_mode == WS_MODE_OLD) ws_old_reset_steal_count();
 }
 
+/* Возвращает число операций кражи и украденных задач текущего планировщика. */
 void ws_runtime_get_steal_stats(long long *steal_operations, long long *stolen_tasks)
 {
     long long ops = 0, tasks = 0;

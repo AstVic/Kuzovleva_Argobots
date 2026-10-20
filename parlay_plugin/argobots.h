@@ -34,6 +34,7 @@ namespace parlay {
 
 namespace internal {
 
+/* Число ES: PARLAY_NUM_THREADS или число ядер. */
 inline int argobots_default_num_workers() {
   if (const char* env = std::getenv("PARLAY_NUM_THREADS")) {
     int n = std::atoi(env);
@@ -43,8 +44,10 @@ inline int argobots_default_num_workers() {
   return n > 0 ? static_cast<int>(n) : 1;
 }
 
+/* Пустая задача для замера цены развилки. */
 inline void argobots_noop(void*) {}
 
+/* Цена одной развилки: 3 раза по 64 создания и ожидания пустой задачи, минимум среднего. */
 inline long argobots_measure_fork_ns() {
   using clk = std::chrono::steady_clock;
   long best = LONG_MAX;
@@ -64,11 +67,13 @@ inline long argobots_measure_fork_ns() {
   return best > 0 ? best : 1;
 }
 
+/* Измеренная цена развилки в наносекундах. */
 inline std::atomic<long>& argobots_fork_ns_slot() {
   static std::atomic<long> ns{0};
   return ns;
 }
 
+/* Запуск рантайма при первом вызове parlay и остановка при выходе из программы. */
 struct argobots_runtime {
   argobots_runtime() {
     ws_runtime_init(argobots_default_num_workers(), PARLAY_ARGOBOTS_STACK_SIZE);
@@ -77,21 +82,25 @@ struct argobots_runtime {
   ~argobots_runtime() { ws_runtime_finalize(); }
 };
 
+/* Гарантирует, что рантайм запущен. */
 inline void argobots_ensure_runtime() {
   static argobots_runtime runtime;
 }
 
+/* Цена развилки (запускает рантайм, если нужно). */
 inline long argobots_fork_ns() {
   argobots_ensure_runtime();
   return argobots_fork_ns_slot().load(std::memory_order_relaxed);
 }
 
+/* true для моих планировщиков old и new; чужие работают в исходной конфигурации плагина. */
 inline bool argobots_tuned_mode() {
   argobots_ensure_runtime();
   ws_mode_t mode = ws_runtime_mode();
   return mode == WS_MODE_OLD || mode == WS_MODE_NEW;
 }
 
+/* Нужна ли проба размера куска: PARLAY_ARGOBOTS_GRAIN=probe|fixed, по умолчанию только для old и new. */
 inline bool argobots_grain_probe() {
   static const bool probe = [] {
     const char* env = std::getenv("PARLAY_ARGOBOTS_GRAIN");
@@ -102,6 +111,7 @@ inline bool argobots_grain_probe() {
   return probe;
 }
 
+/* Целевое время порции пробы: PARLAY_ARGOBOTS_PROBE_FACTOR (10) цен развилки. */
 inline long argobots_target_ns() {
   static const long target = [] {
     long factor = 10;
@@ -114,6 +124,7 @@ inline long argobots_target_ns() {
   return target;
 }
 
+/* При стольких задачах в своём пуле развилка выполняется на месте: P для old и new, 8 для остальных. */
 inline size_t argobots_queue_limit() {
   static const size_t limit = [] {
     if (const char* env = std::getenv("PARLAY_ARGOBOTS_QUEUE_LIMIT")) {
@@ -127,6 +138,7 @@ inline size_t argobots_queue_limit() {
   return limit;
 }
 
+/* Множитель фиксированного куска n/(8P). */
 inline double argobots_grain_factor() {
   static const double factor = [] {
     if (const char* env = std::getenv("PARLAY_ARGOBOTS_GRAIN_FACTOR")) {
@@ -138,6 +150,7 @@ inline double argobots_grain_factor() {
   return factor;
 }
 
+/* Нижняя граница фиксированного куска в итерациях. */
 inline size_t argobots_min_grain() {
   static const size_t grain = [] {
     if (const char* env = std::getenv("PARLAY_ARGOBOTS_MIN_GRAIN")) {
@@ -149,6 +162,7 @@ inline size_t argobots_min_grain() {
   return grain;
 }
 
+/* Хранить метаданные развилки на стеке вызывающего (по умолчанию) или в куче. */
 inline bool argobots_stack_meta() {
   static const bool enabled = [] {
     const char* env = std::getenv("PARLAY_ARGOBOTS_STACK_META");
@@ -157,11 +171,13 @@ inline bool argobots_stack_meta() {
   return enabled;
 }
 
+/* Переходник: вызывает лямбду правой ветки развилки. */
 template <typename F>
 void argobots_invoke(void* p) {
   (*static_cast<F*>(p))();
 }
 
+/* Счётчики плагина при PARLAY_ARGOBOTS_STATS: создано ULT, пик живых, цена развилки. */
 struct argobots_stats {
   const char* path = std::getenv("PARLAY_ARGOBOTS_STATS");
   std::atomic<long> spawned{0};
@@ -188,11 +204,13 @@ struct argobots_stats {
   }
 };
 
+/* Единственный экземпляр счётчиков плагина. */
 inline argobots_stats& argobots_get_stats() {
   static argobots_stats stats;
   return stats;
 }
 
+/* Включены ли счётчики плагина. */
 inline bool argobots_stats_enabled() {
   static const bool enabled = [] {
     const char* env = std::getenv("PARLAY_ARGOBOTS_STATS");
@@ -201,6 +219,7 @@ inline bool argobots_stats_enabled() {
   return enabled;
 }
 
+/* Ждёт и освобождает ULT правой ветки при выходе из области видимости. */
 struct argobots_join_guard {
   ABT_thread thread;
   bool counted;
@@ -210,6 +229,8 @@ struct argobots_join_guard {
   }
 };
 
+/* Развилка: right - новая задача с оценкой estimate, left - на месте, затем ожидание right.
+ * Если пул переполнен или вызов не из ES, обе ветки выполняются на месте. */
 template <typename Lf, typename Rf>
 inline void argobots_par_do(Lf&& left, Rf&& right, long long estimate) {
   argobots_ensure_runtime();
@@ -232,6 +253,8 @@ inline void argobots_par_do(Lf&& left, Rf&& right, long long estimate) {
   std::forward<Lf>(left)();
 }
 
+/* Рекурсивное деление пополам до куска grain; оценка правой половины - число итераций × unit
+ * (нс на итерацию), число итераций при unit < 0 или 0, если оценку назначит рантайм. */
 template <typename F>
 void argobots_parallel_for(size_t start, size_t end, F& f, size_t grain, double unit) {
   if (end - start <= grain) {
@@ -251,17 +274,21 @@ void argobots_parallel_for(size_t start, size_t end, F& f, size_t grain, double 
 
 }  // namespace internal
 
+/* Число рабочих потоков для parlay. */
 inline size_t num_workers() {
   internal::argobots_ensure_runtime();
   return static_cast<size_t>(ws_runtime_num_workers());
 }
 
+/* Номер текущего рабочего потока в [0, num_workers). */
 inline size_t worker_id() {
   internal::argobots_ensure_runtime();
   int rank = ws_runtime_self_rank();
   return rank < 0 ? 0 : static_cast<size_t>(rank);
 }
 
+/* parallel_for parlay: явный размер куска алгоритма; иначе для old и new проба,
+ * для остальных кусок n/(8P). */
 template <typename F>
 inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool) {
   static_assert(std::is_invocable_v<F&, size_t>);
@@ -317,6 +344,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
   internal::argobots_parallel_for(start, end, f, grain, ws_task_cost_enabled() ? 0.0 : 1.0);
 }
 
+/* par_do parlay: развилка без оценки (её назначит рантайм). */
 template <typename Lf, typename Rf>
 inline void par_do(Lf&& left, Rf&& right, bool) {
   static_assert(std::is_invocable_v<Lf&&>);
@@ -324,6 +352,7 @@ inline void par_do(Lf&& left, Rf&& right, bool) {
   internal::argobots_par_do(std::forward<Lf>(left), std::forward<Rf>(right), 0);
 }
 
+/* Не поддерживается плагином: вызов не компилируется. */
 template <typename... Fs>
 void execute_with_scheduler(Fs...) {
   struct Illegal {};

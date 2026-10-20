@@ -32,15 +32,20 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size);
 /* Останавливает ES и завершает Argobots. Вызывается с primary ULT. */
 void ws_runtime_finalize(void);
 
+/* Короткое имя программы. */
 const char *ws_runtime_prog_name(void);
 
+/* 1, если рантайм инициализирован. */
 int ws_runtime_is_active(void);
+/* Текущий режим планирования. */
 ws_mode_t ws_runtime_mode(void);
+/* Число ES. */
 int ws_runtime_num_workers(void);
 
 /* Ранг ES вызывающего, если он выполняется внутри рантайма; иначе -1. */
 int ws_runtime_self_rank(void);
 
+/* Пул ES rank. */
 ABT_pool ws_runtime_pool(int rank);
 
 /* Число готовых к запуску ULT в пуле ES. */
@@ -56,16 +61,20 @@ int ws_runtime_spawn(void (*fn)(void *), void *arg, long long est, ABT_thread *t
 int ws_runtime_spawn_meta(void (*fn)(void *), void *arg, long long est, ws_task_meta *meta,
                           ABT_thread *thread);
 
+/* Создаёт задачу в пуле своего ES с подсказкой стоимости hint (единицы программы). */
 int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task_meta *meta,
                           ABT_thread *thread);
 
+/* Число ES по умолчанию: WS_NUM_THREADS или число ядер. */
 int ws_runtime_default_workers(void);
 
 /* То же, но в пул заданного ES. */
 int ws_runtime_spawn_to(int rank, void (*fn)(void *), void *arg, long long est,
                         ABT_thread *thread);
 
+/* Обнуляет счётчики краж текущего планировщика. */
 void ws_runtime_reset_steal_stats(void);
+/* Число операций кражи и украденных задач текущего планировщика. */
 void ws_runtime_get_steal_stats(long long *steal_operations, long long *stolen_tasks);
 
 #ifdef __cplusplus

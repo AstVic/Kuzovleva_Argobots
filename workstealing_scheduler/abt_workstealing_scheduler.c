@@ -13,6 +13,7 @@ static long long g_old_steal_operations = 0;
 static long long g_old_stolen_tasks = 0;
 static int g_old_steal_one = 0;
 
+/* Обнуляет счётчики краж планировщика old. */
 void ws_old_reset_steal_count(void)
 {
     if (g_old_steal_mutex != ABT_MUTEX_NULL) {
@@ -23,6 +24,7 @@ void ws_old_reset_steal_count(void)
     }
 }
 
+/* Число украденных задач планировщиком old (то же, что ws_old_get_stolen_tasks_count). */
 long long ws_old_get_steal_count(void)
 {
     long long value = 0;
@@ -34,6 +36,7 @@ long long ws_old_get_steal_count(void)
     return value;
 }
 
+/* Число успешных операций кражи: одна операция может забрать несколько задач. */
 long long ws_old_get_steal_ops_count(void)
 {
     long long value = 0;
@@ -45,6 +48,7 @@ long long ws_old_get_steal_ops_count(void)
     return value;
 }
 
+/* Суммарное число украденных задач. */
 long long ws_old_get_stolen_tasks_count(void)
 {
     long long value = 0;
@@ -57,6 +61,7 @@ long long ws_old_get_stolen_tasks_count(void)
 }
 
 
+/* Создаёт данные планировщика ES и читает из конфигурации частоту проверки событий Argobots. */
 static int sched_init(ABT_sched sched, ABT_sched_config config)
 {
     ws_sched_data_t *p_data = (ws_sched_data_t *)calloc(1, sizeof(ws_sched_data_t));
@@ -67,6 +72,9 @@ static int sched_init(ABT_sched sched, ABT_sched_config config)
     return ABT_SUCCESS;
 }
 
+/* Цикл планировщика old на одном ES: берёт новейшую задачу из своего пула, а если он пуст,
+ * обходит чужие пулы начиная с соседа и у первого непустого крадёт половину очереди
+ * (с WS_STEAL_ONE=1 - одну задачу). Украденная задача сразу выполняется на воре. */
 static void sched_run(ABT_sched sched)
 {
     uint32_t work_count = 0;
@@ -134,6 +142,7 @@ static void sched_run(ABT_sched sched)
     free(pools);
 }
 
+/* Освобождает данные планировщика ES. */
 static int sched_free(ABT_sched sched)
 {
     ws_sched_data_t *p_data;
@@ -144,6 +153,8 @@ static int sched_free(ABT_sched sched)
     return ABT_SUCCESS;
 }
 
+/* Создаёт num планировщиков old; ES i получает пулы со сдвигом, свой пул первым.
+ * Переключатель WS_STEAL_ONE читается здесь один раз. */
 void ABT_create_ws_scheds(int num, ABT_pool *pools, ABT_sched *scheds)
 {
     ABT_sched_config config;

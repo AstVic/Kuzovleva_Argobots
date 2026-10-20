@@ -7,6 +7,7 @@
 #include <time.h>
 #include <abt.h>
 
+/* Прежний абсолютный порог дешёвой задачи; действует только при WS_CHEAP_ABSOLUTE=1. */
 #define WS_CHEAP_TASK_COST 32LL
 
 /* ===================== ГЛОБАЛЬНАЯ СТАТИСТИКА ===================== */
@@ -14,6 +15,14 @@ static int g_num_xstreams = 0;
 static atomic_llong g_steal_operations;
 static atomic_llong g_stolen_tasks;
 
+/* Номера счётчиков диагностики на каждом ES:
+ *   LOCAL - задача взята из своего пула;
+ *   STEAL_OPS_EST / STOLEN_EST - кражи по оценкам и украденные в них задачи;
+ *   STEAL_OPS_FB / STOLEN_FB - то же для запасного пути;
+ *   EMPTY_VICTIM - жертва выбрана по оценкам, но её пул уже пуст;
+ *   STOLEN_ZERO_EST - украдена задача с нулевой оценкой;
+ *   STOLEN_RESUMED - украден ULT, созданный не рантаймом;
+ *   IDLE - итерация цикла планировщика без выполненной задачи. */
 enum {
     WS_STAT_LOCAL,
     WS_STAT_STEAL_OPS_EST,
@@ -27,6 +36,8 @@ enum {
     WS_STAT_COUNT
 };
 
+/* Счётчики одного ES. Пишет их только сам ES; записи разных ES лежат в разных
+ * кэш-линиях (шаг g_es_stats_stride), поэтому обновления не мешают друг другу. */
 typedef struct {
     atomic_llong v[WS_STAT_COUNT];
 } ws_es_stats_t;
@@ -45,9 +56,9 @@ typedef struct {
     atomic_llong running_estimated;   /* суммарная оценочная стоимость задач, которые сейчас выполняются на ES */
     atomic_llong running_count;       /* количество задач, которые сейчас выполняются на ES */
     long long *est_buffer;            /* кольцевой FIFO буфер точных оценок задач */
-    int buf_head;
-    int buf_tail;
-    int buf_capacity;
+    int buf_head;                     /* голова буфера (только старый механизм) */
+    int buf_tail;                     /* хвост буфера */
+    int buf_capacity;                 /* ёмкость буфера */
 } pool_meta_t;
 
 static pool_meta_t *g_pool_meta = NULL;
@@ -58,10 +69,13 @@ static pool_meta_t *g_pool_meta = NULL;
 #define WS_CACHE_LINE 128
 static size_t g_pool_meta_stride = sizeof(pool_meta_t);
 
+/* Метаданные пула ES rank с учётом выравнивания записей (WS_META_PADDING). */
 static inline pool_meta_t *ws_meta(int rank) {
     return (pool_meta_t *)((char *)g_pool_meta + (size_t)rank * g_pool_meta_stride);
 }
 
+/* Прибавляет d к счётчику k своего ES. Пишет только сам ES, поэтому достаточно
+ * relaxed-чтения и записи без атомарного сложения. */
 static inline void ws_stat_add(int rank, int k, long long d) {
     atomic_llong *c;
     if (!g_es_stats || rank < 0 || rank >= g_es_stats_num) return;
@@ -70,6 +84,8 @@ static inline void ws_stat_add(int rank, int k, long long d) {
                           memory_order_relaxed);
 }
 
+/* Выделяет счётчики для num ES, каждый ES в своей кэш-линии; при повторном вызове
+ * с тем же числом ES обнуляет их. */
 static void ws_stats_alloc(int num) {
     size_t stride = (sizeof(ws_es_stats_t) + WS_CACHE_LINE - 1) / WS_CACHE_LINE * WS_CACHE_LINE;
     void *mem = NULL;
@@ -87,6 +103,7 @@ static void ws_stats_alloc(int num) {
     g_es_stats_num = num;
 }
 
+/* Отмечает в счётчиках украденную задачу без оценки: чужой ULT или задачу с нулевой оценкой. */
 static void ws_stat_stolen(int rank, ABT_thread thread, long long est) {
     if (!ws_task_meta_of(thread)) {
         ws_stat_add(rank, WS_STAT_STOLEN_RESUMED, 1);
@@ -95,6 +112,7 @@ static void ws_stat_stolen(int rank, ABT_thread thread, long long est) {
     }
 }
 
+/* Складывает счётчики всех ES в out. Вызывается после остановки ES. */
 void ws_get_sched_stats(ws_sched_stats *out) {
     long long t[WS_STAT_COUNT] = {0};
     for (int r = 0; g_es_stats && r < g_es_stats_num; r++) {
@@ -120,12 +138,14 @@ static int g_opt_fallback_stop_on_local = 1;   /* WS_FALLBACK_STOP_ON_LOCAL */
 static int g_opt_fallback_random = 1;          /* WS_FALLBACK_RANDOM */
 static int g_opt_continuation_on_thief = 1;    /* WS_CONTINUATION_ON_THIEF */
 static int g_opt_meta_padding = 1;             /* WS_META_PADDING */
-static int g_opt_steal_one = 0;
-static int g_opt_victim_queued = 1;
-static int g_opt_cheap_absolute = 0;
-static double g_opt_cheap_fraction = 0.0625;
-static int g_victim_sample = 1;
+static int g_opt_steal_one = 0;               /* WS_STEAL_ONE: красть одну задачу */
+static int g_opt_victim_queued = 1;           /* нагрузка жертвы только по очереди; WS_VICTIM_LOAD=total - 0 */
+static int g_opt_cheap_absolute = 0;          /* WS_CHEAP_ABSOLUTE: прежний порог WS_CHEAP_TASK_COST */
+static double g_opt_cheap_fraction = 0.0625;  /* WS_CHEAP_FRACTION: дешёвая задача - меньше этой доли цели кражи */
+static int g_victim_sample = 1;               /* число кандидатов при выборе жертвы */
 
+/* Число случайных кандидатов при выборе жертвы: WS_VICTIM_SAMPLE или round(log2 num),
+ * но не больше num - 1 и не меньше 1. */
 static int ws_victim_sample_for(int num) {
     const char *env = getenv("WS_VICTIM_SAMPLE");
     int k = 0;
@@ -140,6 +160,7 @@ static int ws_victim_sample_for(int num) {
     return k;
 }
 
+/* Читает переключатель 0/1 из переменной окружения; def, если она не задана. */
 static int ws_env_flag(const char *name, int def) {
     const char *v = getenv(name);
     if (!v || v[0] == '\0') return def;
@@ -165,6 +186,7 @@ typedef struct {
 
 /* ===================== УТИЛИТЫ ДЛЯ pool_meta ===================== */
 
+/* Инициализирует атомарные агрегаты пула и буфер старого механизма оценок. */
 static int pool_meta_init_one(pool_meta_t *pm, int initial_capacity) {
     atomic_init(&pm->queued_estimated, 0);
     atomic_init(&pm->queued_count, 0);
@@ -186,6 +208,7 @@ static int pool_meta_init_one(pool_meta_t *pm, int initial_capacity) {
 }
 
 #ifdef WS_LEGACY_EST_FIFO
+/* Удваивает кольцевой буфер оценок старого механизма; вызывается под mutex пула. */
 static int pool_meta_grow_locked(pool_meta_t *pm) {
     int newcap = pm->buf_capacity * 2;
     long long *nb = (long long *)malloc(sizeof(long long) * newcap);
@@ -284,6 +307,7 @@ long long ws_pop_task_estimate(int rank) {
     return est;
 }
 
+/* Задача начала выполняться на ES rank: учитывает её в агрегатах выполняемой работы. */
 static void ws_start_task_execution(int rank, long long est) {
     pool_meta_t *pm;
     if (!g_pool_meta || est <= 0) return;
@@ -293,6 +317,7 @@ static void ws_start_task_execution(int rank, long long est) {
     atomic_fetch_add_explicit(&pm->running_count, 1, memory_order_relaxed);
 }
 
+/* Задача вернула управление планировщику ES rank: снимает её из выполняемой работы. */
 static void ws_finish_task_execution(int rank, long long est) {
     pool_meta_t *pm;
     if (!g_pool_meta || est <= 0) return;
@@ -310,12 +335,14 @@ long long ws_get_pool_estimated_load(int rank) {
     return atomic_load_explicit(&pm->queued_estimated, memory_order_relaxed);
 }
 
+/* Число задач в очереди пула rank по агрегатам планировщика. */
 long long ws_get_pool_queued_count(int rank) {
     if (!g_pool_meta) return 0;
     if (rank < 0 || rank >= g_num_xstreams) return 0;
     return atomic_load_explicit(&ws_meta(rank)->queued_count, memory_order_relaxed);
 }
 
+/* Нагрузка пула rank вместе с выполняемыми задачами; используется при WS_VICTIM_LOAD=total. */
 static long long ws_get_pool_total_load(int rank) {
     if (!g_pool_meta) return 0;
     if (rank < 0 || rank >= g_num_xstreams) return 0;
@@ -329,6 +356,7 @@ static long long ws_get_pool_total_load(int rank) {
 
 /* ===================== УТИЛИТЫ ===================== */
 
+/* Случайный номер ES, отличный от self, или -1, если ES один. */
 static int ws_pick_random_other_pool(unsigned int *rng_state, int self, int num)
 {
     int victim;
@@ -342,6 +370,8 @@ static int ws_pick_random_other_pool(unsigned int *rng_state, int self, int num)
     return victim;
 }
 
+/* Выбор жертвы по оценкам: из нескольких случайных ES берёт ES с наибольшей суммой
+ * оценок в очереди. Возвращает его номер и нагрузку или -1, если у всех кандидатов 0. */
 static int ws_find_victim_sampled(int self, int num,
                                   unsigned int *rng_state, long long *victim_load_out) {
     int victim = -1;
@@ -449,19 +479,23 @@ static void ws_execute_task_with_estimate(ABT_thread thread, int exec_rank, long
     ws_finish_task_execution(exec_rank, est);
 }
 
+/* Обнуляет глобальные счётчики краж планировщика new. */
 void ws_reset_steal_count(void) {
     atomic_store_explicit(&g_steal_operations, 0, memory_order_relaxed);
     atomic_store_explicit(&g_stolen_tasks, 0, memory_order_relaxed);
 }
 
+/* Число украденных задач (то же, что ws_get_stolen_tasks_count). */
 long long ws_get_steal_count(void) {
     return atomic_load_explicit(&g_stolen_tasks, memory_order_relaxed);
 }
 
+/* Число успешных операций кражи. */
 long long ws_get_steal_ops_count(void) {
     return atomic_load_explicit(&g_steal_operations, memory_order_relaxed);
 }
 
+/* Суммарное число украденных задач. */
 long long ws_get_stolen_tasks_count(void) {
     return atomic_load_explicit(&g_stolen_tasks, memory_order_relaxed);
 }
@@ -469,6 +503,7 @@ long long ws_get_stolen_tasks_count(void) {
 
 /* ===================== ФУНКЦИИ ПЛАНИРОВЩИКА ===================== */
 
+/* Создаёт данные планировщика ES: частоту проверки событий и генератор случайных чисел. */
 static int sched_init(ABT_sched sched, ABT_sched_config config) {
     ws_sched_data_t *p_data = (ws_sched_data_t *)calloc(1, sizeof(ws_sched_data_t));
     
@@ -499,6 +534,9 @@ static inline int global_to_local_pool_index(int self_rank, int global_pool_id, 
 }
 
 
+/* Цикл планировщика new на одном ES: своя задача; иначе кража по оценкам у самой
+ * нагруженной из нескольких случайных жертв до половины её нагрузки; если оценённых жертв
+ * нет - запасной путь: половина очереди первого непустого пула со случайного старта. */
 static void sched_run(ABT_sched sched) {
     uint32_t work_count = 0;
     ws_sched_data_t *p_data;
@@ -654,6 +692,7 @@ static void sched_run(ABT_sched sched) {
     free(pools);
 }
 
+/* Освобождает данные планировщика ES. */
 static int sched_free(ABT_sched sched) {
     ws_sched_data_t *p_data;
     ABT_sched_get_data(sched, (void **)&p_data);
@@ -663,6 +702,8 @@ static int sched_free(ABT_sched sched) {
 
 /* ===================== ПУБЛИЧНЫЙ ИНТЕРФЕЙС ===================== */
 
+/* Создаёт num планировщиков new и метаданные пулов, читает все переключатели WS_*
+ * и выделяет счётчики. ES i получает пулы со сдвигом, свой пул первым. */
 void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds) {
     int i, k;
     ABT_sched_config config;
@@ -741,6 +782,7 @@ void ABT_create_ws_scheds_cost_aware(int num, ABT_pool *pools, ABT_sched *scheds
 }
 
 /* ===================== ОТЛАДОЧНЫЕ СЧЁТЧИКИ ===================== */
+/* Обнуляет отладочные счётчики соответствия задачи и оценки (сборка с WS_DEBUG_COST_CHECK). */
 void ws_debug_reset(void) {
     atomic_init(&g_dbg_dispatched, 0);
     atomic_init(&g_dbg_wrong_estimate, 0);
@@ -748,18 +790,22 @@ void ws_debug_reset(void) {
     atomic_init(&g_dbg_foreign_with_estimate, 0);
 }
 
+/* Сколько задач планировщик достал из пулов. */
 long long ws_debug_dispatched(void) {
     return atomic_load_explicit(&g_dbg_dispatched, memory_order_relaxed);
 }
 
+/* Сколько задач получили чужую оценку (только старый механизм). */
 long long ws_debug_wrong_estimate(void) {
     return atomic_load_explicit(&g_dbg_wrong_estimate, memory_order_relaxed);
 }
 
+/* Сколько задач рантайма остались без оценки. */
 long long ws_debug_missing_estimate(void) {
     return atomic_load_explicit(&g_dbg_missing_estimate, memory_order_relaxed);
 }
 
+/* Сколько чужих ULT забрали чью-то оценку. */
 long long ws_debug_foreign_with_estimate(void) {
     return atomic_load_explicit(&g_dbg_foreign_with_estimate, memory_order_relaxed);
 }

@@ -9,32 +9,38 @@
 #include <string.h>
 #include <time.h>
 
+/* Стек ULT: рекурсивное деление и вложенные циклы не помещаются в 16 КБ по умолчанию. */
 #define WS_STACK_SIZE (1u << 20)
 
+/* Общие параметры одного параллельного цикла. */
 typedef struct {
-    ws_range_body body;
-    void *arg;
-    ws_range_cost cost;
+    ws_range_body body;     /* тело цикла */
+    void *arg;              /* его аргумент */
+    ws_range_cost cost;     /* стоимость диапазона или NULL - деление по числу итераций */
     void *cost_arg;
-    long grain;
-    double grain_cost;
-    double unit;
+    long grain;             /* размер листа в итерациях */
+    double grain_cost;      /* размер листа в единицах стоимости */
+    double unit;            /* нс на единицу работы; 0 - оценку назначит рантайм, < 0 - WS_COST=iters */
 } ws_pf_ctx;
 
+/* Аргумент задачи для правой половины диапазона. */
 typedef struct {
     const ws_pf_ctx *ctx;
     long lo;
     long hi;
 } ws_pf_range;
 
+/* Группа задач: созданные ULT, которые ещё нужно дождаться. */
 struct ws_group {
     ABT_thread *threads;
     size_t count;
     size_t capacity;
 };
 
+/* Измеренная цена развилки в нс; 0 - ещё не измерена. */
 static atomic_long g_fork_ns;
 
+/* Монотонное время в наносекундах. */
 static long ws_now_ns(void)
 {
     struct timespec ts;
@@ -42,17 +48,21 @@ static long ws_now_ns(void)
     return (long)ts.tv_sec * 1000000000L + ts.tv_nsec;
 }
 
+/* Пустая задача для замера цены развилки. */
 static void ws_noop(void *arg)
 {
     (void)arg;
 }
 
+/* 1 для моих планировщиков old и new: только для них включаются проба,
+ * деление по стоимости и лимит очереди P; чужие работают в исходной конфигурации. */
 static int ws_tuned(void)
 {
     ws_mode_t mode = ws_runtime_mode();
     return mode == WS_MODE_OLD || mode == WS_MODE_NEW;
 }
 
+/* Положительное число из переменной окружения или def. */
 static long ws_env_long(const char *name, long def)
 {
     const char *env = getenv(name);
@@ -62,6 +72,7 @@ static long ws_env_long(const char *name, long def)
     return v > 0 ? v : def;
 }
 
+/* Цена одной развилки: 3 раза по 64 создания и ожидания пустой задачи, минимум среднего. */
 static long ws_measure_fork_ns(void)
 {
     long best = LONG_MAX;
@@ -81,6 +92,7 @@ static long ws_measure_fork_ns(void)
     return best > 0 ? best : 1;
 }
 
+/* Целевое время порции пробы: WS_PROBE_FACTOR (10) цен развилки; цена меряется один раз. */
 static long ws_target_ns(void)
 {
     long fork = atomic_load_explicit(&g_fork_ns, memory_order_relaxed);
@@ -91,6 +103,7 @@ static long ws_target_ns(void)
     return ws_env_long("WS_PROBE_FACTOR", 10) * fork;
 }
 
+/* Нужна ли проба размера куска: WS_GRAIN=probe|fixed, по умолчанию только для old и new. */
 static int ws_probe_enabled(void)
 {
     const char *env = getenv("WS_GRAIN");
@@ -99,18 +112,21 @@ static int ws_probe_enabled(void)
     return ws_tuned();
 }
 
+/* При стольких задачах в своём пуле развилка выполняется на месте: P для old и new, 8 для остальных. */
 static size_t ws_queue_limit(void)
 {
     long def = ws_tuned() ? ws_runtime_num_workers() : 8;
     return (size_t)ws_env_long("WS_QUEUE_LIMIT", def > 0 ? def : 1);
 }
 
+/* Можно ли создать задачу: вызывающий внутри рантайма и его пул не переполнен. */
 static int ws_can_spawn(void)
 {
     int rank = ws_runtime_self_rank();
     return rank >= 0 && ws_runtime_pool_size(rank) < ws_queue_limit();
 }
 
+/* Лист деления: один элемент или кусок не больше размера куска (в итерациях или в стоимости). */
 static int ws_pf_leaf(const ws_pf_ctx *c, long lo, long hi)
 {
     if (hi - lo <= 1) return 1;
@@ -118,6 +134,7 @@ static int ws_pf_leaf(const ws_pf_ctx *c, long lo, long hi)
     return hi - lo <= c->grain;
 }
 
+/* Точка деления: середина по числу итераций или двоичным поиском - середина по стоимости. */
 static long ws_pf_split(const ws_pf_ctx *c, long lo, long hi)
 {
     long a = lo + 1;
@@ -136,6 +153,8 @@ static long ws_pf_split(const ws_pf_ctx *c, long lo, long hi)
     return a;
 }
 
+/* Оценка задачи для [lo, hi): работа × время единицы работы (нс), число итераций при
+ * WS_COST=iters или 0, если оценку должен назначить рантайм. */
 static long long ws_pf_estimate(const ws_pf_ctx *c, long lo, long hi)
 {
     double work = c->cost ? c->cost(lo, hi, c->cost_arg) : (double)(hi - lo);
@@ -147,12 +166,15 @@ static long long ws_pf_estimate(const ws_pf_ctx *c, long lo, long hi)
 
 static void ws_pf_run(const ws_pf_ctx *c, long lo, long hi);
 
+/* Задача для правой половины диапазона. */
 static void ws_pf_task(void *p)
 {
     ws_pf_range *r = (ws_pf_range *)p;
     ws_pf_run(r->ctx, r->lo, r->hi);
 }
 
+/* Рекурсивное деление: правая половина - новая задача, левая - на месте, затем ожидание;
+ * если задачу создать нельзя, обе половины выполняются на месте. */
 static void ws_pf_run(const ws_pf_ctx *c, long lo, long hi)
 {
     long mid;
@@ -178,23 +200,30 @@ static void ws_pf_run(const ws_pf_ctx *c, long lo, long hi)
     ABT_thread_free(&thread);
 }
 
+/* Запускает рантайм на num_workers ES (0 - WS_NUM_THREADS или число ядер), стек ULT 1 МБ. */
 int ws_init(int num_workers)
 {
     return ws_runtime_init(num_workers > 0 ? num_workers : ws_runtime_default_workers(),
                            WS_STACK_SIZE);
 }
 
+/* Останавливает рантайм и сбрасывает измеренную цену развилки. */
 void ws_finalize(void)
 {
     ws_runtime_finalize();
     atomic_store_explicit(&g_fork_ns, 0, memory_order_relaxed);
 }
 
+/* Число ES или 1 вне рантайма. */
 int ws_num_workers(void)
 {
     return ws_runtime_is_active() ? ws_runtime_num_workers() : 1;
 }
 
+/* Параллельный цикл: body вызывается на непересекающихся диапазонах, покрывающих [lo, hi).
+ * Для old и new сначала проба: 1, 2, 4... итерации на месте до целевого времени, затем деление
+ * остатка; если задана cost, деление и оценки идут по стоимости диапазона, а не по числу итераций.
+ * Для чужих планировщиков - кусок n/(8P) по числу итераций. */
 void ws_parallel_for_cost(long lo, long hi, ws_range_body body, void *arg, ws_range_cost cost,
                           void *cost_arg)
 {
@@ -242,11 +271,13 @@ void ws_parallel_for_cost(long lo, long hi, ws_range_body body, void *arg, ws_ra
     ws_pf_run(&c, lo, hi);
 }
 
+/* Параллельный цикл без функции стоимости. */
 void ws_parallel_for(long lo, long hi, ws_range_body body, void *arg)
 {
     ws_parallel_for_cost(lo, hi, body, arg, NULL, NULL);
 }
 
+/* Параллельный цикл с явным размером куска, без пробы. */
 void ws_parallel_for_grain(long lo, long hi, long grain, ws_range_body body, void *arg)
 {
     ws_pf_ctx c;
@@ -265,6 +296,8 @@ void ws_parallel_for_grain(long lo, long hi, long grain, ws_range_body body, voi
     ws_pf_run(&c, lo, hi);
 }
 
+/* Состояние редукции: [lo, lo + n) делится на blocks фиксированных блоков,
+ * частичный результат блока b лежит в partials + b * elem_size. */
 typedef struct {
     long lo;
     long n;
@@ -275,6 +308,7 @@ typedef struct {
     void *arg;
 } ws_reduce_ctx;
 
+/* Считает частичные результаты для блоков с номерами [blo, bhi). */
 static void ws_reduce_blocks(long blo, long bhi, void *p)
 {
     ws_reduce_ctx *r = (ws_reduce_ctx *)p;
@@ -285,6 +319,8 @@ static void ws_reduce_blocks(long blo, long bhi, void *p)
     }
 }
 
+/* Детерминированная редукция: [lo, hi) делится на 8P фиксированных блоков, частичные
+ * результаты считаются параллельно и объединяются по порядку блоков. */
 void ws_parallel_reduce(long lo, long hi, size_t elem_size, const void *identity,
                         ws_reduce_body body, ws_reduce_combine combine, void *result, void *arg)
 {
@@ -318,11 +354,14 @@ void ws_parallel_reduce(long lo, long hi, size_t elem_size, const void *identity
     free(r.partials);
 }
 
+/* Создаёт пустую группу задач. */
 ws_group *ws_group_create(void)
 {
     return (ws_group *)calloc(1, sizeof(ws_group));
 }
 
+/* Создаёт задачу fn(arg) в группе с подсказкой стоимости hint (0 - нет подсказки).
+ * Вне рантайма или при ошибке задача выполняется сразу. */
 int ws_group_spawn(ws_group *group, void (*fn)(void *), void *arg, long long hint)
 {
     ABT_thread thread = ABT_THREAD_NULL;
@@ -349,6 +388,7 @@ int ws_group_spawn(ws_group *group, void (*fn)(void *), void *arg, long long hin
     return ABT_SUCCESS;
 }
 
+/* Ждёт все задачи группы; после возврата группу можно использовать снова. */
 void ws_group_wait(ws_group *group)
 {
     if (!group) return;
@@ -358,6 +398,7 @@ void ws_group_wait(ws_group *group)
     group->count = 0;
 }
 
+/* Ждёт задачи и освобождает группу. */
 void ws_group_free(ws_group *group)
 {
     if (!group) return;
