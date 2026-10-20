@@ -20,6 +20,7 @@ typedef struct ws_task_meta {
     void (*fn)(void *);   /* настоящая функция задачи */
     void *arg;            /* её аргумент */
     long long est;        /* оценка стоимости задачи */
+    long long sched_est;  /* оценка, которую видит планировщик: est или 0 при WS_COST=off */
     int dispatched;       /* 1 = задача уже запускалась, из очереди списана */
     int heap;             /* 1 = выделена ws_thread_create, освобождается после задачи */
     int depth;            /* глубина вложенности: 1 у задач главного потока */
@@ -57,6 +58,8 @@ int ws_task_cost_init(int num_ranks);
 void ws_task_cost_finalize(void);
 /* 1, если оценки в наносекундах включены. */
 int ws_task_cost_enabled(void);
+/* 1 - оценки считаются как обычно, но планировщику передаются нули (WS_COST=off). */
+void ws_task_cost_set_hidden(int hidden);
 /* Метаданные выполняемой задачи или NULL. */
 ws_task_meta *ws_task_self_meta(void);
 /* Оценка из истории для задачи с функцией fn на глубине depth; 0, если истории нет. */

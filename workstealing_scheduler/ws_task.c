@@ -34,6 +34,8 @@ typedef struct {
 } ws_cost_acc;
 
 static ws_cost_acc *g_cost_acc = NULL;
+/* 1 - планировщик получает нулевые оценки (WS_COST=off). */
+static int g_cost_hidden = 0;
 
 /* Монотонное время в наносекундах. */
 static long long ws_now_ns(void)
@@ -129,6 +131,12 @@ void ws_task_cost_finalize(void)
 int ws_task_cost_enabled(void)
 {
     return g_cost != NULL;
+}
+
+/* Скрывает оценки от планировщика, не меняя их расчёт и замер времени. */
+void ws_task_cost_set_hidden(int hidden)
+{
+    g_cost_hidden = hidden;
 }
 
 /* Метаданные выполняемой задачи или NULL, если вызывающий не задача рантайма. */
@@ -298,11 +306,12 @@ static int ws_spawn_meta(ABT_pool pool, int pool_rank, ws_task_meta *meta,
 
     /* Учитываем задачу в очереди ДО создания ULT: иначе планировщик может
      * забрать её раньше, чем она попадёт в счётчики, и списание уйдёт в минус. */
-    ws_account_task_created(pool_rank, meta->est);
+    meta->sched_est = g_cost_hidden ? 0 : meta->est;
+    ws_account_task_created(pool_rank, meta->sched_est);
 
     ret = ABT_thread_create(pool, ws_trampoline, meta, ABT_THREAD_ATTR_NULL, newthread);
     if (ret != ABT_SUCCESS) {
-        ws_account_task_dispatched(pool_rank, meta->est);
+        ws_account_task_dispatched(pool_rank, meta->sched_est);
     }
     return ret;
 }

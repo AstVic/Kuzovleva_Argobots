@@ -447,7 +447,7 @@ static long long ws_dispatch_cost(ABT_thread thread, int owner_rank)
         }
     } else if (est < 0) {
         atomic_fetch_add_explicit(&g_dbg_missing_estimate, 1, memory_order_relaxed);
-    } else if (est != meta->est) {
+    } else if (est != meta->sched_est) {
         atomic_fetch_add_explicit(&g_dbg_wrong_estimate, 1, memory_order_relaxed);
     }
 #endif
@@ -460,9 +460,9 @@ static long long ws_dispatch_cost(ABT_thread thread, int owner_rank)
     }
     if (!meta->dispatched) {
         meta->dispatched = 1;
-        ws_account_task_dispatched(owner_rank, meta->est);
+        ws_account_task_dispatched(owner_rank, meta->sched_est);
     }
-    return meta->est;
+    return meta->sched_est;
 #endif
 }
 

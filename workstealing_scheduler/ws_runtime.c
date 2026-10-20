@@ -65,7 +65,8 @@ static void create_randws_scheds(int n)
 }
 
 /* Запускает Argobots на num_xstreams ES в режиме из ABT_WS_SCHEDULER: пулы, планировщики,
- * а в режиме new - ещё и историю оценок (если не WS_COST=iters). Вызывающий становится
+ * а в режиме new - ещё и историю оценок (если не WS_COST=iters;
+ * при WS_COST=off оценки считаются, но планировщик их не видит). Вызывающий становится
  * главным ULT на ES 0. */
 int ws_runtime_init(int num_xstreams, size_t default_stack_size)
 {
@@ -108,6 +109,7 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size)
             if (!(cost && strcmp(cost, "iters") == 0)) {
                 ws_task_cost_init(n);
             }
+            ws_task_cost_set_hidden(cost && strcmp(cost, "off") == 0);
         } else if (g_mode == WS_MODE_OLD) {
             ABT_create_ws_scheds(n, g_pools, g_scheds);
             ws_old_reset_steal_count();
