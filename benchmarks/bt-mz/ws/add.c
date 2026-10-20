@@ -57,7 +57,7 @@ double (*u)[(ny-1)-(0)+1][(nxmax-1)-(0)+1][5] = (double (*)[(ny-1)-(0)+1][(nxmax
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
-/* Аргументы add и номер выполняемой части. */
+/* Аргументы add. */
 typedef struct {
     void * ou;
     void * orhs;
@@ -65,14 +65,14 @@ typedef struct {
     int nxmax;
     int ny;
     int nz;
-    int part;
 } add_job;
 
-/* Тело параллельного цикла: часть j->part на итерациях [lo, hi). */
-static void add_body(long lo, long hi, void *p)
+/* Тела параллельных циклов, по одной функции на каждую часть: так история стоимости
+ * различает циклы, как если бы каждый был вынесен в свою функцию. */
+static void add_body_1(long lo, long hi, void *p)
 {
     add_job *j = (add_job *)p;
-    add_part(j->ou, j->orhs, j->nx, j->nxmax, j->ny, j->nz, j->part, lo, hi);
+    add_part(j->ou, j->orhs, j->nx, j->nxmax, j->ny, j->nz, 1, lo, hi);
 }
 
 /* add с тем же интерфейсом, что в исходной программе: части выполняются по очереди,
@@ -94,6 +94,5 @@ void add (ou,orhs,nx,nxmax,ny,nz)
     j.nxmax = nxmax;
     j.ny = ny;
     j.nz = nz;
-    j.part = 1;
-    ws_parallel_for(1, (nz-2) + 1, add_body, &j);
+    ws_parallel_for(1, (nz-2) + 1, add_body_1, &j);
 }

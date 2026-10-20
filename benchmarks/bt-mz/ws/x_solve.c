@@ -343,7 +343,7 @@ double (*rho_i)[(ny-1)-(0)+1][(nxmax-1)-(0)+1] = (double (*)[(ny-1)-(0)+1][(nxma
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
-/* Аргументы x_solve и номер выполняемой части. */
+/* Аргументы x_solve. */
 typedef struct {
     void * orho_i;
     void * oqs;
@@ -354,14 +354,14 @@ typedef struct {
     int nxmax;
     int ny;
     int nz;
-    int part;
 } x_solve_job;
 
-/* Тело параллельного цикла: часть j->part на итерациях [lo, hi). */
-static void x_solve_body(long lo, long hi, void *p)
+/* Тела параллельных циклов, по одной функции на каждую часть: так история стоимости
+ * различает циклы, как если бы каждый был вынесен в свою функцию. */
+static void x_solve_body_1(long lo, long hi, void *p)
 {
     x_solve_job *j = (x_solve_job *)p;
-    x_solve_part(j->orho_i, j->oqs, j->osquare, j->ou, j->orhs, j->nx, j->nxmax, j->ny, j->nz, j->part, lo, hi);
+    x_solve_part(j->orho_i, j->oqs, j->osquare, j->ou, j->orhs, j->nx, j->nxmax, j->ny, j->nz, 1, lo, hi);
 }
 
 /* x_solve с тем же интерфейсом, что в исходной программе: части выполняются по очереди,
@@ -389,6 +389,5 @@ void x_solve (orho_i,oqs,osquare,ou,orhs,nx,nxmax,ny,nz)
     j.nxmax = nxmax;
     j.ny = ny;
     j.nz = nz;
-    j.part = 1;
-    ws_parallel_for(1, (nz-2) + 1, x_solve_body, &j);
+    ws_parallel_for(1, (nz-2) + 1, x_solve_body_1, &j);
 }

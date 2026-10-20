@@ -353,7 +353,7 @@ double (*rho_i)[(ny-1)-(0)+1][(nxmax-1)-(0)+1] = (double (*)[(ny-1)-(0)+1][(nxma
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 
-/* Аргументы compute_rhs и номер выполняемой части. */
+/* Аргументы compute_rhs. */
 typedef struct {
     void * orho_i;
     void * ous;
@@ -368,14 +368,74 @@ typedef struct {
     int nxmax;
     int ny;
     int nz;
-    int part;
 } compute_rhs_job;
 
-/* Тело параллельного цикла: часть j->part на итерациях [lo, hi). */
-static void compute_rhs_body(long lo, long hi, void *p)
+/* Тела параллельных циклов, по одной функции на каждую часть: так история стоимости
+ * различает циклы, как если бы каждый был вынесен в свою функцию. */
+static void compute_rhs_body_1(long lo, long hi, void *p)
 {
     compute_rhs_job *j = (compute_rhs_job *)p;
-    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, j->part, lo, hi);
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 1, lo, hi);
+}
+
+static void compute_rhs_body_2(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 2, lo, hi);
+}
+
+static void compute_rhs_body_3(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 3, lo, hi);
+}
+
+static void compute_rhs_body_4(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 4, lo, hi);
+}
+
+static void compute_rhs_body_5(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 5, lo, hi);
+}
+
+static void compute_rhs_body_6(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 6, lo, hi);
+}
+
+static void compute_rhs_body_7(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 7, lo, hi);
+}
+
+static void compute_rhs_body_8(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 8, lo, hi);
+}
+
+static void compute_rhs_body_9(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 9, lo, hi);
+}
+
+static void compute_rhs_body_10(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 10, lo, hi);
+}
+
+static void compute_rhs_body_11(long lo, long hi, void *p)
+{
+    compute_rhs_job *j = (compute_rhs_job *)p;
+    compute_rhs_part(j->orho_i, j->ous, j->ovs, j->ows, j->oqs, j->osquare, j->orhs, j->oforcing, j->ou, j->nx, j->nxmax, j->ny, j->nz, 11, lo, hi);
 }
 
 /* compute_rhs с тем же интерфейсом, что в исходной программе: части выполняются по очереди,
@@ -411,26 +471,15 @@ void compute_rhs (orho_i,ous,ovs,ows,oqs,osquare,orhs,oforcing,ou,nx,nxmax,ny,nz
     j.nxmax = nxmax;
     j.ny = ny;
     j.nz = nz;
-    j.part = 1;
-    ws_parallel_for(0, (nz-1) + 1, compute_rhs_body, &j);
-    j.part = 2;
-    ws_parallel_for(0, (nz-1) + 1, compute_rhs_body, &j);
-    j.part = 3;
-    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body, &j);
-    j.part = 4;
-    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body, &j);
-    j.part = 5;
-    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body, &j);
-    j.part = 6;
-    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body, &j);
-    j.part = 7;
-    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body, &j);
-    j.part = 8;
-    ws_parallel_for(3, (nz-4) + 1, compute_rhs_body, &j);
-    j.part = 9;
-    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body, &j);
-    j.part = 10;
-    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body, &j);
-    j.part = 11;
-    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body, &j);
+    ws_parallel_for(0, (nz-1) + 1, compute_rhs_body_1, &j);
+    ws_parallel_for(0, (nz-1) + 1, compute_rhs_body_2, &j);
+    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body_3, &j);
+    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body_4, &j);
+    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body_5, &j);
+    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body_6, &j);
+    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body_7, &j);
+    ws_parallel_for(3, (nz-4) + 1, compute_rhs_body_8, &j);
+    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body_9, &j);
+    ws_parallel_for(1, (ny-2) + 1, compute_rhs_body_10, &j);
+    ws_parallel_for(1, (nz-2) + 1, compute_rhs_body_11, &j);
 }
