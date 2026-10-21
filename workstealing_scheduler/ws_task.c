@@ -8,16 +8,17 @@
 /* Размер таблицы истории одного ES (степень двойки) и число проб при поиске. */
 #define WS_COST_SLOTS 1024
 #define WS_COST_PROBES 8
-/* Записи «наносекунд на единицу подсказки» хранятся под этой глубиной,
- * в фиксированной точке с множителем WS_COST_HINT_SCALE. */
+/* Калибровка подсказки хранится под этой глубиной. */
 #define WS_COST_HINT_DEPTH (-1)
-#define WS_COST_HINT_SCALE 1024
 
-/* Запись истории: средняя работа задачи с ключом key на глубине depth. */
+/* Запись истории: средняя работа задачи с ключом key на глубине depth;
+ * для калибровки подсказки - средние работа и подсказка (их отношение - нс на единицу). */
 typedef struct {
     const void *key;
     int depth;
     long long ns;
+    double hint_work;
+    double hint_sum;
 } ws_cost_slot;
 
 /* Таблицы истории всех ES подряд (NULL - оценки в наносекундах выключены). */
@@ -75,6 +76,8 @@ static ws_cost_slot *ws_cost_find(ws_cost_slot *table, const void *key, int dept
             slot->key = key;
             slot->depth = depth;
             slot->ns = 0;
+            slot->hint_work = 0.0;
+            slot->hint_sum = 0.0;
             return slot;
         }
     }
@@ -83,6 +86,8 @@ static ws_cost_slot *ws_cost_find(ws_cost_slot *table, const void *key, int dept
     slot->key = key;
     slot->depth = depth;
     slot->ns = 0;
+    slot->hint_work = 0.0;
+    slot->hint_sum = 0.0;
     return slot;
 }
 
@@ -97,6 +102,24 @@ static void ws_cost_record(const void *key, int depth, long long ns)
     if (ns < 1) ns = 1;
     slot->ns = slot->ns > 0 ? slot->ns + (ns - slot->ns) / 8 : ns;
     g_cost_avg[rank] = g_cost_avg[rank] > 0 ? g_cost_avg[rank] + (ns - g_cost_avg[rank]) / 8 : ns;
+}
+
+/* Калибровка подсказки: средние с забыванием 1/8 отдельно для работы и для подсказки.
+ * Отношение средних, а не среднее отношений: задача с почти нулевой подсказкой
+ * не раздувает калибровку для остальных. */
+static void ws_cost_record_hint(const void *key, long long work, long long hint)
+{
+    ws_cost_slot *table = ws_cost_table(ws_cost_rank());
+    ws_cost_slot *slot;
+    if (!table || hint <= 0) return;
+    slot = ws_cost_find(table, key, WS_COST_HINT_DEPTH, 1);
+    if (slot->hint_sum <= 0.0) {
+        slot->hint_work = (double)work;
+        slot->hint_sum = (double)hint;
+    } else {
+        slot->hint_work += ((double)work - slot->hint_work) / 8.0;
+        slot->hint_sum += ((double)hint - slot->hint_sum) / 8.0;
+    }
 }
 
 /* Включает оценки в наносекундах: выделяет таблицы истории на num_ranks ES. */
@@ -180,8 +203,8 @@ static void ws_assign_cost(ws_task_meta *meta)
     meta->depth = parent ? parent->depth + 1 : 1;
     if (meta->est <= 0 && meta->hint > 0) {
         ws_cost_slot *slot = ws_cost_find_self(meta->key, WS_COST_HINT_DEPTH);
-        if (slot && slot->ns > 0) {
-            meta->est = meta->hint * slot->ns / WS_COST_HINT_SCALE;
+        if (slot && slot->hint_sum > 0.0) {
+            meta->est = (long long)((double)meta->hint * slot->hint_work / slot->hint_sum);
             if (meta->est < 1) meta->est = 1;
         }
     }
@@ -208,7 +231,7 @@ static void ws_cost_complete(ws_task_meta *meta, long long elapsed)
     int rank = ws_cost_rank();
     ws_cost_record(meta->key, meta->depth, work);
     if (meta->hint > 0) {
-        ws_cost_record(meta->key, WS_COST_HINT_DEPTH, work * WS_COST_HINT_SCALE / meta->hint);
+        ws_cost_record_hint(meta->key, work, meta->hint);
     }
     if (rank >= 0 && meta->est0 > 0 && work > 0) {
         double d = (double)meta->est0 - (double)work;
