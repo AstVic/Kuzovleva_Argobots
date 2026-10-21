@@ -22,6 +22,7 @@ typedef struct {
     long grain;             /* размер листа в итерациях */
     double grain_cost;      /* размер листа в единицах стоимости */
     double unit;            /* нс на единицу работы; 0 - оценку назначит рантайм, < 0 - WS_COST=iters */
+    int measure;            /* 1 - листья пишут своё время на единицу работы в кэш пробы */
 } ws_pf_ctx;
 
 /* Аргумент задачи для правой половины диапазона. */
@@ -173,6 +174,18 @@ static long long ws_pf_estimate(const ws_pf_ctx *c, long lo, long hi)
     return est > 0 ? est : 1;
 }
 
+/* Порция пробы: выполняет итерации [lo, hi) в вызывающей задаче, пишет в ns её работу
+ * (без ожидания вложенных задач) и возвращает время на единицу стоимости или 0. */
+static double ws_probe_batch(const ws_pf_ctx *c, long lo, long hi, long long *ns)
+{
+    long long start = ws_task_work_clock();
+    double work;
+    c->body(lo, hi, c->arg);
+    *ns = ws_task_work_clock() - start;
+    work = c->cost ? c->cost(lo, hi, c->cost_arg) : (double)(hi - lo);
+    return work > 0 ? (double)*ns / work : 0.0;
+}
+
 static void ws_pf_run(const ws_pf_ctx *c, long lo, long hi);
 
 /* Задача для правой половины диапазона. */
@@ -191,7 +204,13 @@ static void ws_pf_run(const ws_pf_ctx *c, long lo, long hi)
     ws_task_meta meta;
     ABT_thread thread = ABT_THREAD_NULL;
     if (ws_pf_leaf(c, lo, hi)) {
-        c->body(lo, hi, c->arg);
+        if (c->measure) {
+            long long ns;
+            double rate = ws_probe_batch(c, lo, hi, &ns);
+            ws_runtime_rate_put(c->key, rate);
+        } else {
+            c->body(lo, hi, c->arg);
+        }
         return;
     }
     mid = ws_pf_split(c, lo, hi);
@@ -230,25 +249,14 @@ int ws_num_workers(void)
     return ws_runtime_is_active() ? ws_runtime_num_workers() : 1;
 }
 
-/* Параллельный цикл: body вызывается на непересекающихся диапазонах, покрывающих [lo, hi).
- * Для old и new сначала проба: 1, 2, 4... итерации на месте до целевого времени, затем деление
- * остатка; если задана cost, деление и оценки идут по стоимости диапазона, а не по числу итераций.
- * Для чужих планировщиков - кусок n/(8P) по числу итераций. */
-/* Порция пробы: выполняет итерации [lo, hi) в вызывающей задаче, пишет в ns её работу
- * (без ожидания вложенных задач) и возвращает время на единицу стоимости или 0. */
-static double ws_probe_batch(const ws_pf_ctx *c, long lo, long hi, long long *ns)
-{
-    long long start = ws_task_work_clock();
-    double work;
-    c->body(lo, hi, c->arg);
-    *ns = ws_task_work_clock() - start;
-    work = c->cost ? c->cost(lo, hi, c->cost_arg) : (double)(hi - lo);
-    return work > 0 ? (double)*ns / work : 0.0;
-}
-
 static void ws_parallel_for_keyed(long lo, long hi, ws_range_body body, void *arg,
                                   ws_range_cost cost, void *cost_arg, const void *key);
 
+/* Параллельный цикл: body вызывается на непересекающихся диапазонах, покрывающих [lo, hi).
+ * Для old и new при первом вызове цикла на ES проба: 1, 2, 4... итерации на месте до целевого
+ * времени, затем деление остатка; время на единицу работы запоминается по телу цикла, и
+ * следующие вызовы делятся сразу, без пробы. Если задана cost, деление и оценки идут по
+ * стоимости диапазона, а не по числу итераций. Для чужих планировщиков - кусок n/(8P). */
 void ws_parallel_for_cost(long lo, long hi, ws_range_body body, void *arg, ws_range_cost cost,
                           void *cost_arg)
 {
@@ -273,12 +281,28 @@ static void ws_parallel_for_keyed(long lo, long hi, ws_range_body body, void *ar
     c.cost = ws_tuned() ? cost : NULL;
     c.cost_arg = cost_arg;
     c.unit = ws_task_cost_enabled() ? 0.0 : -1.0;
+    c.measure = 0;
     if (ws_probe_enabled()) {
         long target = ws_target_ns();
+        double cached = ws_runtime_rate_get(key);
         long done = 0;
         long sz = 1;
         long grain = 0;
         double prev_rate = 0.0;
+        c.measure = 1;
+        if (cached > 0.0) {
+            /* Цикл уже пробовался на этом ES: размер листа - по сохранённому времени на
+             * единицу работы, без последовательной пробы; листья обновляют это время. */
+            double leaf = 2.0 * (double)target / cached;
+            if (c.cost) {
+                c.grain_cost = leaf;
+            } else {
+                c.grain = leaf < 1.0 ? 1 : (leaf > (double)n ? n : (long)leaf);
+            }
+            if (ws_task_cost_enabled()) c.unit = cached;
+            ws_pf_run(&c, lo, hi);
+            return;
+        }
         while (1) {
             long long ns;
             double rate;
@@ -303,6 +327,7 @@ static void ws_parallel_for_keyed(long lo, long hi, ws_range_body body, void *ar
              * порций берётся меньшее время на единицу работы. */
             if (prev_rate > 0.0 && (rate <= 0.0 || prev_rate < rate)) rate = prev_rate;
             if (ws_task_cost_enabled() && rate > 0.0) c.unit = rate;
+            ws_runtime_rate_put(key, rate);
             break;
         }
         c.grain = grain;
@@ -341,6 +366,7 @@ void ws_parallel_for_grain(long lo, long hi, long grain, ws_range_body body, voi
     c.grain = grain > 0 ? grain : 1;
     c.grain_cost = 0.0;
     c.unit = ws_task_cost_enabled() ? 0.0 : -1.0;
+    c.measure = 0;
     ws_pf_run(&c, lo, hi);
 }
 

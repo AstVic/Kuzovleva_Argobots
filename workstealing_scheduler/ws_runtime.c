@@ -5,6 +5,7 @@
 #include "ws_task.h"
 
 #include <stdatomic.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,17 @@ static ABT_pool *g_pools = NULL;
 static ABT_sched *g_scheds = NULL;
 /* Счётчик раздачи задач по кругу в режиме default. */
 static atomic_uint g_round_robin;
+
+/* Кэш пробы: время на единицу работы цикла по ключу (телу цикла), своя таблица у каждого ES.
+ * ULT не вытесняется внутри операций с таблицей, поэтому блокировки не нужны. */
+#define WS_RATE_SLOTS 256
+#define WS_RATE_PROBES 8
+typedef struct {
+    const void *key;
+    double rate;
+} ws_rate_slot;
+static ws_rate_slot *g_rates = NULL;
+static int g_rates_on = 1;
 
 /* Режим планирования из ABT_WS_SCHEDULER; неизвестное значение означает old. */
 static ws_mode_t mode_from_env(void)
@@ -92,6 +104,11 @@ int ws_runtime_init(int num_xstreams, size_t default_stack_size)
     atomic_init(&g_round_robin, 0);
 
     ABT_xstream_self(&g_xstreams[0]);
+    {
+        const char *cache = getenv("WS_GRAIN_CACHE");
+        g_rates_on = !(cache && strcmp(cache, "0") == 0);
+        g_rates = (ws_rate_slot *)calloc((size_t)n * WS_RATE_SLOTS, sizeof(ws_rate_slot));
+    }
 
     if (g_mode == WS_MODE_DEFAULT) {
         for (int i = 1; i < n; i++) {
@@ -188,10 +205,61 @@ void ws_runtime_finalize(void)
     free(g_xstreams);
     free(g_pools);
     free(g_scheds);
+    free(g_rates);
+    g_rates = NULL;
     g_xstreams = NULL;
     g_pools = NULL;
     g_scheds = NULL;
     g_num_xstreams = 0;
+}
+
+/* Ячейка кэша пробы для key на ES вызывающего; при insert создаёт её или вытесняет первую. */
+static ws_rate_slot *rate_slot(const void *key, int insert)
+{
+    int rank = ws_runtime_self_rank();
+    ws_rate_slot *table;
+    uintptr_t h;
+    if (!g_rates || !g_rates_on || rank < 0 || !key) return NULL;
+    table = g_rates + (size_t)rank * WS_RATE_SLOTS;
+    h = ((uintptr_t)key >> 4) * 2654435761u;
+    for (int i = 0; i < WS_RATE_PROBES; i++) {
+        ws_rate_slot *slot = &table[(h + (uintptr_t)i) & (WS_RATE_SLOTS - 1)];
+        if (slot->key == key) return slot;
+        if (!slot->key) {
+            if (!insert) return NULL;
+            slot->key = key;
+            slot->rate = 0.0;
+            return slot;
+        }
+    }
+    if (!insert) return NULL;
+    table[h & (WS_RATE_SLOTS - 1)].key = key;
+    table[h & (WS_RATE_SLOTS - 1)].rate = 0.0;
+    return &table[h & (WS_RATE_SLOTS - 1)];
+}
+
+/* Время на единицу работы цикла key, измеренное на этом ES; 0 - данных нет
+ * или кэш выключен (WS_GRAIN_CACHE=0). */
+double ws_runtime_rate_get(const void *key)
+{
+    ws_rate_slot *slot = rate_slot(key, 0);
+    return slot ? slot->rate : 0.0;
+}
+
+/* Добавляет замер времени на единицу работы: первый берётся как есть, следующие
+ * сглаживаются с забыванием 1/8; замер больше 4 средних ограничивается (вытеснение потока ОС). */
+void ws_runtime_rate_put(const void *key, double rate)
+{
+    ws_rate_slot *slot;
+    if (rate <= 0.0) return;
+    slot = rate_slot(key, 1);
+    if (!slot) return;
+    if (slot->rate <= 0.0) {
+        slot->rate = rate;
+        return;
+    }
+    if (rate > 4.0 * slot->rate) rate = 4.0 * slot->rate;
+    slot->rate += (rate - slot->rate) / 8.0;
 }
 
 /* 1, если рантайм инициализирован. */

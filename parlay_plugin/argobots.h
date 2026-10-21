@@ -254,11 +254,20 @@ inline void argobots_par_do(Lf&& left, Rf&& right, long long estimate) {
 }
 
 /* Рекурсивное деление пополам до куска grain; оценка правой половины - число итераций × unit
- * (нс на итерацию), число итераций при unit < 0 или 0, если оценку назначит рантайм. */
+ * (нс на итерацию), число итераций при unit < 0 или 0, если оценку назначит рантайм.
+ * Если key не NULL, лист пишет своё время на итерацию в кэш пробы цикла key. */
 template <typename F>
-void argobots_parallel_for(size_t start, size_t end, F& f, size_t grain, double unit) {
+void argobots_parallel_for(size_t start, size_t end, F& f, size_t grain, double unit,
+                           const void* key = nullptr) {
   if (end - start <= grain) {
-    for (size_t i = start; i < end; i++) f(i);
+    if (key) {
+      long long t0 = ws_task_work_clock();
+      for (size_t i = start; i < end; i++) f(i);
+      long long ns = ws_task_work_clock() - t0;
+      ws_runtime_rate_put(key, static_cast<double>(ns) / static_cast<double>(end - start));
+    } else {
+      for (size_t i = start; i < end; i++) f(i);
+    }
     return;
   }
   size_t mid = start + (end - start) / 2;
@@ -267,8 +276,8 @@ void argobots_parallel_for(size_t start, size_t end, F& f, size_t grain, double 
     estimate = static_cast<long long>(static_cast<double>(end - mid) * unit);
     if (estimate < 1) estimate = 1;
   }
-  argobots_par_do([&] { argobots_parallel_for(start, mid, f, grain, unit); },
-                  [&] { argobots_parallel_for(mid, end, f, grain, unit); },
+  argobots_par_do([&] { argobots_parallel_for(start, mid, f, grain, unit, key); },
+                  [&] { argobots_parallel_for(mid, end, f, grain, unit, key); },
                   estimate);
 }
 
@@ -299,7 +308,19 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     return;
   }
   if (granularity <= 0 && internal::argobots_grain_probe()) {
+    // Ключ кэша пробы: свой адрес у каждого типа тела цикла.
+    static const char loop_key = 0;
+    const void* key = &loop_key;
     const long target = internal::argobots_target_ns();
+    double cached = ws_runtime_rate_get(key);
+    if (cached > 0.0) {
+      // Цикл уже пробовался на этом ES: размер листа по сохранённому времени на итерацию.
+      double leaf = 2.0 * static_cast<double>(target) / cached;
+      size_t grain = leaf < 1.0 ? 1 : (leaf > static_cast<double>(n) ? n : static_cast<size_t>(leaf));
+      internal::argobots_parallel_for(start, end, f, grain,
+                                      ws_task_cost_enabled() ? cached : 1.0, key);
+      return;
+    }
     size_t done = 0;
     size_t sz = 1;
     size_t grain = 0;
@@ -328,10 +349,11 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
       }
       // Вытеснение потока ОС только удлиняет замер: берётся меньшее из двух последних порций.
       unit = (prev_unit > 0.0 && prev_unit < cur) ? prev_unit : cur;
+      ws_runtime_rate_put(key, unit);
       break;
     }
     internal::argobots_parallel_for(start + done, end, f, grain,
-                                    ws_task_cost_enabled() ? unit : 1.0);
+                                    ws_task_cost_enabled() ? unit : 1.0, key);
     return;
   }
   size_t grain;

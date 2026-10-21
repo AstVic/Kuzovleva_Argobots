@@ -69,6 +69,12 @@ int ws_runtime_spawn_keyed(void (*fn)(void *), void *arg, long long est, const v
 int ws_runtime_spawn_hint(void (*fn)(void *), void *arg, long long hint, ws_task_meta *meta,
                           ABT_thread *thread);
 
+/* Кэш пробы размера куска: время на единицу работы цикла с ключом key (телом цикла)
+ * на ES вызывающего; 0 - данных нет. WS_GRAIN_CACHE=0 выключает кэш. */
+double ws_runtime_rate_get(const void *key);
+/* Добавляет замер времени на единицу работы цикла key на ES вызывающего. */
+void ws_runtime_rate_put(const void *key, double rate);
+
 /* Число ES по умолчанию: WS_NUM_THREADS или число ядер. */
 int ws_runtime_default_workers(void);
 
