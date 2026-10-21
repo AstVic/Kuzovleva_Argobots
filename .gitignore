@@ -8,3 +8,4 @@ build/
 third_party/pbbsbench/
 scripts/jac3d_multi_runtime
 scripts/perf_*
+server_results/
