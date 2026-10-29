@@ -14,7 +14,8 @@ BUILD="$SCRIPT_DIR/build"
 RESULTS="$REPO_ROOT/tests_results/parlay_plugin"
 
 MODES="${MODES:-default randws randws_fifo old new}"
-THREADS="${THREADS:-1 2 4 8}"
+CPUS="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)"
+THREADS="${THREADS:-$(printf '%s\n' 1 4 "$CPUS" | sort -nu | tr '\n' ' ')}"
 GRAINS="${GRAINS:-default fixed:PARLAY_ARGOBOTS_GRAIN=fixed fine:PARLAY_ARGOBOTS_GRAIN=fixed,PARLAY_ARGOBOTS_GRAIN_FACTOR=0.25 coarse:PARLAY_ARGOBOTS_GRAIN=fixed,PARLAY_ARGOBOTS_GRAIN_FACTOR=16 min4k:PARLAY_ARGOBOTS_GRAIN=fixed,PARLAY_ARGOBOTS_MIN_GRAIN=4096}"
 
 if [ ! -f "$CONFIG" ]; then

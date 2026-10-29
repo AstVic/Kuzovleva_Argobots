@@ -7,7 +7,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SCHED="$REPO_ROOT/workstealing_scheduler"
 BUILD="$SCRIPT_DIR/build"
 RESULTS="$REPO_ROOT/tests_results/c_api"
-THREADS="${THREADS:-1 2 4 8}"
+CPUS="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)"
+THREADS="${THREADS:-$(printf '%s\n' 1 4 "$CPUS" | sort -nu | tr '\n' ' ')}"
 
 resolve_argobots() {
     local candidates=()
