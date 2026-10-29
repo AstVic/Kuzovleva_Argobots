@@ -6,7 +6,7 @@
 #
 # Переменные окружения:
 #   PROGRAMS  - cg bt-mz hetero
-#   MODES     - seq omp default randws randws_fifo old new; вариант режима -
+#   MODES     - seq omp bolt llvm default randws randws_fifo old new; вариант режима -
 #               метка:режим:ПЕРЕМЕННАЯ=значение,..., например omp_dyn:omp:OMP_SCHEDULE=dynamic
 #   THREADS   - число потоков (по умолчанию все ядра)
 #   CG_CLASS, BT_CLASS - класс задач NPB (S W A B C)
@@ -81,6 +81,8 @@ binary_for() {
     case "$mode" in
         seq) variant=seq ;;
         omp) variant=omp ;;
+        bolt) variant=bolt ;;
+        llvm) variant=llvm ;;
         *) variant=ws ;;
     esac
     case "$program" in
@@ -109,7 +111,7 @@ run_one() {
     stats="$OUT/logs/${program}_${label}_p${pass}.stats"
     case "$mode" in
         seq) ;;
-        omp) envs=(OMP_NUM_THREADS="$THREADS") ;;
+        omp|bolt|llvm) envs=(OMP_NUM_THREADS="$THREADS") ;;
         *) envs=(ABT_WS_SCHEDULER="$mode" WS_NUM_THREADS="$THREADS" WS_STATS="$stats") ;;
     esac
     for v in $(spec_env "$spec"); do envs+=("$v"); done
