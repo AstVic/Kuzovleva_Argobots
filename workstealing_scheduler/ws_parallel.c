@@ -122,10 +122,10 @@ static int ws_probe_enabled(void)
     return ws_tuned();
 }
 
-/* При стольких задачах в своём пуле развилка выполняется на месте: P для old и new, 8 для остальных. */
+/* При стольких задачах в своём пуле развилка выполняется на месте: P во всех режимах. */
 static size_t ws_queue_limit(void)
 {
-    long def = ws_tuned() ? ws_runtime_num_workers() : 8;
+    long def = ws_runtime_num_workers();
     return (size_t)ws_env_long("WS_QUEUE_LIMIT", def > 0 ? def : 1);
 }
 

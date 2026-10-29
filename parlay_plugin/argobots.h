@@ -124,14 +124,13 @@ inline long argobots_target_ns() {
   return target;
 }
 
-/* При стольких задачах в своём пуле развилка выполняется на месте: P для old и new, 8 для остальных. */
+/* При стольких задачах в своём пуле развилка выполняется на месте: P во всех режимах. */
 inline size_t argobots_queue_limit() {
   static const size_t limit = [] {
     if (const char* env = std::getenv("PARLAY_ARGOBOTS_QUEUE_LIMIT")) {
       long v = std::atol(env);
       if (v > 0) return static_cast<size_t>(v);
     }
-    if (!argobots_tuned_mode()) return static_cast<size_t>(8);
     int workers = ws_runtime_num_workers();
     return static_cast<size_t>(workers > 0 ? workers : 1);
   }();
