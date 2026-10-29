@@ -128,6 +128,9 @@ run_one() {
         status=FAILED
     fi
     seconds=$(awk -F= '/Real time \(nanos\)/{gsub(/ /,"",$2); printf "%.6f", $2 / 1e9; exit}' "$log")
+    if [ -z "$seconds" ] || awk -v s="$seconds" 'BEGIN{exit !(s > 86400)}'; then
+        status=FAILED
+    fi
     echo "$program,$(class_for "$program"),$label,$THREADS,$pass,$seconds,$status" >> "$RUNS_CSV"
     printf "  %-3s %-10s %-14s %10s %s\n" "$pass" "$program" "$label" "${seconds:-?}" "$status"
 }
